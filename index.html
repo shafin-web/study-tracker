@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্টাডি ট্র্যাকার | পড়াশোনার অগ্রগতি ট্র্যাক করুন</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            /* Fallback gradient background */
+            background: linear-gradient(135deg, #4f46e5 0%, #1e3a8a 100%);
+            /* Background image will be set by JavaScript and will override this if it loads */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
+        }
+        /* Overlay to ensure text readability over any background image */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.45); /* Slightly darker overlay for better contrast */
+            z-index: -1;
+        }
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .nav-item.active {
+            background-color: #1d4ed8; /* Darker blue */
+            color: white;
+        }
+        /* Glassmorphism effect for cards */
+        .card {
+            background-color: rgba(255, 255, 255, 0.85); /* Slightly less transparent */
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        aside {
+            background-color: rgba(255, 255, 255, 0.8); /* Slightly less transparent */
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-right: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-secondary {
+            background-color: #ef4444;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #dc2626;
+        }
+        .progress-bar-container {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .progress-bar {
+            background-color: #34d399; /* Green */
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Main Content -->
+        <div class="flex flex-1">
+            <!-- Sidebar Navigation -->
+            <aside class="w-64 shadow-lg p-4 flex-shrink-0 hidden md:flex flex-col">
+                <div class="text-2xl font-bold text-blue-600 mb-8 text-center">স্টাডি ট্র্যাকার</div>
+                <nav id="sidebar-nav" class="flex flex-col space-y-2 flex-grow">
+                    <a href="#" id="nav-dashboard" class="nav-item py-2 px-4 rounded-lg font-semibold text-gray-700 hover:bg-blue-100">ড্যাশবোর্ড</a>
+                    <a href="#" id="nav-profile" class="nav-item py-2 px-4 rounded-lg font-semibold text-gray-700 hover:bg-blue-100">প্রোফাইল</a>
+                </nav>
+                <button id="logout-button" class="w-full btn-secondary font-bold py-2 px-4 rounded-lg mt-4 hidden">লগ আউট</button>
+            </aside>
+            
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8">
+                <!-- Login View -->
+                <div id="login-view">
+                     <div class="flex items-center justify-center h-full">
+                        <div class="text-center card max-w-md mx-auto">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">স্বাগতম!</h1>
+                            <p class="text-gray-600 mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+                            <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
+                            <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
+                            <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg">প্রবেশ করুন</button>
+                            <p class="text-xs text-gray-500 mt-4">(যদি অ্যাকাউন্ট না থাকে, প্রবেশ করুন বোতাম চাপলে নতুন অ্যাকাউন্ট তৈরি হয়ে যাবে।)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="hidden">
+                    <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">ড্যাশবোর্ড</h1>
+                    
+                    <!-- Motivational Quote -->
+                    <div id="quote-container" class="mb-6 p-4 bg-blue-50/70 border-l-4 border-blue-500 rounded-r-lg">
+                        <p id="quote-text" class="text-blue-800 italic"></p>
+                        <p id="quote-author" class="text-blue-900 font-semibold mt-2 text-xs text-right"></p>
+                    </div>
+
+                    <!-- Timer and Goal Section -->
+                    <div class="card mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <!-- Left: Timer Controls -->
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সেশন</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="daily-goal" class="block text-sm font-medium text-gray-700">আজকের লক্ষ্য (ঘন্টা)</label>
+                                        <input type="number" id="daily-goal" value="7" min="1" max="24" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="subject" class="block text-sm font-medium text-gray-700">বিষয়</label>
+                                        <input type="text" id="subject" placeholder="যেমন: গণিত" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="topic" class="block text-sm font-medium text-gray-700">টপিক</p>
+                                        <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div class="flex space-x-4">
+                                        <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
+                                        <button id="stop-btn" class="w-full btn-secondary font-bold py-3 rounded-lg text-lg hidden">থামুন এবং সংরক্ষণ করুন</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Summary -->
+                            <div class="text-center bg-blue-50/70 p-6 rounded-lg">
+                                 <p class="text-lg font-semibold text-blue-800">টাইমার</p>
+                                <div id="timer" class="text-6xl font-bold text-blue-600 my-4">00:00:00</div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-md text-gray-600">আজ পড়েছেন</p>
+                                        <p id="today-total" class="text-2xl font-bold text-gray-800">0 ঘন্টা 0 মিনিট</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-md text-gray-600">লক্ষ্য বাকি</p>
+                                        <p id="today-remaining" class="text-2xl font-bold text-gray-800">7 ঘন্টা 0 মিনিট</p>
+                                    </div>
+                                    <div class="w-full progress-bar-container mt-4">
+                                        <div id="progress-bar" class="progress-bar h-full" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Chart and History -->
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-3 card">
+                             <h2 class="text-2xl font-bold text-gray-700 mb-4">সাপ্তাহিক রিপোর্ট</h2>
+                            <canvas id="weeklyChart"></canvas>
+                        </div>
+                        <div class="lg:col-span-2 card">
+                            <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সম্পন্ন টপিক</h2>
+                            <div id="history-log" class="space-y-3 max-h-80 overflow-y-auto">
+                                <p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile View -->
+                <div id="profile-view" class="hidden">
+                     <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">প্রোফাইল</h1>
+                    <div class="card max-w-2xl mx-auto">
+                        <div class="flex flex-col items-center space-y-4">
+                            <img id="profile-img-display" src="https://placehold.co/128x128/E2E8F0/4A5568?text=ছবি" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover">
+                            <input type="file" id="profile-img-upload" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('profile-img-upload').click()" class="text-sm text-blue-600 hover:underline">ছবি পরিবর্তন করুন</button>
+                        </div>
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="profile-name" class="block text-sm font-medium text-gray-700">নাম</label>
+                                <input type="text" id="profile-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <div>
+                                <label for="profile-email" class="block text-sm font-medium text-gray-700">ইমেইল</label>
+                                <input type="email" id="profile-email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                            </div>
+                            <div>
+                                <label for="profile-mobile" class="block text-sm font-medium text-gray-700">মোবাইল</label>
+                                <input type="text" id="profile-mobile" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <div>
+                                <label for="profile-class" class="block text-sm font-medium text-gray-700">কিসে পড়েন</label>
+                                <input type="text" id="profile-class" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <div class="md:col-span-2">
+                                <label for="profile-institution" class="block text-sm font-medium text-gray-700">শিক্ষা প্রতিষ্ঠান</label>
+                                <input type="text" id="profile-institution" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="profile-motivation" class="block text-sm font-medium text-gray-700">আপনার মোটিভেশন</label>
+                                <textarea id="profile-motivation" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-8 text-right">
+                             <button id="save-profile" class="btn-primary font-bold py-2 px-6 rounded-lg">সংরক্ষণ করুন</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <footer class="text-center pt-8 text-white/80 font-semibold text-xs drop-shadow-md">
+                    Created by Saad | STAT - 63 | RU
+                </footer>
+
+            </main>
+        </div>
+        
+        <!-- Mobile Bottom Navigation -->
+        <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg shadow-t-lg justify-around p-2 hidden">
+            <a href="#" id="mobile-nav-dashboard" class="text-center text-blue-600 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span class="text-xs">ড্যাশবোর্ড</span>
+            </a>
+            <a href="#" id="mobile-nav-profile" class="text-center text-gray-500 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <span class="text-xs">প্রোফাইল</span>
+            </a>
+            <a href="#" id="mobile-logout-button" class="text-center text-gray-500 p-2">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="text-xs">লগ আউট</span>
+            </a>
+        </nav>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- SET RANDOM BACKGROUND IMAGE ---
+    // Final, robust list of 5 high-quality, reliable Pexels images.
+    const backgroundImages = [
+        'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920', // 1. Modern library aisle
+        'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1920', // 2. Classic library shelves
+        'https://images.pexels.com/photos/3747505/pexels-photo-3747505.jpeg?auto=compress&cs=tinysrgb&w=1920', // 3. Student studying with books
+        'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1920',  // 4. Bright, modern university hall
+        'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1920' // 5. Cozy study desk with laptop
+    ];
+    const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+    document.body.style.backgroundImage = `url('${backgroundImages[randomIndex]}')`;
+
+
+    // --- STATE MANAGEMENT ---
+    let currentUserEmail = null;
+    let allUsersData = {};
+    let state = null; // This will hold the data for the currently logged-in user
+
+    let timerInterval = null;
+    let weeklyChartInstance = null;
+    let quoteInterval = null;
+    
+    // Default structure for a new user
+    const createNewUserData = (password) => ({
+        password: password, // In a real app, this should be hashed!
+        profile: {
+            name: '', mobile: '', class: '', institution: '', motivation: '',
+            profileImg: 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
+        },
+        studySession: { isActive: false, startTime: null, subject: '', topic: '' },
+        studyHistory: [],
+        dailyGoal: 7
+    });
+
+    // --- UI ELEMENTS ---
+    const views = { login: document.getElementById('login-view'), dashboard: document.getElementById('dashboard-view'), profile: document.getElementById('profile-view') };
+    const navItems = {
+        sidebar: document.getElementById('sidebar-nav'),
+        mobile: document.getElementById('mobile-nav'),
+        logoutBtn: document.getElementById('logout-button'),
+        mobileLogoutBtn: document.getElementById('mobile-logout-button')
+    };
+    const navDashboard = document.getElementById('nav-dashboard'), navProfile = document.getElementById('nav-profile');
+    const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile');
+    const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginButton = document.getElementById('login-button');
+    const dailyGoalInput = document.getElementById('daily-goal'), subjectInput = document.getElementById('subject'), topicInput = document.getElementById('topic');
+    const startBtn = document.getElementById('start-btn'), stopBtn = document.getElementById('stop-btn');
+    const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
+    const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
+    const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload');
+    const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
+    const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
+    const saveProfileBtn = document.getElementById('save-profile');
+    const quotes = [
+        { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" },
+        { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" },
+        { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" },
+        { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" },
+        { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" },
+        { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
+        { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
+        { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" },
+        { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" },
+        { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" }
+    ];
+    const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
+
+
+    // --- DATA PERSISTENCE ---
+    function saveAllUsersData() {
+        if (currentUserEmail && state) {
+            allUsersData[currentUserEmail] = state;
+        }
+        localStorage.setItem('studyTrackerUsers', JSON.stringify(allUsersData));
+        localStorage.setItem('studyTrackerSession', currentUserEmail || '');
+    }
+
+    function loadAllUsersData() {
+        allUsersData = JSON.parse(localStorage.getItem('studyTrackerUsers')) || {};
+        currentUserEmail = localStorage.getItem('studyTrackerSession');
+        if (currentUserEmail && allUsersData[currentUserEmail]) {
+            state = allUsersData[currentUserEmail];
+        } else {
+            currentUserEmail = null;
+            state = null;
+        }
+    }
+
+    // --- NAVIGATION & VIEWS ---
+    function showView(viewName) {
+        Object.values(views).forEach(view => view.classList.add('hidden'));
+        if(views[viewName]) views[viewName].classList.remove('hidden');
+        updateNavActiveState(viewName);
+    }
+    
+    function updateUIAfterLogin() {
+        navItems.sidebar.classList.remove('hidden');
+        navItems.mobile.classList.add('flex');
+        navItems.mobile.classList.remove('hidden');
+        navItems.logoutBtn.classList.remove('hidden');
+        showView('dashboard');
+        loadAndDisplayUserData();
+        updateQuote();
+        if(quoteInterval) clearInterval(quoteInterval);
+        quoteInterval = setInterval(updateQuote, 20000);
+    }
+    
+    function updateUIAfterLogout() {
+        navItems.sidebar.classList.add('hidden');
+        navItems.mobile.classList.remove('flex');
+        navItems.mobile.classList.add('hidden');
+        navItems.logoutBtn.classList.add('hidden');
+        showView('login');
+        loginEmailInput.value = '';
+        loginPasswordInput.value = '';
+        if(quoteInterval) clearInterval(quoteInterval);
+    }
+
+    function updateNavActiveState(activeView) {
+        [navDashboard, navProfile, mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.remove('active', 'text-blue-600'));
+        [mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.add('text-gray-500'));
+
+        if (activeView === 'dashboard') {
+            navDashboard.classList.add('active');
+            mobileNavDashboard.classList.remove('text-gray-500');
+            mobileNavDashboard.classList.add('text-blue-600');
+        } else if (activeView === 'profile') {
+            navProfile.classList.add('active');
+            mobileNavProfile.classList.remove('text-gray-500');
+            mobileNavProfile.classList.add('text-blue-600');
+        }
+    }
+
+    // --- AUTHENTICATION ---
+    function handleLogin() {
+        const email = loginEmailInput.value.trim().toLowerCase();
+        const password = loginPasswordInput.value;
+        
+        if (!email || !password || !email.includes('@')) {
+            Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'অনুগ্রহ করে সঠিক ইমেইল এবং পাসওয়ার্ড দিন।' });
+            return;
+        }
+
+        if (allUsersData[email]) { // Existing user
+            if (allUsersData[email].password === password) {
+                currentUserEmail = email;
+                state = allUsersData[email];
+                saveAllUsersData();
+                updateUIAfterLogin();
+            } else {
+                Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
+            }
+        } else { // New user (Sign up)
+            allUsersData[email] = createNewUserData(password);
+            currentUserEmail = email;
+            state = allUsersData[email];
+            saveAllUsersData();
+            Swal.fire({ icon: 'success', title: 'স্বাগতম!', text: 'আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।' });
+            updateUIAfterLogin();
+        }
+    }
+
+    function handleLogout() {
+        // Before logging out, save any active session
+        if (state && state.studySession.isActive) {
+            stopTimer(false); // Stop timer but don't show popups
+        }
+        currentUserEmail = null;
+        state = null;
+        saveAllUsersData(); // This will clear the session
+        updateUIAfterLogout();
+    }
+
+    // --- CORE LOGIC ---
+    function startTimer() {
+        if (!subjectInput.value.trim() || !topicInput.value.trim()) {
+            Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'অনুগ্রহ করে বিষয় এবং টপিক লিখুন।' });
+            return;
+        }
+        state.studySession.isActive = true;
+        state.studySession.startTime = new Date().getTime();
+        state.studySession.subject = subjectInput.value.trim();
+        state.studySession.topic = topicInput.value.trim();
+        startBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+        [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+        saveAllUsersData();
+    }
+
+    function stopTimer(showCongratsPopup = true) {
+        if (!state.studySession.isActive) return;
+
+        const duration = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
+        state.studyHistory.push({ date: new Date().toISOString(), subject: state.studySession.subject, topic: state.studySession.topic, duration: duration });
+
+        clearInterval(timerInterval);
+        timerInterval = null;
+        state.studySession.isActive = false;
+
+        startBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+        [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
+        subjectInput.value = '';
+        topicInput.value = '';
+        timerDisplay.textContent = '00:00:00';
+        
+        saveAllUsersData();
+        updateDashboard();
+
+        if (showCongratsPopup) {
+            const totalStudiedSeconds = getTotalStudiedSecondsForToday();
+            const goalSeconds = state.dailyGoal * 3600;
+            if (totalStudiedSeconds >= goalSeconds) {
+                Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
+            }
+        }
+    }
+    
+    function updateTimerDisplay() {
+        if (!state || !state.studySession.isActive) return;
+        const elapsed = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
+        timerDisplay.textContent = formatTime(elapsed);
+    }
+    
+    const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+    const formatDuration = (s) => { const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || '0 মিনিট'; };
+    const getTotalStudiedSecondsForToday = () => { if(!state) return 0; const t = new Date().toISOString().slice(0,10); return state.studyHistory.filter(e=>e.date.startsWith(t)).reduce((sum, e)=>sum+e.duration,0);};
+
+
+    // --- UI UPDATES ---
+    function loadAndDisplayUserData() {
+        if (!state) return;
+        // Clean up old data (older than 28 days)
+        const fourWeeksAgo = new Date().getTime() - (28 * 24 * 60 * 60 * 1000);
+        state.studyHistory = state.studyHistory.filter(entry => new Date(entry.date).getTime() >= fourWeeksAgo);
+        
+        updateDashboard();
+        updateProfilePage();
+        dailyGoalInput.value = state.dailyGoal;
+
+        if (state.studySession.isActive && state.studySession.startTime) {
+            startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
+            subjectInput.value = state.studySession.subject; topicInput.value = state.studySession.topic;
+            [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+    }
+
+    function updateDashboard() {
+        const totalSecondsToday = getTotalStudiedSecondsForToday();
+        const goalSeconds = state.dailyGoal * 3600;
+        todayTotalDisplay.textContent = formatDuration(totalSecondsToday);
+        todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday));
+        progressBar.style.width = `${Math.min(100, (totalSecondsToday / goalSeconds) * 100)}%`;
+
+        const todayHistory = state.studyHistory.filter(e => e.date.startsWith(new Date().toISOString().slice(0, 10)));
+        historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.reverse().map(e => `
+            <div class="p-3 bg-gray-50/80 rounded-lg border border-gray-200">
+                <p class="font-semibold text-gray-800">${e.subject}: <span class="font-normal">${e.topic}</span></p>
+                <p class="text-sm text-gray-500">সময়: ${formatDuration(e.duration)}</p>
+            </div>`).join('') : '<p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+
+        renderWeeklyChart();
+    }
+
+    function renderWeeklyChart() {
+        if (!document.getElementById('weeklyChart')) return;
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+        const labels = [], data = [];
+        let totalMinutes = 0;
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            labels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
+            const dailySeconds = state.studyHistory.filter(e=>e.date.startsWith(d.toISOString().slice(0,10))).reduce((s,e)=>s+e.duration,0);
+            const minutes = Math.round(dailySeconds/60); data.push(minutes); totalMinutes += minutes;
+        }
+        const avgMinutes = data.length > 0 ? Math.round(totalMinutes / data.filter(d=>d>0).length || 1) : 0;
+        
+        if (weeklyChartInstance) weeklyChartInstance.destroy();
+        weeklyChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'পড়ার সময় (মিনিট)', data: data, backgroundColor: 'rgba(37, 99, 235, 0.8)', borderRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes*60)}`, font: { size: 16 } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label||''}: ${formatDuration(c.parsed.y*60)}` } } } } });
+    }
+
+    function updateProfilePage() {
+        const p = state.profile;
+        profileEmailInput.value = currentUserEmail;
+        profileNameInput.value = p.name;
+        profileMobileInput.value = p.mobile;
+        profileClassInput.value = p.class;
+        profileInstitutionInput.value = p.institution;
+        profileMotivationInput.value = p.motivation;
+        profileImgDisplay.src = p.profileImg;
+    }
+    
+    const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
+
+    // --- INITIALIZATION ---
+    function init() {
+        loadAllUsersData();
+        if (currentUserEmail && state) {
+            updateUIAfterLogin();
+        } else {
+            updateUIAfterLogout();
+        }
+    }
+    
+    // --- EVENT LISTENERS ---
+    loginButton.addEventListener('click', handleLogin);
+    [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
+    [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
+    [navItems.logoutBtn, navItems.mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
+    
+    startBtn.addEventListener('click', startTimer);
+    stopBtn.addEventListener('click', () => stopTimer(true));
+    dailyGoalInput.addEventListener('change', () => { if(state) { state.dailyGoal = parseFloat(dailyGoalInput.value) || 7; saveAllUsersData(); updateDashboard(); } });
+    saveProfileBtn.addEventListener('click', () => {
+        if(state) {
+            Object.assign(state.profile, { name: profileNameInput.value, mobile: profileMobileInput.value, class: profileClassInput.value, institution: profileInstitutionInput.value, motivation: profileMotivationInput.value });
+            saveAllUsersData();
+            Swal.fire({ icon: 'success', title: 'সফল!', text: 'আপনার প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', showConfirmButton: false, timer: 1500 });
+        }
+    });
+    profileImgUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && state) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { state.profile.profileImg = ev.target.result; profileImgDisplay.src = ev.target.result; saveAllUsersData(); };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    init();
+});
+</script>
+
+</body>
+</html>
+
