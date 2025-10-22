@@ -464,7 +464,7 @@
             }
         });
 
-        // Email/Password login ba create
+        // Email/Password login ba create --- *** FIX START *** ---
         async function handleLogin() {
             const email = loginEmailInput.value.trim().toLowerCase();
             const password = loginPasswordInput.value;
@@ -477,23 +477,42 @@
             try {
                 // Prothome login korar cheshta korun
                 await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged baki kaj korbe
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    // User nei, notun account create korun
+                // Login successful, onAuthStateChanged handles the rest
+                console.log("Login successful for:", email); 
+            } catch (signInError) {
+                // Login failed, check the reason
+                // Treat 'invalid-credential' as potentially 'user-not-found' for signup purposes
+                if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') { 
+                    // User nei ba credential vul (login er jonno), ekhon account create korar cheshta korun
+                    console.log("Login failed or user not found, attempting signup for:", email);
                     try {
                         await createUserWithEmailAndPassword(auth, email, password);
-                        // onAuthStateChanged baki kaj korbe
+                        // Signup successful, onAuthStateChanged handles the rest
+                        console.log("Signup successful for:", email);
                     } catch (createError) {
-                        Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: createError.message });
+                        // Signup failed
+                        console.error("Signup error:", createError);
+                        // Show a more specific error for weak password etc.
+                         if (createError.code === 'auth/weak-password') {
+                             Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।' });
+                         } else if (createError.code === 'auth/email-already-in-use') {
+                            Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'এই ইমেইল ঠিকানা দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট আছে।' });
+                         } else {
+                            Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: createError.message });
+                         }
                     }
-                } else if (error.code === 'auth/wrong-password') {
+                } else if (signInError.code === 'auth/wrong-password') { // Keep specific wrong password check
+                    // Password shothik na login er jonno
+                    console.error("Wrong password for:", email);
                     Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: error.message });
+                    // Onanno login error
+                    console.error("Login error:", signInError);
+                    Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message });
                 }
             }
         }
+        // --- *** FIX END *** ---
         
         // Google login
         async function handleGoogleLogin() {
@@ -769,4 +788,3 @@
 
 </body>
 </html>
-
