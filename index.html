@@ -464,7 +464,7 @@
             }
         });
 
-        // Email/Password login ba create --- *** FIX START *** ---
+        // Email/Password login ba create --- *** FIX START (More Logging) *** ---
         async function handleLogin() {
             const email = loginEmailInput.value.trim().toLowerCase();
             const password = loginPasswordInput.value;
@@ -474,40 +474,47 @@
                 return;
             }
 
+            console.log("Attempting sign in for:", email); // Log sign-in attempt
+
             try {
                 // Prothome login korar cheshta korun
                 await signInWithEmailAndPassword(auth, email, password);
                 // Login successful, onAuthStateChanged handles the rest
                 console.log("Login successful for:", email); 
             } catch (signInError) {
-                // Login failed, check the reason
-                // Treat 'invalid-credential' as potentially 'user-not-found' for signup purposes
-                if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') { 
-                    // User nei ba credential vul (login er jonno), ekhon account create korar cheshta korun
-                    console.log("Login failed or user not found, attempting signup for:", email);
+                console.error("Sign-in attempt failed. Error Code:", signInError.code, "Message:", signInError.message); // Log the specific sign-in error
+
+                // Treat 'invalid-credential' (newer SDK) or 'invalid-login-credentials' (older SDK maybe?)
+                // as potentially 'user-not-found' for signup purposes
+                if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/invalid-login-credentials' ) { 
+                    console.log("Assuming user not found or invalid credential means signup attempt needed for:", email);
                     try {
+                        console.log("Attempting account creation for:", email); // Log signup attempt
                         await createUserWithEmailAndPassword(auth, email, password);
                         // Signup successful, onAuthStateChanged handles the rest
                         console.log("Signup successful for:", email);
                     } catch (createError) {
                         // Signup failed
-                        console.error("Signup error:", createError);
+                        console.error("Signup attempt failed. Error Code:", createError.code, "Message:", createError.message); // Log the specific signup error
+
                         // Show a more specific error for weak password etc.
                          if (createError.code === 'auth/weak-password') {
                              Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।' });
                          } else if (createError.code === 'auth/email-already-in-use') {
                             Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'এই ইমেইল ঠিকানা দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট আছে।' });
                          } else {
+                            // Show the generic 'invalid credential' message if signup fails unexpectedly,
+                            // OR show the specific createError message? Let's stick to the specific one.
                             Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: createError.message });
                          }
                     }
-                } else if (signInError.code === 'auth/wrong-password') { // Keep specific wrong password check
-                    // Password shothik na login er jonno
-                    console.error("Wrong password for:", email);
+                // Keep specific wrong password check if the error code is exactly that
+                } else if (signInError.code === 'auth/wrong-password') { 
+                    console.error("Wrong password error confirmed for:", email);
                     Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
                 } else {
                     // Onanno login error
-                    console.error("Login error:", signInError);
+                    console.error("Unhandled Login error:", signInError);
                     Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message });
                 }
             }
@@ -788,3 +795,4 @@
 
 </body>
 </html>
+
