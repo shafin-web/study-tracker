@@ -13,39 +13,26 @@
     <style>
         body {
             font-family: 'Hind Siliguri', sans-serif;
-            /* Fallback gradient background */
             background: linear-gradient(135deg, #4f46e5 0%, #1e3a8a 100%);
-            /* Background image will be set by JavaScript and will override this if it loads */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
             transition: background-image 1s ease-in-out;
         }
-        /* Overlay to ensure text readability over any background image */
         body::before {
             content: '';
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.45); /* Slightly darker overlay for better contrast */
+            background-color: rgba(0, 0, 0, 0.45);
             z-index: -1;
         }
-        .main-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .nav-item {
-            transition: all 0.3s ease;
-        }
-        .nav-item.active {
-            background-color: #1d4ed8; /* Darker blue */
-            color: white;
-        }
-        /* Glassmorphism effect for cards */
+        .main-container { min-height: 100vh; display: flex; flex-direction: column; }
+        .nav-item { transition: all 0.3s ease; }
+        .nav-item.active { background-color: #1d4ed8; color: white; }
         .card {
-            background-color: rgba(255, 255, 255, 0.85); /* Slightly less transparent */
+            background-color: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.25);
@@ -54,37 +41,24 @@
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
         }
         aside {
-            background-color: rgba(255, 255, 255, 0.8); /* Slightly less transparent */
+            background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border-right: 1px solid rgba(255, 255, 255, 0.25);
         }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
+        .btn-primary { background-color: #2563eb; color: white; transition: background-color 0.3s ease; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #ef4444; color: white; transition: background-color 0.3s ease; }
+        .btn-secondary:hover { background-color: #dc2626; }
+        .btn-google {
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #D1D5DB;
             transition: background-color 0.3s ease;
         }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-secondary {
-            background-color: #ef4444;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background-color: #dc2626;
-        }
-        .progress-bar-container {
-            background-color: #e5e7eb;
-            border-radius: 9999px;
-            overflow: hidden;
-            height: 20px;
-        }
-        .progress-bar {
-            background-color: #34d399; /* Green */
-            transition: width 0.5s ease-in-out;
-        }
+        .btn-google:hover { background-color: #f9fafb; }
+        .progress-bar-container { background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; height: 20px; }
+        .progress-bar { background-color: #34d399; transition: width 0.5s ease-in-out; }
     </style>
 </head>
 <body>
@@ -106,15 +80,27 @@
                 <!-- Login View -->
                 <div id="login-view">
                      <div class="flex items-center justify-center h-full">
-                        <div class="text-center card max-w-md mx-auto">
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">স্বাগতম!</h1>
-                            <p class="text-gray-600 mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
-                            <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
-                            <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
-                            <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg">প্রবেশ করুন</button>
-                            <p class="text-xs text-gray-500 mt-4">(যদি অ্যাকাউন্ট না থাকে, প্রবেশ করুন বোতাম চাপলে নতুন অ্যাকাউন্ট তৈরি হয়ে যাবে।)</p>
-                        </div>
-                    </div>
+                         <div class="text-center card max-w-md mx-auto">
+                             <h1 class="text-3xl font-bold text-gray-800 mb-2">স্বাগতম!</h1>
+                             <p class="text-gray-600 mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+                             
+                             <!-- Notun Google Sign-in Button -->
+                             <button id="google-login-button" class="w-full btn-google font-bold py-3 px-4 rounded-lg mb-4 flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.222 0-9.567-3.108-11.283-7.481l-6.571 4.819C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-0.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.999 36.31 44 30.603 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
+                                <span>Google দিয়ে চালিয়ে যান</span>
+                             </button>
+                             
+                             <div class="my-4 flex items-center justify-center">
+                                <span class="flex-grow bg-gray-300 h-px"></span>
+                                <span class="mx-4 text-sm text-gray-500">অথবা</span>
+                                <span class="flex-grow bg-gray-300 h-px"></span>
+                             </div>
+
+                             <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
+                             <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
+                             <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg">প্রবেশ করুন / অ্যাকাউন্ট তৈরি করুন</button>
+                         </div>
+                     </div>
                 </div>
 
                 <!-- Dashboard View -->
@@ -139,15 +125,16 @@
                                         <input type="number" id="daily-goal" value="7" min="1" max="24" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div>
-                                        <label for="subject" class="block text-sm font-medium text-gray-700">বিষয়</label>
+                                        <label for="subject" class="block text-sm font-medium text-gray-700">বিষয়</label>
                                         <input type="text" id="subject" placeholder="যেমন: গণিত" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
+    
                                     <div>
                                         <label for="topic" class="block text-sm font-medium text-gray-700">টপিক</p>
                                         <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div class="flex space-x-4">
-                                        <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
+                                        <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
                                         <button id="stop-btn" class="w-full btn-secondary font-bold py-3 rounded-lg text-lg hidden">থামুন এবং সংরক্ষণ করুন</button>
                                     </div>
                                 </div>
@@ -159,7 +146,7 @@
                                 <div id="timer" class="text-6xl font-bold text-blue-600 my-4">00:00:00</div>
                                 <div class="space-y-4">
                                     <div>
-                                        <p class="text-md text-gray-600">আজ পড়েছেন</p>
+                                        <p class="text-md text-gray-600">আজ পড়েছেন</p>
                                         <p id="today-total" class="text-2xl font-bold text-gray-800">0 ঘন্টা 0 মিনিট</p>
                                     </div>
                                     <div>
@@ -181,9 +168,9 @@
                             <canvas id="weeklyChart"></canvas>
                         </div>
                         <div class="lg:col-span-2 card">
-                            <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সম্পন্ন টপিক</h2>
+                             <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সম্পন্ন টপিক</h2>
                             <div id="history-log" class="space-y-3 max-h-80 overflow-y-auto">
-                                <p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
+                                <p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
                             </div>
                         </div>
                     </div>
@@ -207,12 +194,13 @@
                                 <label for="profile-email" class="block text-sm font-medium text-gray-700">ইমেইল</label>
                                 <input type="email" id="profile-email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
                             </div>
+    
                             <div>
                                 <label for="profile-mobile" class="block text-sm font-medium text-gray-700">মোবাইল</label>
                                 <input type="text" id="profile-mobile" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                              <div>
-                                <label for="profile-class" class="block text-sm font-medium text-gray-700">কিসে পড়েন</label>
+                                <label for="profile-class" class="block text-sm font-medium text-gray-700">কিসে পড়েন</label>
                                 <input type="text" id="profile-class" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                              <div class="md:col-span-2">
@@ -257,341 +245,526 @@
 
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // --- SET RANDOM BACKGROUND IMAGE ---
-    // Final, robust list of 5 high-quality, reliable Pexels images.
-    const backgroundImages = [
-        'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920', // 1. Modern library aisle
-        'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1920', // 2. Classic library shelves
-        'https://images.pexels.com/photos/3747505/pexels-photo-3747505.jpeg?auto=compress&cs=tinysrgb&w=1920', // 3. Student studying with books
-        'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1920',  // 4. Bright, modern university hall
-        'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1920' // 5. Cozy study desk with laptop
-    ];
-    const randomIndex = Math.floor(Math.random() * backgroundImages.length);
-    document.body.style.backgroundImage = `url('${backgroundImages[randomIndex]}')`;
+<!-- 
+    **************************************************
+    * FIREBASE SCRIPT START - SOB LOGIC EKHANE     *
+    **************************************************
+-->
+<script type="module">
+    // --- FIREBASE SDK IMPORTS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        signInWithEmailAndPassword, 
+        createUserWithEmailAndPassword,
+        signInWithPopup,
+        GoogleAuthProvider,
+        signOut
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        setDoc, 
+        getDoc, 
+        updateDoc, 
+        onSnapshot,
+        arrayUnion
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-
-    // --- STATE MANAGEMENT ---
-    let currentUserEmail = null;
-    let allUsersData = {};
-    let state = null; // This will hold the data for the currently logged-in user
-
-    let timerInterval = null;
-    let weeklyChartInstance = null;
-    let quoteInterval = null;
-    
-    // Default structure for a new user
-    const createNewUserData = (password) => ({
-        password: password, // In a real app, this should be hashed!
-        profile: {
-            name: '', mobile: '', class: '', institution: '', motivation: '',
-            profileImg: 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
-        },
-        studySession: { isActive: false, startTime: null, subject: '', topic: '' },
-        studyHistory: [],
-        dailyGoal: 7
-    });
-
-    // --- UI ELEMENTS ---
-    const views = { login: document.getElementById('login-view'), dashboard: document.getElementById('dashboard-view'), profile: document.getElementById('profile-view') };
-    const navItems = {
-        sidebar: document.getElementById('sidebar-nav'),
-        mobile: document.getElementById('mobile-nav'),
-        logoutBtn: document.getElementById('logout-button'),
-        mobileLogoutBtn: document.getElementById('mobile-logout-button')
+    // --- !! IMPORTANT !! ---
+    // APNAR FIREBASE CONFIG CODE EKHANE ADD KORA HOYECHE
+    const firebaseConfig = {
+        apiKey: "AIzaSyASoBtoZ3tb7_9joLCaL9jFA3uW-QlCvnA",
+        authDomain: "study-trucker-dc956.firebaseapp.com",
+        projectId: "study-trucker-dc956",
+        storageBucket: "study-trucker-dc956.firebasestorage.app", // User-er file e 'firebasestorage.app' ache, kintu default 'appspot.com' hoy. User-er ta-i use korchi.
+        messagingSenderId: "457109620815",
+        appId: "1:457109620815:web:a71f94e25585cef3d3823a",
+        measurementId: "G-T8JNPYCPXB"
     };
-    const navDashboard = document.getElementById('nav-dashboard'), navProfile = document.getElementById('nav-profile');
-    const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile');
-    const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password'), loginButton = document.getElementById('login-button');
-    const dailyGoalInput = document.getElementById('daily-goal'), subjectInput = document.getElementById('subject'), topicInput = document.getElementById('topic');
-    const startBtn = document.getElementById('start-btn'), stopBtn = document.getElementById('stop-btn');
-    const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
-    const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
-    const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload');
-    const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
-    const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
-    const saveProfileBtn = document.getElementById('save-profile');
-    const quotes = [
-        { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" },
-        { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" },
-        { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" },
-        { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" },
-        { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" },
-        { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
-        { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
-        { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" },
-        { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" },
-        { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" }
-    ];
-    const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
+    // --- !! END OF CONFIG !! ---
+
+    // --- FIREBASE INITIALIZATION ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- SET RANDOM BACKGROUND IMAGE ---
+        const backgroundImages = [
+            'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920', // 1. Modern
+        'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1920', // 2. Classic library shelves
+            'https://images.pexels.com/photos/3747505/pexels-photo-3747505.jpeg?auto=compress&cs=tinysrgb&w=1920', // 3. Student studying with books
+            'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1920',  // 4. Bright, modern university hall
+            'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1920', // 5. Cozy study desk with laptop
+            'https://images.pexels.com/photos/1595385/pexels-photo-1595385.jpeg?auto=compress&cs=tinysrgb&w=1920', // 6. Bunch of students collaborating
+            'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1920', // 7. Successful gestures (team high-five)
+            'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=1920', // 8. Creative canvas (study desk)
+        ];
+        const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+        document.body.style.backgroundImage = `url('${backgroundImages[randomIndex]}')`;
 
 
-    // --- DATA PERSISTENCE ---
-    function saveAllUsersData() {
-        if (currentUserEmail && state) {
-            allUsersData[currentUserEmail] = state;
-        }
-        localStorage.setItem('studyTrackerUsers', JSON.stringify(allUsersData));
-        localStorage.setItem('studyTrackerSession', currentUserEmail || '');
-    }
+        // --- STATE MANAGEMENT (Firebase driven) ---
+        let currentUser = null; // Firebase Auth user object
+        let state = null; // User's data from Firestore
+        let userDocRef = null; // Firestore document reference
+        let firestoreUnsubscribe = null; // Function to stop listening to data
 
-    function loadAllUsersData() {
-        allUsersData = JSON.parse(localStorage.getItem('studyTrackerUsers')) || {};
-        currentUserEmail = localStorage.getItem('studyTrackerSession');
-        if (currentUserEmail && allUsersData[currentUserEmail]) {
-            state = allUsersData[currentUserEmail];
-        } else {
-            currentUserEmail = null;
-            state = null;
-        }
-    }
-
-    // --- NAVIGATION & VIEWS ---
-    function showView(viewName) {
-        Object.values(views).forEach(view => view.classList.add('hidden'));
-        if(views[viewName]) views[viewName].classList.remove('hidden');
-        updateNavActiveState(viewName);
-    }
-    
-    function updateUIAfterLogin() {
-        navItems.sidebar.classList.remove('hidden');
-        navItems.mobile.classList.add('flex');
-        navItems.mobile.classList.remove('hidden');
-        navItems.logoutBtn.classList.remove('hidden');
-        showView('dashboard');
-        loadAndDisplayUserData();
-        updateQuote();
-        if(quoteInterval) clearInterval(quoteInterval);
-        quoteInterval = setInterval(updateQuote, 20000);
-    }
-    
-    function updateUIAfterLogout() {
-        navItems.sidebar.classList.add('hidden');
-        navItems.mobile.classList.remove('flex');
-        navItems.mobile.classList.add('hidden');
-        navItems.logoutBtn.classList.add('hidden');
-        showView('login');
-        loginEmailInput.value = '';
-        loginPasswordInput.value = '';
-        if(quoteInterval) clearInterval(quoteInterval);
-    }
-
-    function updateNavActiveState(activeView) {
-        [navDashboard, navProfile, mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.remove('active', 'text-blue-600'));
-        [mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.add('text-gray-500'));
-
-        if (activeView === 'dashboard') {
-            navDashboard.classList.add('active');
-            mobileNavDashboard.classList.remove('text-gray-500');
-            mobileNavDashboard.classList.add('text-blue-600');
-        } else if (activeView === 'profile') {
-            navProfile.classList.add('active');
-            mobileNavProfile.classList.remove('text-gray-500');
-            mobileNavProfile.classList.add('text-blue-600');
-        }
-    }
-
-    // --- AUTHENTICATION ---
-    function handleLogin() {
-        const email = loginEmailInput.value.trim().toLowerCase();
-        const password = loginPasswordInput.value;
+        let timerInterval = null;
+        let weeklyChartInstance = null;
+        let quoteInterval = null;
         
-        if (!email || !password || !email.includes('@')) {
-            Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'অনুগ্রহ করে সঠিক ইমেইল এবং পাসওয়ার্ড দিন।' });
-            return;
+        // Default structure for a new user in Firestore
+        const createNewUserData = (user) => ({
+            uid: user.uid,
+            email: user.email,
+            profile: {
+                name: user.displayName || '', 
+                mobile: user.phoneNumber || '', 
+                class: '', 
+                institution: '', 
+                motivation: '',
+                profileImg: user.photoURL || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
+            },
+            studySession: { isActive: false, startTime: null, subject: '', topic: '' },
+            studyHistory: [],
+            dailyGoal: 7
+        });
+
+        // --- UI ELEMENTS ---
+        const views = { login: document.getElementById('login-view'), dashboard: document.getElementById('dashboard-view'), profile: document.getElementById('profile-view') };
+        const navItems = {
+            sidebar: document.getElementById('sidebar-nav'),
+            mobile: document.getElementById('mobile-nav'),
+            logoutBtn: document.getElementById('logout-button'),
+            mobileLogoutBtn: document.getElementById('mobile-logout-button')
+        };
+        const navDashboard = document.getElementById('nav-dashboard'), navProfile = document.getElementById('nav-profile');
+        const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile');
+        const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password');
+        const loginButton = document.getElementById('login-button'), googleLoginButton = document.getElementById('google-login-button');
+        const dailyGoalInput = document.getElementById('daily-goal'), subjectInput = document.getElementById('subject'), topicInput = document.getElementById('topic');
+        const startBtn = document.getElementById('start-btn'), stopBtn = document.getElementById('stop-btn');
+        const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
+        const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
+        const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload');
+        const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
+        const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
+        const saveProfileBtn = document.getElementById('save-profile');
+        
+        const quotes = [
+            { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
+            { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
+            { text: "যে ব্যক্তি জ্ঞানের সন্ধানে বের হয়, সে আল্লাহর পথে থাকে যতক্ষণ না সে ফিরে আসে।", author: "তিরমিযী - ২৬৪৭" },
+            { text: "যিনি জ্ঞান অনুসন্ধান করেন, আল্লাহ তার জান্নাতের পথ সহজ করে দেন।", author: "সহীহ মুসলিম - ২৬৯৯" },
+            { text: "...যাদের জ্ঞান দান করা হয়েছে, আল্লাহ তাদেরকে বহু স্তরে উন্নত করবেন।", author: "আল-কুরআন, সূরা মুজাদালা : ১১" },
+            { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" },
+            { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" },
+            { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" },
+            { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" },
+            { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" },
+            { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" },
+            { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" },
+            { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" },
+            { text: "ভবিষ্যৎ তাদেরই যারা তাদের স্বপ্নের সৌন্দর্যে বিশ্বাস করে।", author: "এলেনর রুজভেল্ট" },
+            { text: "সফলতা চূড়ান্ত নয়, ব্যর্থতা মারাত্মক নয়: চালিয়ে যাওয়ার সাহসটাই আসল।", author: "উইনস্টন চার্চিল" },
+            { text: "যতক্ষণ না কাজ শেষ হয়, ততক্ষণ পর্যন্ত তা অসম্ভব বলে মনে হয়।", author: "নেলসন ম্যান্ডেলা" },
+            { text: "চমৎকার কাজ করার একমাত্র উপায় হল আপনি যা করেন তা ভালবাসা।", author: "স্টিভ জবস" },
+        ];
+        const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
+
+
+        // --- DATA PERSISTENCE (Firebase) ---
+        // Ei function user login korle shob data load o update korbe
+        function setupFirestoreListener(user) {
+            userDocRef = doc(db, 'users', user.uid);
+            
+            // onSnapshot real-time listener set korbe
+            firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    // User data paoa geche
+                    state = docSnap.data();
+                    loadAndDisplayUserData(); // Data diye UI update korun
+                } else {
+                    // Notun user! Database e entry create korun
+                    console.log("Notun user! Data create kora hocche...");
+                    const newUserData = createNewUserData(user);
+                    setDoc(userDocRef, newUserData).then(() => {
+                        state = newUserData;
+                        loadAndDisplayUserData();
+                    });
+                }
+            });
+        }
+        
+        // --- NAVIGATION & VIEWS ---
+        function showView(viewName) {
+            Object.values(views).forEach(view => view.classList.add('hidden'));
+            if(views[viewName]) views[viewName].classList.remove('hidden');
+            updateNavActiveState(viewName);
+        }
+        
+        function updateUIAfterLogin() {
+            navItems.sidebar.classList.remove('hidden');
+            navItems.mobile.classList.add('flex');
+            navItems.mobile.classList.remove('hidden');
+            navItems.logoutBtn.classList.remove('hidden');
+            showView('dashboard');
+            updateQuote();
+            if(quoteInterval) clearInterval(quoteInterval);
+            quoteInterval = setInterval(updateQuote, 20000);
+        }
+        
+        function updateUIAfterLogout() {
+            if (firestoreUnsubscribe) firestoreUnsubscribe(); // Stop listening to data
+            currentUser = null;
+            state = null;
+            userDocRef = null;
+            
+            navItems.sidebar.classList.add('hidden');
+            navItems.mobile.classList.remove('flex');
+            navItems.mobile.classList.add('hidden');
+            navItems.logoutBtn.classList.add('hidden');
+            showView('login');
+            loginEmailInput.value = '';
+            loginPasswordInput.value = '';
+            if(quoteInterval) clearInterval(quoteInterval);
         }
 
-        if (allUsersData[email]) { // Existing user
-            if (allUsersData[email].password === password) {
-                currentUserEmail = email;
-                state = allUsersData[email];
-                saveAllUsersData();
+        function updateNavActiveState(activeView) {
+            [navDashboard, navProfile, mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.remove('active', 'text-blue-600'));
+            [mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.add('text-gray-500'));
+
+            if (activeView === 'dashboard') {
+                navDashboard.classList.add('active');
+                mobileNavDashboard.classList.remove('text-gray-500');
+                mobileNavDashboard.classList.add('text-blue-600');
+            } else if (activeView === 'profile') {
+                navProfile.classList.add('active');
+                mobileNavProfile.classList.remove('text-gray-500');
+                mobileNavProfile.classList.add('text-blue-600');
+            }
+        }
+
+        // --- AUTHENTICATION (Firebase) ---
+
+        // Main auth listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User login koreche
+                currentUser = user;
+                setupFirestoreListener(user); // User er data load/listen korun
                 updateUIAfterLogin();
             } else {
-                Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
+                // User logout koreche
+                updateUIAfterLogout();
             }
-        } else { // New user (Sign up)
-            allUsersData[email] = createNewUserData(password);
-            currentUserEmail = email;
-            state = allUsersData[email];
-            saveAllUsersData();
-            Swal.fire({ icon: 'success', title: 'স্বাগতম!', text: 'আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।' });
-            updateUIAfterLogin();
+        });
+
+        // Email/Password login ba create
+        async function handleLogin() {
+            const email = loginEmailInput.value.trim().toLowerCase();
+            const password = loginPasswordInput.value;
+            
+            if (!email || !password || !email.includes('@')) {
+                Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'অনুগ্রহ করে সঠিক ইমেইল এবং পাসওয়ার্ড দিন।' });
+                return;
+            }
+
+            try {
+                // Prothome login korar cheshta korun
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged baki kaj korbe
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    // User nei, notun account create korun
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                        // onAuthStateChanged baki kaj korbe
+                    } catch (createError) {
+                        Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: createError.message });
+                    }
+                } else if (error.code === 'auth/wrong-password') {
+                    Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: error.message });
+                }
+            }
         }
-    }
-
-    function handleLogout() {
-        // Before logging out, save any active session
-        if (state && state.studySession.isActive) {
-            stopTimer(false); // Stop timer but don't show popups
-        }
-        currentUserEmail = null;
-        state = null;
-        saveAllUsersData(); // This will clear the session
-        updateUIAfterLogout();
-    }
-
-    // --- CORE LOGIC ---
-    function startTimer() {
-        if (!subjectInput.value.trim() || !topicInput.value.trim()) {
-            Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'অনুগ্রহ করে বিষয় এবং টপিক লিখুন।' });
-            return;
-        }
-        state.studySession.isActive = true;
-        state.studySession.startTime = new Date().getTime();
-        state.studySession.subject = subjectInput.value.trim();
-        state.studySession.topic = topicInput.value.trim();
-        startBtn.classList.add('hidden');
-        stopBtn.classList.remove('hidden');
-        [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
-        timerInterval = setInterval(updateTimerDisplay, 1000);
-        saveAllUsersData();
-    }
-
-    function stopTimer(showCongratsPopup = true) {
-        if (!state.studySession.isActive) return;
-
-        const duration = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
-        state.studyHistory.push({ date: new Date().toISOString(), subject: state.studySession.subject, topic: state.studySession.topic, duration: duration });
-
-        clearInterval(timerInterval);
-        timerInterval = null;
-        state.studySession.isActive = false;
-
-        startBtn.classList.remove('hidden');
-        stopBtn.classList.add('hidden');
-        [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
-        subjectInput.value = '';
-        topicInput.value = '';
-        timerDisplay.textContent = '00:00:00';
         
-        saveAllUsersData();
-        updateDashboard();
+        // Google login
+        async function handleGoogleLogin() {
+            try {
+                await signInWithPopup(auth, provider);
+                // onAuthStateChanged baki kaj korbe
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: error.message });
+            }
+        }
 
-        if (showCongratsPopup) {
-            const totalStudiedSeconds = getTotalStudiedSecondsForToday();
+        function handleLogout() {
+            // Logout korar age active session save korun
+            if (state && state.studySession.isActive) {
+                stopTimer(false); // Stop timer but don't show popups
+            }
+            signOut(auth);
+        }
+
+        // --- CORE LOGIC (Firebase backed) ---
+        async function startTimer() {
+            if (!subjectInput.value.trim() || !topicInput.value.trim()) {
+                Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'অনুগ্রহ করে বিষয় এবং টপিক লিখুন।' });
+                return;
+            }
+            
+            const sessionData = {
+                isActive: true,
+                startTime: new Date().getTime(),
+                subject: subjectInput.value.trim(),
+                topic: topicInput.value.trim()
+            };
+
+            try {
+                // Firestore e 'studySession' update korun
+                await updateDoc(userDocRef, { studySession: sessionData });
+                
+                // UI Update (state localy update hobe onSnapshot theke)
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+            } catch (error) {
+                console.error("Error starting timer: ", error);
+                Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' });
+            }
+        }
+
+        async function stopTimer(showCongratsPopup = true) {
+            if (!state || !state.studySession.isActive) return;
+
+            const duration = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
+            const sessionHistory = { 
+                date: new Date().toISOString(), 
+                subject: state.studySession.subject, 
+                topic: state.studySession.topic, 
+                duration: duration 
+            };
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+
+            try {
+                // Firestore update: session inactive korun ebong history-te add korun
+                await updateDoc(userDocRef, {
+                    studySession: { isActive: false, startTime: null, subject: '', topic: '' },
+                    studyHistory: arrayUnion(sessionHistory) // arrayUnion duplicate entry add korbe na
+                });
+
+                // UI update
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
+                subjectInput.value = '';
+                topicInput.value = '';
+                timerDisplay.textContent = '00:00:00';
+                
+                // updateDashboard() nijei call hobe onSnapshot theke
+                
+                if (showCongratsPopup) {
+                    const totalStudiedSeconds = getTotalStudiedSecondsForToday();
+                    const goalSeconds = state.dailyGoal * 3600;
+                    if (totalStudiedSeconds >= goalSeconds) {
+                        Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
+                    }
+                }
+            } catch (error) {
+                console.error("Error stopping timer: ", error);
+                Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' });
+            }
+        }
+        
+        function updateTimerDisplay() {
+            if (!state || !state.studySession.isActive) return;
+            const elapsed = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
+            timerDisplay.textContent = formatTime(elapsed);
+        }
+        
+        const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+        const formatDuration = (s) => { const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || '0 মিনিট'; };
+
+        // --- TIMEZONE BUG FIX (Local Date) ---
+        const getLocalDateString = (date = new Date()) => {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
+        const getTotalStudiedSecondsForToday = () => { 
+            if(!state) return 0; 
+            const todayStr = getLocalDateString(new Date());
+            return state.studyHistory
+                .filter(e => getLocalDateString(new Date(e.date)) === todayStr)
+                .reduce((sum, e) => sum + e.duration, 0);
+        };
+        // --- END OF FIX ---
+
+
+        // --- UI UPDATES ---
+        function loadAndDisplayUserData() {
+            if (!state) return;
+            
+            updateDashboard();
+            updateProfilePage();
+            dailyGoalInput.value = state.dailyGoal;
+
+            if (state.studySession.isActive && state.studySession.startTime) {
+                startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
+                subjectInput.value = state.studySession.subject; topicInput.value = state.studySession.topic;
+                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
+                if(timerInterval) clearInterval(timerInterval); // Clear any old interval
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+            } else {
+                // Ensure timer is stopped if session is not active
+                if(timerInterval) clearInterval(timerInterval);
+                timerInterval = null;
+                timerDisplay.textContent = '00:00:00';
+                startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden');
+                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
+            }
+        }
+
+        function updateDashboard() {
+            if (!state) return;
+            const totalSecondsToday = getTotalStudiedSecondsForToday();
             const goalSeconds = state.dailyGoal * 3600;
-            if (totalStudiedSeconds >= goalSeconds) {
-                Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
+            todayTotalDisplay.textContent = formatDuration(totalSecondsToday);
+            todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday));
+            progressBar.style.width = `${Math.min(100, (totalSecondsToday / goalSeconds) * 100)}%`;
+
+            const todayStr = getLocalDateString(new Date());
+            const todayHistory = state.studyHistory.filter(e => getLocalDateString(new Date(e.date)) === todayStr);
+            
+            historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `
+                <div class="p-3 bg-gray-50/80 rounded-lg border border-gray-200">
+                    <p class="font-semibold text-gray-800">${e.subject}: <span class="font-normal">${e.topic}</span></p>
+                    <p class="text-sm text-gray-500">সময়: ${formatDuration(e.duration)}</p>
+                </div>`).join('') : '<p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+
+            renderWeeklyChart();
+        }
+
+        function renderWeeklyChart() {
+            if (!document.getElementById('weeklyChart') || !state) return;
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const labels = [], data = [];
+            let totalMinutes = 0;
+            
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(); 
+                d.setDate(d.getDate() - i);
+                const dayStr = getLocalDateString(d);
+                labels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
+                
+                const dailySeconds = state.studyHistory
+                    .filter(e => getLocalDateString(new Date(e.date)) === dayStr)
+                    .reduce((s, e) => s + e.duration, 0);
+                const minutes = Math.round(dailySeconds / 60);
+                data.push(minutes); 
+                totalMinutes += minutes;
             }
+            
+            const activeDays = data.filter(d => d > 0).length || 1;
+            const avgMinutes = Math.round(totalMinutes / activeDays);
+            
+            if (weeklyChartInstance) weeklyChartInstance.destroy();
+            weeklyChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'পড়ার সময় (মিনিট)', data: data, backgroundColor: 'rgba(37, 99, 235, 0.8)', borderRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes * 60)}`, font: { size: 16 } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatDuration(c.parsed.y * 60)}` } } } } });
         }
-    }
-    
-    function updateTimerDisplay() {
-        if (!state || !state.studySession.isActive) return;
-        const elapsed = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
-        timerDisplay.textContent = formatTime(elapsed);
-    }
-    
-    const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
-    const formatDuration = (s) => { const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || '0 মিনিট'; };
-    const getTotalStudiedSecondsForToday = () => { if(!state) return 0; const t = new Date().toISOString().slice(0,10); return state.studyHistory.filter(e=>e.date.startsWith(t)).reduce((sum, e)=>sum+e.duration,0);};
 
-
-    // --- UI UPDATES ---
-    function loadAndDisplayUserData() {
-        if (!state) return;
-        // Clean up old data (older than 28 days)
-        const fourWeeksAgo = new Date().getTime() - (28 * 24 * 60 * 60 * 1000);
-        state.studyHistory = state.studyHistory.filter(entry => new Date(entry.date).getTime() >= fourWeeksAgo);
+        function updateProfilePage() {
+            if (!state || !currentUser) return;
+            const p = state.profile;
+            profileEmailInput.value = currentUser.email;
+            profileNameInput.value = p.name;
+            profileMobileInput.value = p.mobile;
+            profileClassInput.value = p.class;
+            profileInstitutionInput.value = p.institution;
+            profileMotivationInput.value = p.motivation;
+            profileImgDisplay.src = p.profileImg;
+        }
         
-        updateDashboard();
-        updateProfilePage();
-        dailyGoalInput.value = state.dailyGoal;
+        const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
 
-        if (state.studySession.isActive && state.studySession.startTime) {
-            startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
-            subjectInput.value = state.studySession.subject; topicInput.value = state.studySession.topic;
-            [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
-            timerInterval = setInterval(updateTimerDisplay, 1000);
-        }
-    }
-
-    function updateDashboard() {
-        const totalSecondsToday = getTotalStudiedSecondsForToday();
-        const goalSeconds = state.dailyGoal * 3600;
-        todayTotalDisplay.textContent = formatDuration(totalSecondsToday);
-        todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday));
-        progressBar.style.width = `${Math.min(100, (totalSecondsToday / goalSeconds) * 100)}%`;
-
-        const todayHistory = state.studyHistory.filter(e => e.date.startsWith(new Date().toISOString().slice(0, 10)));
-        historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.reverse().map(e => `
-            <div class="p-3 bg-gray-50/80 rounded-lg border border-gray-200">
-                <p class="font-semibold text-gray-800">${e.subject}: <span class="font-normal">${e.topic}</span></p>
-                <p class="text-sm text-gray-500">সময়: ${formatDuration(e.duration)}</p>
-            </div>`).join('') : '<p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
-
-        renderWeeklyChart();
-    }
-
-    function renderWeeklyChart() {
-        if (!document.getElementById('weeklyChart')) return;
-        const ctx = document.getElementById('weeklyChart').getContext('2d');
-        const labels = [], data = [];
-        let totalMinutes = 0;
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            labels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
-            const dailySeconds = state.studyHistory.filter(e=>e.date.startsWith(d.toISOString().slice(0,10))).reduce((s,e)=>s+e.duration,0);
-            const minutes = Math.round(dailySeconds/60); data.push(minutes); totalMinutes += minutes;
-        }
-        const avgMinutes = data.length > 0 ? Math.round(totalMinutes / data.filter(d=>d>0).length || 1) : 0;
+        // --- EVENT LISTENERS ---
+        loginButton.addEventListener('click', handleLogin);
+        googleLoginButton.addEventListener('click', handleGoogleLogin);
+        [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
+        [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
+        [navItems.logoutBtn, navItems.mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
         
-        if (weeklyChartInstance) weeklyChartInstance.destroy();
-        weeklyChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'পড়ার সময় (মিনিট)', data: data, backgroundColor: 'rgba(37, 99, 235, 0.8)', borderRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes*60)}`, font: { size: 16 } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label||''}: ${formatDuration(c.parsed.y*60)}` } } } } });
-    }
-
-    function updateProfilePage() {
-        const p = state.profile;
-        profileEmailInput.value = currentUserEmail;
-        profileNameInput.value = p.name;
-        profileMobileInput.value = p.mobile;
-        profileClassInput.value = p.class;
-        profileInstitutionInput.value = p.institution;
-        profileMotivationInput.value = p.motivation;
-        profileImgDisplay.src = p.profileImg;
-    }
-    
-    const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
-
-    // --- INITIALIZATION ---
-    function init() {
-        loadAllUsersData();
-        if (currentUserEmail && state) {
-            updateUIAfterLogin();
-        } else {
-            updateUIAfterLogout();
-        }
-    }
-    
-    // --- EVENT LISTENERS ---
-    loginButton.addEventListener('click', handleLogin);
-    [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
-    [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
-    [navItems.logoutBtn, navItems.mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
-    
-    startBtn.addEventListener('click', startTimer);
-    stopBtn.addEventListener('click', () => stopTimer(true));
-    dailyGoalInput.addEventListener('change', () => { if(state) { state.dailyGoal = parseFloat(dailyGoalInput.value) || 7; saveAllUsersData(); updateDashboard(); } });
-    saveProfileBtn.addEventListener('click', () => {
-        if(state) {
-            Object.assign(state.profile, { name: profileNameInput.value, mobile: profileMobileInput.value, class: profileClassInput.value, institution: profileInstitutionInput.value, motivation: profileMotivationInput.value });
-            saveAllUsersData();
-            Swal.fire({ icon: 'success', title: 'সফল!', text: 'আপনার প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', showConfirmButton: false, timer: 1500 });
-        }
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', () => stopTimer(true));
+        
+        dailyGoalInput.addEventListener('change', async () => { 
+            if(state && userDocRef) { 
+                const newGoal = parseFloat(dailyGoalInput.value) || 7;
+                try {
+                    await updateDoc(userDocRef, { dailyGoal: newGoal });
+                    // onSnapshot auto UI update korbe
+                } catch (e) { console.error("Error updating goal: ", e); }
+            } 
+        });
+        
+        saveProfileBtn.addEventListener('click', async () => {
+            if(state && userDocRef) {
+                const updatedProfile = {
+                    ...state.profile, // Purono data rakha
+                    name: profileNameInput.value, 
+                    mobile: profileMobileInput.value, 
+                    class: profileClassInput.value, 
+                    institution: profileInstitutionInput.value, 
+                    motivation: profileMotivationInput.value
+                };
+                try {
+                    await updateDoc(userDocRef, { profile: updatedProfile });
+                    Swal.fire({ icon: 'success', title: 'সফল!', text: 'আপনার প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', showConfirmButton: false, timer: 1500 });
+                } catch (e) {
+                    console.error("Error saving profile: ", e);
+                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'প্রোফাইল সেভ করা যায়নি।' });
+                }
+            }
+        });
+        
+        // Profile image upload (Firebase Storage lagbe, ekhonkar jonno base64 save kora hocche)
+        // NOTE: Base64 boro hole Firestore e somossa korte pare. Optimal solution hocche Firebase Storage.
+        profileImgUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && state && userDocRef) {
+                // Check file size (e.g., limit to 1MB for base64 in Firestore)
+                if (file.size > 1048576) {
+                    Swal.fire({ icon: 'error', title: 'ছবিটি খুব বড়', text: 'অনুগ্রহ করে 1MB-এর ছোট ছবি আপলোড করুন।' });
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = async (ev) => { 
+                    const imgData = ev.target.result;
+                    try {
+                        await updateDoc(userDocRef, { "profile.profileImg": imgData });
+                        profileImgDisplay.src = imgData; // onSnapshot o eta korbe
+                    } catch (e) {
+                        console.error("Error uploading image data: ", e);
+                        Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ছবি আপলোড করা যায়নি।' });
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // init() function-er ar dorkar nei, onAuthStateChanged shob handle korbe
     });
-    profileImgUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && state) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { state.profile.profileImg = ev.target.result; profileImgDisplay.src = ev.target.result; saveAllUsersData(); };
-            reader.readAsDataURL(file);
-        }
-    });
-    
-    init();
-});
 </script>
 
 </body>
