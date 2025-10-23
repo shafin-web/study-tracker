@@ -11,43 +11,125 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* Basic Light Theme Variables */
+        :root {
+            --bg-body: linear-gradient(135deg, #4f46e5 0%, #1e3a8a 100%);
+            --bg-overlay: rgba(0, 0, 0, 0.45);
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-aside: rgba(255, 255, 255, 0.8);
+            --text-primary: #1f2937; /* Gray 800 */
+            --text-secondary: #4b5563; /* Gray 600 */
+            --text-light: #f9fafb; /* Gray 50 */
+            --text-accent: #2563eb; /* Blue 600 */
+            --border-color: rgba(255, 255, 255, 0.25);
+            --input-border: #D1D5DB; /* Gray 300 */
+            --input-bg: #ffffff;
+            --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --badge-bg: #e0e7ff; /* Indigo 100 */
+            --badge-text: #3730a3; /* Indigo 800 */
+        }
+
+        /* Dark Theme Variables */
+        .dark {
+            --bg-body: linear-gradient(135deg, #1f2937 0%, #111827 100%); /* Darker Gradient */
+            --bg-overlay: rgba(0, 0, 0, 0.6); /* Darker Overlay */
+            --bg-card: rgba(31, 41, 55, 0.8); /* Gray 800 semi-transparent */
+            --bg-aside: rgba(17, 24, 39, 0.85); /* Gray 900 semi-transparent */
+            --text-primary: #f9fafb; /* Gray 50 */
+            --text-secondary: #d1d5db; /* Gray 300 */
+            --text-light: #f9fafb; /* Gray 50 */
+            --text-accent: #60a5fa; /* Blue 400 */
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-border: #4b5563; /* Gray 600 */
+            --input-bg: #374151; /* Gray 700 */
+            --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3);
+            --badge-bg: #312e81; /* Indigo 900 */
+            --badge-text: #c7d2fe; /* Indigo 200 */
+        }
+
         body {
             font-family: 'Hind Siliguri', sans-serif;
-            background: linear-gradient(135deg, #4f46e5 0%, #1e3a8a 100%);
+            background: var(--bg-body);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
-            transition: background-image 1s ease-in-out;
+            transition: background 1s ease-in-out, color 0.3s ease;
+            color: var(--text-primary);
         }
         body::before {
             content: '';
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.45);
+            background-color: var(--bg-overlay);
             z-index: -1;
+            transition: background-color 0.3s ease;
         }
         .main-container { min-height: 100vh; display: flex; flex-direction: column; }
-        .nav-item { transition: all 0.3s ease; }
-        .nav-item.active { background-color: #1d4ed8; color: white; }
+        .nav-item { transition: all 0.3s ease; color: var(--text-secondary); }
+        .nav-item:hover { background-color: rgba(96, 165, 250, 0.2); } /* Blue hover subtle */
+        .nav-item.active { background-color: var(--text-accent); color: white; }
+        .dark .nav-item.active { background-color: var(--text-accent); color: var(--bg-aside); }
+
         .card {
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: var(--bg-card);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 2rem;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            box-shadow: var(--shadow-card);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         aside {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: var(--bg-aside);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border-right: 1px solid rgba(255, 255, 255, 0.25);
+            border-right: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        .btn-primary { background-color: #2563eb; color: white; transition: background-color 0.3s ease; }
-        .btn-primary:hover { background-color: #1d4ed8; }
+        /* Update other elements for dark mode */
+        input, textarea, select {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        input::placeholder, textarea::placeholder {
+             color: var(--text-secondary);
+        }
+        .text-white\/90 { color: rgba(249, 250, 251, 0.9); } /* Gray 50 */
+        .dark .text-white\/90 { color: rgba(249, 250, 251, 0.9); }
+        .text-white\/80 { color: rgba(249, 250, 251, 0.8); }
+        .dark .text-white\/80 { color: rgba(209, 213, 219, 0.8); } /* Gray 300 */
+        .bg-blue-50\/70 { background-color: rgba(239, 246, 255, 0.7); }
+        .dark .bg-blue-50\/70 { background-color: rgba(55, 65, 81, 0.7); } /* Gray 600 */
+        .text-blue-800 { color: #1e40af; }
+        .dark .text-blue-800 { color: #93c5fd; } /* Blue 300 */
+        .text-blue-900 { color: #1e3a8a; }
+        .dark .text-blue-900 { color: #bfdbfe; } /* Blue 200 */
+        .text-gray-700 { color: #374151; }
+        .dark .text-gray-700 { color: #d1d5db; } /* Gray 300 */
+        .text-gray-800 { color: #1f2937; }
+        .dark .text-gray-800 { color: #f9fafb; } /* Gray 50 */
+        .text-gray-600 { color: #4b5563; }
+        .dark .text-gray-600 { color: #9ca3af; } /* Gray 400 */
+        .text-gray-500 { color: #6b7280; }
+        .dark .text-gray-500 { color: #9ca3af; } /* Gray 400 */
+        .text-blue-600 { color: #2563eb; }
+        .dark .text-blue-600 { color: #60a5fa; } /* Blue 400 */
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .dark .bg-gray-100 { background-color: #4b5563; } /* Gray 600 */
+        .bg-gray-50\/80 { background-color: rgba(249, 250, 251, 0.8); }
+        .dark .bg-gray-50\/80 { background-color: rgba(55, 65, 81, 0.8); } /* Gray 600 */
+        .border-gray-200 { border-color: #e5e7eb; }
+        .dark .border-gray-200 { border-color: #4b5563; } /* Gray 600 */
+
+
+        .btn-primary { background-color: var(--text-accent); color: white; transition: background-color 0.3s ease; }
+        .btn-primary:hover { opacity: 0.9; }
         .btn-secondary { background-color: #ef4444; color: white; transition: background-color 0.3s ease; }
         .btn-secondary:hover { background-color: #dc2626; }
         .btn-google {
@@ -57,11 +139,78 @@
             transition: background-color 0.3s ease;
         }
         .btn-google:hover { background-color: #f9fafb; }
+        .dark .btn-google { background-color: #374151; color: #f9fafb; border-color: #4b5563; }
+        .dark .btn-google:hover { background-color: #4b5563; }
+
         .progress-bar-container { background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; height: 20px; }
+        .dark .progress-bar-container { background-color: #4b5563; }
         .progress-bar { background-color: #34d399; transition: width 0.5s ease-in-out; }
+
+        /* Theme Toggle Button */
+        #theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            /* padding: 0.5rem; */ /* Reduced padding for emoji */
+            width: 2.5rem; /* Fixed width */
+            height: 2.5rem; /* Fixed height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-card);
+            font-size: 1.25rem; /* Adjust emoji size */
+        }
+        /* #theme-toggle svg { width: 1.25rem; height: 1.25rem; } */ /* Removed SVG style */
+
+        /* Subject Summary */
+        .subject-summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--input-border);
+        }
+         .subject-summary-item:last-child {
+            border-bottom: none;
+         }
+
+         /* Mobile Nav Icons Emoji Size */
+         #mobile-nav span.emoji-icon {
+            font-size: 1.5rem; /* Larger emoji size */
+            line-height: 1;
+            margin-bottom: 0.125rem; /* Adjust spacing */
+         }
+
+         /* Badge Styles */
+         .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background-color: var(--badge-bg);
+            color: var(--badge-text);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+         }
+         .badge span:first-child { /* Emoji */
+             margin-right: 0.3rem;
+             font-size: 1rem;
+         }
     </style>
 </head>
 <body>
+    <!-- Theme Toggle Button with Emojis -->
+    <button id="theme-toggle" title="Toggle theme">
+        <span id="theme-icon-light">☀️</span>
+        <span id="theme-icon-dark" class="hidden">🌙</span>
+    </button>
 
     <div class="main-container">
         <!-- Main Content -->
@@ -70,35 +219,36 @@
             <aside class="w-64 shadow-lg p-4 flex-shrink-0 hidden md:flex flex-col">
                 <div class="text-2xl font-bold text-blue-600 mb-8 text-center">স্টাডি ট্র্যাকার</div>
                 <nav id="sidebar-nav" class="flex flex-col space-y-2 flex-grow">
-                    <a href="#" id="nav-dashboard" class="nav-item py-2 px-4 rounded-lg font-semibold text-gray-700 hover:bg-blue-100">ড্যাশবোর্ড</a>
-                    <a href="#" id="nav-profile" class="nav-item py-2 px-4 rounded-lg font-semibold text-gray-700 hover:bg-blue-100">প্রোফাইল</a>
+                    <a href="#" id="nav-dashboard" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">ড্যাশবোর্ড</a>
+                    <a href="#" id="nav-profile" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">প্রোফাইল</a>
                 </nav>
                 <button id="logout-button" class="w-full btn-secondary font-bold py-2 px-4 rounded-lg mt-4 hidden">লগ আউট</button>
             </aside>
-            
+
             <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8">
                 <!-- Login View -->
                 <div id="login-view">
-                     <div class="flex items-center justify-center h-full">
+                     <div class="flex items-center justify-center min-h-[80vh]">
                          <div class="text-center card max-w-md mx-auto">
-                             <h1 class="text-3xl font-bold text-gray-800 mb-2">স্বাগতম!</h1>
+                             <h1 class="text-3xl font-bold mb-2">স্বাগতম!</h1>
                              <p class="text-gray-600 mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
-                             
+
                              <!-- Notun Google Sign-in Button -->
                              <button id="google-login-button" class="w-full btn-google font-bold py-3 px-4 rounded-lg mb-4 flex items-center justify-center space-x-2">
                                 <svg class="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.222 0-9.567-3.108-11.283-7.481l-6.571 4.819C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-0.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.999 36.31 44 30.603 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
                                 <span>Google দিয়ে চালিয়ে যান</span>
                              </button>
-                             
+
                              <div class="my-4 flex items-center justify-center">
                                 <span class="flex-grow bg-gray-300 h-px"></span>
                                 <span class="mx-4 text-sm text-gray-500">অথবা</span>
                                 <span class="flex-grow bg-gray-300 h-px"></span>
                              </div>
 
-                             <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
-                             <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
-                             <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg">প্রবেশ করুন / অ্যাকাউন্ট তৈরি করুন</button>
+                             <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
+                             <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
+                             <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg mb-4">প্রবেশ করুন / অ্যাকাউন্ট তৈরি করুন</button>
+                             <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">পাসওয়ার্ড ভুলে গেছেন?</a>
                          </div>
                      </div>
                 </div>
@@ -106,7 +256,7 @@
                 <!-- Dashboard View -->
                 <div id="dashboard-view" class="hidden">
                     <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">ড্যাশবোর্ড</h1>
-                    
+
                     <!-- Motivational Quote -->
                     <div id="quote-container" class="mb-6 p-4 bg-blue-50/70 border-l-4 border-blue-500 rounded-r-lg">
                         <p id="quote-text" class="text-blue-800 italic"></p>
@@ -118,20 +268,20 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                             <!-- Left: Timer Controls -->
                             <div>
-                                <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সেশন</h2>
+                                <h2 class="text-2xl font-bold mb-4">আজকের সেশন</h2>
                                 <div class="space-y-4">
                                     <div>
-                                        <label for="daily-goal" class="block text-sm font-medium text-gray-700">আজকের লক্ষ্য (ঘন্টা)</label>
-                                        <input type="number" id="daily-goal" value="7" min="1" max="24" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <label for="daily-goal" class="block text-sm font-medium">আজকের লক্ষ্য (ঘন্টা)</label>
+                                        <input type="number" id="daily-goal" value="7" min="1" max="24" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div>
-                                        <label for="subject" class="block text-sm font-medium text-gray-700">বিষয়</label>
-                                        <input type="text" id="subject" placeholder="যেমন: গণিত" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <label for="subject" class="block text-sm font-medium">বিষয়</label>
+                                        <input type="text" id="subject" placeholder="যেমন: গণিত" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
-    
+
                                     <div>
-                                        <label for="topic" class="block text-sm font-medium text-gray-700">টপিক</p>
-                                        <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <label for="topic" class="block text-sm font-medium">টপিক</label>
+                                        <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div class="flex space-x-4">
                                         <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
@@ -147,14 +297,21 @@
                                 <div class="space-y-4">
                                     <div>
                                         <p class="text-md text-gray-600">আজ পড়েছেন</p>
-                                        <p id="today-total" class="text-2xl font-bold text-gray-800">0 ঘন্টা 0 মিনিট</p>
+                                        <p id="today-total" class="text-2xl font-bold">0 ঘন্টা 0 মিনিট</p>
                                     </div>
                                     <div>
                                         <p class="text-md text-gray-600">লক্ষ্য বাকি</p>
-                                        <p id="today-remaining" class="text-2xl font-bold text-gray-800">7 ঘন্টা 0 মিনিট</p>
+                                        <p id="today-remaining" class="text-2xl font-bold">7 ঘন্টা 0 মিনিট</p>
                                     </div>
                                     <div class="w-full progress-bar-container mt-4">
                                         <div id="progress-bar" class="progress-bar h-full" style="width: 0%;"></div>
+                                    </div>
+                                    <!-- Notun Subject Summary Section -->
+                                    <div id="subject-summary-today" class="mt-6 text-left">
+                                        <h4 class="text-md font-semibold mb-2 text-center border-b pb-1">আজকের বিষয়ভিত্তিক সময়</h4>
+                                        <div id="subject-summary-list" class="text-sm">
+                                             <p class="text-gray-500 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -164,11 +321,11 @@
                     <!-- Weekly Chart and History -->
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                         <div class="lg:col-span-3 card">
-                             <h2 class="text-2xl font-bold text-gray-700 mb-4">সাপ্তাহিক রিপোর্ট</h2>
+                             <h2 class="text-2xl font-bold mb-4">সাপ্তাহিক রিপোর্ট</h2>
                             <canvas id="weeklyChart"></canvas>
                         </div>
                         <div class="lg:col-span-2 card">
-                             <h2 class="text-2xl font-bold text-gray-700 mb-4">আজকের সম্পন্ন টপিক</h2>
+                             <h2 class="text-2xl font-bold mb-4">আজকের সম্পন্ন টপিক</h2>
                             <div id="history-log" class="space-y-3 max-h-80 overflow-y-auto">
                                 <p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
                             </div>
@@ -181,96 +338,127 @@
                      <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">প্রোফাইল</h1>
                     <div class="card max-w-2xl mx-auto">
                         <div class="flex flex-col items-center space-y-4">
-                            <img id="profile-img-display" src="https://placehold.co/128x128/E2E8F0/4A5568?text=ছবি" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover">
+                            <img id="profile-img-display" src="https://placehold.co/128x128/E2E8F0/4A5568?text=ছবি" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600">
+                             <!-- Loading Indicator for Image Upload -->
+                            <div id="img-upload-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                             <input type="file" id="profile-img-upload" class="hidden" accept="image/*">
                             <button onclick="document.getElementById('profile-img-upload').click()" class="text-sm text-blue-600 hover:underline">ছবি পরিবর্তন করুন</button>
                         </div>
                         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="profile-name" class="block text-sm font-medium text-gray-700">নাম</label>
-                                <input type="text" id="profile-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="profile-name" class="block text-sm font-medium">নাম</label>
+                                <input type="text" id="profile-name" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div>
-                                <label for="profile-email" class="block text-sm font-medium text-gray-700">ইমেইল</label>
-                                <input type="email" id="profile-email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                                <label for="profile-email" class="block text-sm font-medium">ইমেইল</label>
+                                <input type="email" id="profile-email" class="mt-1 block w-full border rounded-md shadow-sm bg-gray-100" readonly>
                             </div>
-    
+
                             <div>
-                                <label for="profile-mobile" class="block text-sm font-medium text-gray-700">মোবাইল</label>
-                                <input type="text" id="profile-mobile" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="profile-mobile" class="block text-sm font-medium">মোবাইল</label>
+                                <input type="text" id="profile-mobile" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div>
-                                <label for="profile-class" class="block text-sm font-medium text-gray-700">কিসে পড়েন</label>
-                                <input type="text" id="profile-class" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="profile-class" class="block text-sm font-medium">কিসে পড়েন</label>
+                                <input type="text" id="profile-class" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div class="md:col-span-2">
-                                <label for="profile-institution" class="block text-sm font-medium text-gray-700">শিক্ষা প্রতিষ্ঠান</label>
-                                <input type="text" id="profile-institution" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="profile-institution" class="block text-sm font-medium">শিক্ষা প্রতিষ্ঠান</label>
+                                <input type="text" id="profile-institution" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                             <div class="md:col-span-2">
-                                <label for="profile-motivation" class="block text-sm font-medium text-gray-700">আপনার মোটিভেশন</label>
-                                <textarea id="profile-motivation" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                                <label for="profile-motivation" class="block text-sm font-medium">আপনার মোটিভেশন</label>
+                                <textarea id="profile-motivation" rows="3" class="mt-1 block w-full border rounded-md shadow-sm"></textarea>
                             </div>
                         </div>
+
+                        <!-- Gamification Section -->
+                        <div class="mt-8 pt-6 border-t border-[var(--input-border)]">
+                            <h3 class="text-lg font-semibold mb-3">অর্জন</h3>
+                            <div class="mb-4">
+                                <span class="font-medium">মোট পয়েন্ট:</span>
+                                <span id="profile-points" class="font-bold text-xl text-[var(--text-accent)]">0</span>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">ব্যাজসমূহ:</h4>
+                                <div id="profile-badges" class="flex flex-wrap">
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>
+                                    <!-- Badges will be added here dynamically -->
+                                    <!-- Example: <span class="badge"><span>🏆</span> প্রথম ১ ঘন্টা</span> -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Gamification Section -->
+
                         <div class="mt-8 text-right">
                              <button id="save-profile" class="btn-primary font-bold py-2 px-6 rounded-lg">সংরক্ষণ করুন</button>
                         </div>
                     </div>
                 </div>
-                
+
                 <footer class="text-center pt-8 text-white/80 font-semibold text-xs drop-shadow-md">
                     Created by Saad | STAT - 63 | RU
                 </footer>
 
             </main>
         </div>
-        
-        <!-- Mobile Bottom Navigation -->
-        <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg shadow-t-lg justify-around p-2 hidden">
-            <a href="#" id="mobile-nav-dashboard" class="text-center text-blue-600 p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+
+        <!-- Mobile Bottom Navigation with Emojis -->
+        <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg shadow-t-lg justify-around p-2 hidden">
+            <a href="#" id="mobile-nav-dashboard" class="text-center text-blue-600 dark:text-blue-400 p-2">
+                <span class="emoji-icon mx-auto">📊</span>
                 <span class="text-xs">ড্যাশবোর্ড</span>
             </a>
-            <a href="#" id="mobile-nav-profile" class="text-center text-gray-500 p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <a href="#" id="mobile-nav-profile" class="text-center text-gray-500 dark:text-gray-400 p-2">
+                 <span class="emoji-icon mx-auto">👤</span>
                 <span class="text-xs">প্রোফাইল</span>
             </a>
-            <a href="#" id="mobile-logout-button" class="text-center text-gray-500 p-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+            <a href="#" id="mobile-logout-button" class="text-center text-gray-500 dark:text-gray-400 p-2">
+                 <span class="emoji-icon mx-auto">🚪</span>
                 <span class="text-xs">লগ আউট</span>
             </a>
         </nav>
 
     </div>
 
-<!-- 
+<!--
     **************************************************
     * FIREBASE SCRIPT START - SOB LOGIC EKHANE     *
     **************************************************
 -->
+<!-- Removed Lucide Script Tag -->
+
 <script type="module">
     // --- FIREBASE SDK IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged, 
-        signInWithEmailAndPassword, 
+    import {
+        getAuth,
+        onAuthStateChanged,
+        signInWithEmailAndPassword,
         createUserWithEmailAndPassword,
         signInWithPopup,
         GoogleAuthProvider,
+        sendPasswordResetEmail, // Password Reset er jonno
         signOut
     } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        setDoc, 
-        getDoc, 
-        updateDoc, 
+    import {
+        getFirestore,
+        doc,
+        setDoc,
+        getDoc,
+        updateDoc,
         onSnapshot,
-        arrayUnion
+        arrayUnion,
+        increment // For updating points easily
     } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    // Firebase Storage er jonno notun import
+    import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+
 
     // --- !! IMPORTANT !! ---
     // APNAR FIREBASE CONFIG CODE EKHANE ADD KORA HOYECHE
@@ -278,7 +466,7 @@
         apiKey: "AIzaSyASoBtoZ3tb7_9joLCaL9jFA3uW-QlCvnA",
         authDomain: "study-trucker-dc956.firebaseapp.com",
         projectId: "study-trucker-dc956",
-        storageBucket: "study-trucker-dc956.firebasestorage.app", // User-er file e 'firebasestorage.app' ache, kintu default 'appspot.com' hoy. User-er ta-i use korchi.
+        storageBucket: "study-trucker-dc956.appspot.com", // *** Default Storage Bucket use korchi ***
         messagingSenderId: "457109620815",
         appId: "1:457109620815:web:a71f94e25585cef3d3823a",
         measurementId: "G-T8JNPYCPXB"
@@ -289,49 +477,109 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app); // Storage initialize kora
     const provider = new GoogleAuthProvider();
 
+    // --- STATE MANAGEMENT (Firebase driven) --- Moved Up ---
+    let currentUser = null; // Firebase Auth user object
+    let state = null; // User's data from Firestore
+    let userDocRef = null; // Firestore document reference
+    let firestoreUnsubscribe = null; // Function to stop listening to data
+    let initialLoadComplete = false; // *** FIX: Flag for initial load ***
+
+    let timerInterval = null;
+    let weeklyChartInstance = null;
+    let quoteInterval = null;
+    let lastChartDataString = null; // *** FIX: Store last chart data as string ***
+    // Removed Lucide specific variables
+    // --- END STATE MANAGEMENT ---
+
+    // --- BADGE DEFINITIONS ---
+    const badges = {
+        'first_hour': { name: 'প্রথম ১ ঘন্টা', emoji: '🏆', threshold: 3600, type: 'total_time' }, // 1 hour in seconds
+        'ten_hours': { name: '১০ ঘন্টা সম্পন্ন', emoji: '⏱️', threshold: 36000, type: 'total_time' }, // 10 hours in seconds
+        'fifty_hours': { name: '৫০ ঘন্টা সম্পন্ন', emoji: '⏳', threshold: 180000, type: 'total_time' }, // 50 hours
+        'hundred_points': { name: '১০০ পয়েন্ট অর্জন', emoji: '💯', threshold: 100, type: 'points' },
+        'five_hundred_points': { name: '৫০০ পয়েন্ট অর্জন', emoji: '🔥', threshold: 500, type: 'points' },
+        'thousand_points': { name: '১০০০+ পয়েন্ট', emoji: '⭐', threshold: 1000, type: 'points' },
+        'goal_achiever': { name: 'লক্ষ্য পূরণকারী', emoji: '🎯', type: 'goal_met' }, // Awarded when goal is met
+    };
+
+
     document.addEventListener('DOMContentLoaded', function() {
+
         // --- SET RANDOM BACKGROUND IMAGE ---
         const backgroundImages = [
-            'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920', // 1. Modern
-        'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1920', // 2. Classic library shelves
-            'https://images.pexels.com/photos/3747505/pexels-photo-3747505.jpeg?auto=compress&cs=tinysrgb&w=1920', // 3. Student studying with books
-            'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1920',  // 4. Bright, modern university hall
-            'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1920', // 5. Cozy study desk with laptop
-            'https://images.pexels.com/photos/1595385/pexels-photo-1595385.jpeg?auto=compress&cs=tinysrgb&w=1920', // 6. Bunch of students collaborating
-            'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1920', // 7. Successful gestures (team high-five)
-            'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=1920', // 8. Creative canvas (study desk)
+            'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/3747505/pexels-photo-3747505.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/1595385/pexels-photo-1595385.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1920',
+            'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=1920',
         ];
         const randomIndex = Math.floor(Math.random() * backgroundImages.length);
         document.body.style.backgroundImage = `url('${backgroundImages[randomIndex]}')`;
 
+        // --- THEME MANAGEMENT ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIconLight = document.getElementById('theme-icon-light'); // Emoji span
+        const themeIconDark = document.getElementById('theme-icon-dark');   // Emoji span
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
-        // --- STATE MANAGEMENT (Firebase driven) ---
-        let currentUser = null; // Firebase Auth user object
-        let state = null; // User's data from Firestore
-        let userDocRef = null; // Firestore document reference
-        let firestoreUnsubscribe = null; // Function to stop listening to data
+        function applyTheme(isDark, triggeredByListener = false) { // Add flag
+            console.log("Applying theme. Is dark:", isDark, "Triggered by listener:", triggeredByListener);
+            document.documentElement.classList.toggle('dark', isDark);
+            themeIconLight.classList.toggle('hidden', isDark);
+            themeIconDark.classList.toggle('hidden', !isDark);
 
-        let timerInterval = null;
-        let weeklyChartInstance = null;
-        let quoteInterval = null;
-        
-        // Default structure for a new user in Firestore
+            // *** FIX: Only update chart colors if instance exists, triggered by theme toggle (not initial load) ***
+            if (currentUser && weeklyChartInstance && triggeredByListener) {
+                 console.log("Theme changed by toggle, updating chart colors only.");
+                 renderWeeklyChart(true); // Pass true to indicate theme change only
+            } else if (currentUser && !weeklyChartInstance && !triggeredByListener && initialLoadComplete) { // Render only if initial load done
+                 // If called on initial load AFTER user is confirmed, render chart
+                 console.log("Initial theme apply after user confirmed, attempting chart render.");
+                 renderWeeklyChart();
+            } else {
+                 console.log("Skipping chart theme update/render in applyTheme. currentUser:", !!currentUser, "weeklyChartInstance:", !!weeklyChartInstance, "triggeredByListener:", triggeredByListener, "initialLoadComplete:", initialLoadComplete);
+            }
+        }
+
+
+        // Check saved theme or system preference
+        const currentTheme = localStorage.getItem('theme');
+        const initialDark = currentTheme === 'dark' || (!currentTheme && prefersDark.matches);
+        // *** FIX: Apply theme initially without triggering chart update ***
+        applyTheme(initialDark, false); // Initial call, not triggered by listener
+
+
+        // Theme toggle button listener
+        themeToggle.addEventListener('click', () => {
+            const isDark = !document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            // *** FIX: Indicate theme change was triggered by listener ***
+            applyTheme(isDark, true);
+        });
+
+        // --- Default User Data ---
         const createNewUserData = (user) => ({
             uid: user.uid,
             email: user.email,
             profile: {
-                name: user.displayName || '', 
-                mobile: user.phoneNumber || '', 
-                class: '', 
-                institution: '', 
+                name: user.displayName || '',
+                mobile: user.phoneNumber || '',
+                class: '',
+                institution: '',
                 motivation: '',
                 profileImg: user.photoURL || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
             },
             studySession: { isActive: false, startTime: null, subject: '', topic: '' },
             studyHistory: [],
-            dailyGoal: 7
+            dailyGoal: 7,
+            points: 0, // Added points
+            badges: [] // Added badges array
         });
 
         // --- UI ELEMENTS ---
@@ -346,15 +594,19 @@
         const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile');
         const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password');
         const loginButton = document.getElementById('login-button'), googleLoginButton = document.getElementById('google-login-button');
+        const forgotPasswordLink = document.getElementById('forgot-password-link'); // Forgot password link
         const dailyGoalInput = document.getElementById('daily-goal'), subjectInput = document.getElementById('subject'), topicInput = document.getElementById('topic');
         const startBtn = document.getElementById('start-btn'), stopBtn = document.getElementById('stop-btn');
         const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
         const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
-        const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload');
+        const subjectSummaryList = document.getElementById('subject-summary-list'); // Subject summary list container
+        const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload'), imgUploadSpinner = document.getElementById('img-upload-spinner');
         const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
         const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
         const saveProfileBtn = document.getElementById('save-profile');
-        
+        const profilePointsDisplay = document.getElementById('profile-points'); // Points display
+        const profileBadgesContainer = document.getElementById('profile-badges'); // Badges container
+
         const quotes = [
             { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
             { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
@@ -376,76 +628,144 @@
         ];
         const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
 
+        // Removed Icon Initialization code
+
 
         // --- DATA PERSISTENCE (Firebase) ---
-        // Ei function user login korle shob data load o update korbe
         function setupFirestoreListener(user) {
             userDocRef = doc(db, 'users', user.uid);
-            
-            // onSnapshot real-time listener set korbe
+            initialLoadComplete = false; // *** FIX: Reset flag on listener setup ***
+
+            if (firestoreUnsubscribe) { // Unsubscribe from previous listener if exists
+                 console.log("Unsubscribing from previous Firestore listener.");
+                 firestoreUnsubscribe();
+                 firestoreUnsubscribe = null;
+            }
+
+            console.log("Setting up Firestore listener for user:", user.uid);
             firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
+                console.log("Firestore listener triggered.");
+                let needsUIUpdateAndDashboardShow = !initialLoadComplete; // Show dashboard only on first trigger
+
                 if (docSnap.exists()) {
-                    // User data paoa geche
+                    console.log("User data found in Firestore:", docSnap.data());
                     state = docSnap.data();
-                    loadAndDisplayUserData(); // Data diye UI update korun
+                    // Ensure points and badges exist
+                    state.points = state.points || 0;
+                    state.badges = Array.isArray(state.badges) ? state.badges : [];
                 } else {
-                    // Notun user! Database e entry create korun
-                    console.log("Notun user! Data create kora hocche...");
+                    console.log("No data found for user, creating new document...");
                     const newUserData = createNewUserData(user);
+                    needsUIUpdateAndDashboardShow = true; // Also show dashboard after creation
                     setDoc(userDocRef, newUserData).then(() => {
-                        state = newUserData;
-                        loadAndDisplayUserData();
+                        console.log("New user document created in Firestore.");
+                        state = newUserData; // Set state immediately
+                        loadAndDisplayUserData(); // Update UI
+                        if (needsUIUpdateAndDashboardShow) {
+                            console.log("Showing dashboard after new user creation.");
+                            showView('dashboard');
+                            initialLoadComplete = true; // Mark initial load as complete
+                        }
+                    }).catch(err => {
+                        console.error("Error creating user data in Firestore:", err);
+                        Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা তৈরি করা যায়নি।' });
                     });
+                    return; // Stop further processing until setDoc completes
                 }
+
+                // If not returned (meaning data exists or setDoc finished previously)
+                loadAndDisplayUserData(); // Update UI with existing or newly set data
+                if (needsUIUpdateAndDashboardShow) {
+                    console.log("Showing dashboard after initial data load.");
+                    showView('dashboard');
+                    initialLoadComplete = true; // Mark initial load as complete
+                }
+
+            }, (error) => {
+                console.error("Error listening to Firestore:", error);
+                Swal.fire({ icon: 'error', title: 'Connection সমস্যা', text: 'ডেটাবেসের সাথে সংযোগ বিচ্ছিন্ন হয়ে গেছে। পৃষ্ঠাটি রিফ্রেশ করুন।' });
+                initialLoadComplete = true; // Mark as complete even on error to prevent loops
             });
         }
-        
+
+
         // --- NAVIGATION & VIEWS ---
         function showView(viewName) {
+            console.log("Showing view:", viewName); // Log view change
             Object.values(views).forEach(view => view.classList.add('hidden'));
             if(views[viewName]) views[viewName].classList.remove('hidden');
             updateNavActiveState(viewName);
+            // No need to render icons here
         }
-        
+
+        // *** REMOVED showView('dashboard') from here ***
         function updateUIAfterLogin() {
+             console.log("Updating common UI elements for logged-in state.");
             navItems.sidebar.classList.remove('hidden');
             navItems.mobile.classList.add('flex');
             navItems.mobile.classList.remove('hidden');
             navItems.logoutBtn.classList.remove('hidden');
-            showView('dashboard');
+            // Dashboard view will be shown by the Firestore listener now
             updateQuote();
             if(quoteInterval) clearInterval(quoteInterval);
             quoteInterval = setInterval(updateQuote, 20000);
+            // No need to render icons here
         }
-        
+
         function updateUIAfterLogout() {
-            if (firestoreUnsubscribe) firestoreUnsubscribe(); // Stop listening to data
+             console.log("Updating UI for logged-out state.");
+            if (firestoreUnsubscribe) {
+                 console.log("Unsubscribing from Firestore listener on logout.");
+                 firestoreUnsubscribe();
+                 firestoreUnsubscribe = null; // Reset variable
+            }
             currentUser = null;
             state = null;
             userDocRef = null;
-            
+            initialLoadComplete = false; // Reset initial load flag
+
             navItems.sidebar.classList.add('hidden');
             navItems.mobile.classList.remove('flex');
             navItems.mobile.classList.add('hidden');
             navItems.logoutBtn.classList.add('hidden');
-            showView('login');
+            showView('login'); // Show login view explicitly
             loginEmailInput.value = '';
             loginPasswordInput.value = '';
             if(quoteInterval) clearInterval(quoteInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            timerDisplay.textContent = '00:00:00';
+            todayTotalDisplay.textContent = '0 ঘন্টা 0 মিনিট';
+            todayRemainingDisplay.textContent = '0 ঘন্টা 0 মিনিট';
+            progressBar.style.width = '0%';
+            historyLog.innerHTML = '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+            subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
+            if (weeklyChartInstance) {
+                weeklyChartInstance.destroy();
+                weeklyChartInstance = null;
+                 lastChartDataString = null; // *** FIX: Reset last chart data on logout ***
+            }
+
         }
 
         function updateNavActiveState(activeView) {
-            [navDashboard, navProfile, mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.remove('active', 'text-blue-600'));
-            [mobileNavDashboard, mobileNavProfile].forEach(el => el.classList.add('text-gray-500'));
+            // Update sidebar
+            [navDashboard, navProfile].forEach(el => el.classList.remove('active'));
+             if (activeView === 'dashboard') navDashboard.classList.add('active');
+             else if (activeView === 'profile') navProfile.classList.add('active');
 
-            if (activeView === 'dashboard') {
-                navDashboard.classList.add('active');
-                mobileNavDashboard.classList.remove('text-gray-500');
-                mobileNavDashboard.classList.add('text-blue-600');
-            } else if (activeView === 'profile') {
-                navProfile.classList.add('active');
-                mobileNavProfile.classList.remove('text-gray-500');
-                mobileNavProfile.classList.add('text-blue-600');
+            // Update mobile nav
+            [mobileNavDashboard, mobileNavProfile].forEach(el => {
+                el.classList.remove('text-blue-600', 'dark:text-blue-400');
+                el.classList.add('text-gray-500', 'dark:text-gray-400');
+            });
+            let activeMobileNav = null;
+            if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard;
+            else if (activeView === 'profile') activeMobileNav = mobileNavProfile;
+
+            if(activeMobileNav) {
+                activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400');
+                activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400');
             }
         }
 
@@ -453,91 +773,146 @@
 
         // Main auth listener
         onAuthStateChanged(auth, (user) => {
+             console.log("Auth state changed. User:", user ? user.uid : "null");
             if (user) {
-                // User login koreche
-                currentUser = user;
-                setupFirestoreListener(user); // User er data load/listen korun
-                updateUIAfterLogin();
+                if (!currentUser || currentUser.uid !== user.uid) { // Only setup listener if user is new or changed
+                    currentUser = user;
+                    updateUIAfterLogin(); // Update common UI elements like nav/logout button
+                    setupFirestoreListener(user); // Setup listener for the logged-in user (will show dashboard on first data)
+                } else {
+                     console.log("Auth state changed, but user is the same. No listener setup needed.");
+                     // Ensure dashboard is visible if already logged in and not on login page
+                     if (initialLoadComplete && views.login.classList.contains('hidden') && views.dashboard.classList.contains('hidden')) {
+                         console.log("User already logged in, ensuring dashboard is visible.");
+                         showView('dashboard');
+                     } else if (!initialLoadComplete) {
+                         console.log("Auth state changed, user same, but initial load not complete yet.");
+                     }
+                }
             } else {
-                // User logout koreche
-                updateUIAfterLogout();
+                 if (currentUser != null) { // Only trigger logout UI if there WAS a logged-in user before
+                    updateUIAfterLogout();
+                 } else {
+                     console.log("Auth state changed, user is null, already logged out.");
+                     showView('login'); // Ensure login view is shown if initially logged out
+                 }
             }
         });
 
-        // Email/Password login ba create --- *** FIX START (More Logging) *** ---
+
+        // Email/Password login ba create
         async function handleLogin() {
             const email = loginEmailInput.value.trim().toLowerCase();
             const password = loginPasswordInput.value;
-            
+
             if (!email || !password || !email.includes('@')) {
                 Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'অনুগ্রহ করে সঠিক ইমেইল এবং পাসওয়ার্ড দিন।' });
                 return;
             }
 
-            console.log("Attempting sign in for:", email); // Log sign-in attempt
+            console.log("Attempting sign in for:", email);
 
             try {
-                // Prothome login korar cheshta korun
                 await signInWithEmailAndPassword(auth, email, password);
-                // Login successful, onAuthStateChanged handles the rest
-                console.log("Login successful for:", email); 
+                console.log("Login successful for:", email);
+                // onAuthStateChanged will handle UI updates via listener
             } catch (signInError) {
-                console.error("Sign-in attempt failed. Error Code:", signInError.code, "Message:", signInError.message); // Log the specific sign-in error
-
-                // Treat 'invalid-credential' (newer SDK) or 'invalid-login-credentials' (older SDK maybe?)
-                // as potentially 'user-not-found' for signup purposes
-                if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/invalid-login-credentials' ) { 
-                    console.log("Assuming user not found or invalid credential means signup attempt needed for:", email);
+                console.error("Sign-in attempt failed. Error Code:", signInError.code, "Message:", signInError.message);
+                // Check for common 'invalid credential' errors first
+                if (signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/invalid-login-credentials' || signInError.code === 'auth/wrong-password' || signInError.code === 'auth/user-not-found') { // Combine checks
+                     console.log("Invalid credentials or user not found, attempting signup...");
                     try {
-                        console.log("Attempting account creation for:", email); // Log signup attempt
+                        console.log("Attempting account creation for:", email);
                         await createUserWithEmailAndPassword(auth, email, password);
-                        // Signup successful, onAuthStateChanged handles the rest
                         console.log("Signup successful for:", email);
+                        // onAuthStateChanged will handle UI updates via listener
                     } catch (createError) {
-                        // Signup failed
-                        console.error("Signup attempt failed. Error Code:", createError.code, "Message:", createError.message); // Log the specific signup error
-
-                        // Show a more specific error for weak password etc.
-                         if (createError.code === 'auth/weak-password') {
+                         // This error happens if sign-in failed due to WRONG PASSWORD (and user actually exists) OR other signup errors
+                         console.error("Signup attempt also failed. Error Code:", createError.code, "Message:", createError.message);
+                         if (createError.code === 'auth/email-already-in-use') {
+                             // This means the initial sign-in attempt failed because of wrong password OR user not found wasn't the real issue
+                             Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয় অথবা অন্য কোনো সমস্যা হয়েছে।' });
+                         } else if (createError.code === 'auth/weak-password') {
                              Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।' });
-                         } else if (createError.code === 'auth/email-already-in-use') {
-                            Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'এই ইমেইল ঠিকানা দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট আছে।' });
                          } else {
-                            // Show the generic 'invalid credential' message if signup fails unexpectedly,
-                            // OR show the specific createError message? Let's stick to the specific one.
-                            Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: createError.message });
+                            Swal.fire({ icon: 'error', title: 'Login/Signup সমস্যা', text: createError.message });
                          }
                     }
-                // Keep specific wrong password check if the error code is exactly that
-                } else if (signInError.code === 'auth/wrong-password') { 
-                    console.error("Wrong password error confirmed for:", email);
-                    Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয়।' });
                 } else {
-                    // Onanno login error
                     console.error("Unhandled Login error:", signInError);
                     Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message });
                 }
             }
         }
-        // --- *** FIX END *** ---
-        
+
         // Google login
         async function handleGoogleLogin() {
             try {
                 await signInWithPopup(auth, provider);
-                // onAuthStateChanged baki kaj korbe
+                // onAuthStateChanged will handle UI updates via listener
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: error.message });
+                 console.error("Google login error:", error);
+                 let errorMsg = error.message;
+                 if (error.code === 'auth/popup-closed-by-user') {
+                     errorMsg = 'Google সাইন-ইন পপআপ বন্ধ করা হয়েছে।';
+                 } else if (error.code === 'auth/cancelled-popup-request') {
+                     errorMsg = 'একাধিক সাইন-ইন পপআপ খোলার চেষ্টা করা হয়েছে।';
+                 }
+                Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: errorMsg });
             }
         }
 
-        function handleLogout() {
-            // Logout korar age active session save korun
-            if (state && state.studySession.isActive) {
-                stopTimer(false); // Stop timer but don't show popups
+        // Password Reset Function
+        async function handlePasswordReset() {
+             const { value: email } = await Swal.fire({
+                title: 'পাসওয়ার্ড রিসেট',
+                input: 'email',
+                inputLabel: 'আপনার অ্যাকাউন্টের ইমেইল ঠিকানা দিন',
+                inputPlaceholder: 'email@example.com',
+                showCancelButton: true,
+                confirmButtonText: 'রিসেট লিংক পাঠান',
+                cancelButtonText: 'বাতিল'
+            });
+
+            if (email) {
+                console.log("Requesting password reset for:", email);
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    console.log("Password reset email sent successfully.");
+                    Swal.fire({ icon: 'success', title: 'লিংক পাঠানো হয়েছে!', text: 'আপনার ইমেইল ('+email+') চেক করুন এবং পাসওয়ার্ড রিসেট করার জন্য লিংকে ক্লিক করুন।' });
+                } catch (error) {
+                    console.error("Password reset error:", error);
+                     let errorMsg = 'পাসওয়ার্ড রিসেট লিংক পাঠানো যায়নি।';
+                     if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                         errorMsg += ' ইমেইল ঠিকানাটি সঠিক কিনা বা অ্যাকাউন্ট আছে কিনা দেখুন।';
+                     } else {
+                          errorMsg += ` (${error.code})`;
+                     }
+                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: errorMsg });
+                }
             }
-            signOut(auth);
         }
+
+
+        function handleLogout() {
+            console.log("Logout initiated...");
+            const isActiveSession = state && state.studySession && state.studySession.isActive;
+            if (isActiveSession) {
+                 console.log("Active session detected, attempting to save before logout...");
+                 stopTimer(false).then(() => { // stopTimer returns a promise now
+                     console.log("Session handling complete, proceeding with sign out.");
+                     signOut(auth).catch(err => console.error("Sign out error:", err));
+                 }).catch(err => {
+                      console.error("Error stopping/saving timer before logout:", err);
+                      // Still try to sign out even if stopTimer fails
+                      signOut(auth).catch(err => console.error("Sign out error after stopTimer failure:", err));
+                 });
+            } else {
+                 console.log("No active session, signing out directly.");
+                 signOut(auth).catch(err => console.error("Sign out error:", err));
+            }
+        }
+
 
         // --- CORE LOGIC (Firebase backed) ---
         async function startTimer() {
@@ -545,7 +920,12 @@
                 Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'অনুগ্রহ করে বিষয় এবং টপিক লিখুন।' });
                 return;
             }
-            
+             if (!userDocRef) {
+                 console.error("startTimer: userDocRef is null!");
+                 Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি। আবার চেষ্টা করুন।' });
+                 return;
+             }
+
             const sessionData = {
                 isActive: true,
                 startTime: new Date().getTime(),
@@ -554,14 +934,9 @@
             };
 
             try {
-                // Firestore e 'studySession' update korun
                 await updateDoc(userDocRef, { studySession: sessionData });
-                
-                // UI Update (state localy update hobe onSnapshot theke)
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
-                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
-                timerInterval = setInterval(updateTimerDisplay, 1000);
+                console.log("Timer started, session data updated in Firestore.");
+                // UI update will be handled by onSnapshot triggering loadAndDisplayUserData
             } catch (error) {
                 console.error("Error starting timer: ", error);
                 Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' });
@@ -569,71 +944,201 @@
         }
 
         async function stopTimer(showCongratsPopup = true) {
-            if (!state || !state.studySession.isActive) return;
-
-            const duration = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
-            const sessionHistory = { 
-                date: new Date().toISOString(), 
-                subject: state.studySession.subject, 
-                topic: state.studySession.topic, 
-                duration: duration 
-            };
-            
-            clearInterval(timerInterval);
-            timerInterval = null;
-
-            try {
-                // Firestore update: session inactive korun ebong history-te add korun
-                await updateDoc(userDocRef, {
-                    studySession: { isActive: false, startTime: null, subject: '', topic: '' },
-                    studyHistory: arrayUnion(sessionHistory) // arrayUnion duplicate entry add korbe na
-                });
-
-                // UI update
-                startBtn.classList.remove('hidden');
-                stopBtn.classList.add('hidden');
-                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
-                subjectInput.value = '';
-                topicInput.value = '';
-                timerDisplay.textContent = '00:00:00';
-                
-                // updateDashboard() nijei call hobe onSnapshot theke
-                
-                if (showCongratsPopup) {
-                    const totalStudiedSeconds = getTotalStudiedSecondsForToday();
-                    const goalSeconds = state.dailyGoal * 3600;
-                    if (totalStudiedSeconds >= goalSeconds) {
-                        Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
-                    }
+             return new Promise(async (resolve, reject) => {
+                if (!state || !state.studySession || !state.studySession.isActive || !userDocRef) {
+                     console.log("stopTimer: No active session or userDocRef. State:", state);
+                     resolve(); return;
                 }
-            } catch (error) {
-                console.error("Error stopping timer: ", error);
-                Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' });
-            }
+
+                const startTime = state.studySession.startTime;
+                if (startTime === null) {
+                    console.warn("stopTimer: startTime is null, cannot calculate duration.");
+                    try {
+                         await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' }});
+                         console.log("Cleared potentially inconsistent session state.");
+                         resolve();
+                    } catch (clearError) {
+                         console.error("Error clearing inconsistent session state:", clearError);
+                         reject(clearError);
+                    }
+                    return;
+                }
+
+                const duration = Math.round((new Date().getTime() - startTime) / 1000);
+                const pointsEarned = Math.floor(duration / 60); // 1 point per minute
+
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; console.log("Timer interval cleared."); }
+
+                if (duration <= 0) {
+                     console.log("Session duration <= 0, clearing session without saving history.");
+                     try {
+                         await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } });
+                         console.log("Inactive session cleared in Firestore.");
+                         resolve();
+                     } catch(error) {
+                         console.error("Error clearing inactive session:", error);
+                         reject(error);
+                     }
+                     return;
+                }
+
+                const sessionHistory = {
+                    date: new Date().toISOString(),
+                    subject: state.studySession.subject || 'N/A',
+                    topic: state.studySession.topic || 'N/A',
+                    duration: duration
+                };
+
+                try {
+                    const currentData = state || {}; // Use state directly
+                    const historyExists = Array.isArray(currentData.studyHistory);
+                    const currentPoints = currentData.points || 0;
+                    const currentBadges = Array.isArray(currentData.badges) ? currentData.badges : [];
+
+                    const updateData = {
+                        studySession: { isActive: false, startTime: null, subject: '', topic: '' },
+                        points: increment(pointsEarned) // Update points using increment
+                    };
+
+                    if (historyExists) {
+                         updateData.studyHistory = arrayUnion(sessionHistory);
+                    } else {
+                         console.warn("studyHistory array not found, creating it.");
+                         updateData.studyHistory = [sessionHistory]; // Create as a new array
+                    }
+
+                    // --- Check for new badges ---
+                    const newTotalPoints = currentPoints + pointsEarned;
+                    // Calculate total study seconds AFTER potential history update
+                    const updatedHistory = historyExists ? [...currentData.studyHistory, sessionHistory] : [sessionHistory];
+                    const totalStudySeconds = updatedHistory.reduce((sum, h) => sum + (h.duration || 0), 0);
+                    const newBadgesEarned = [];
+
+
+                    for (const badgeId in badges) {
+                        if (badgeId !== 'goal_achiever' && !currentBadges.includes(badgeId)) { // Skip goal badge here
+                            const badge = badges[badgeId];
+                            let earned = false;
+                            if (badge.type === 'points' && newTotalPoints >= badge.threshold) {
+                                earned = true;
+                            } else if (badge.type === 'total_time' && totalStudySeconds >= badge.threshold) {
+                                earned = true;
+                            }
+                            if (earned) {
+                                newBadgesEarned.push(badgeId);
+                            }
+                        }
+                    }
+
+                    if (newBadgesEarned.length > 0) {
+                        updateData.badges = arrayUnion(...newBadgesEarned); // Add new badges
+                        console.log("New badges earned (time/points):", newBadgesEarned);
+                        // Show popup after a delay
+                        setTimeout(() => {
+                            newBadgesEarned.forEach(badgeId => {
+                                Swal.fire({ /* ... badge popup ... */ });
+                            });
+                        }, 800);
+                    }
+                    // --- End Badge Check ---
+
+                    await updateDoc(userDocRef, updateData);
+                    console.log("Session stopped, history and points updated. Points Earned:", pointsEarned);
+
+                    // Immediate UI updates for responsiveness
+                    startBtn.classList.remove('hidden');
+                    stopBtn.classList.add('hidden');
+                    [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
+                    subjectInput.value = '';
+                    topicInput.value = '';
+                    timerDisplay.textContent = '00:00:00';
+
+                    // --- Goal Met Badge Check ---
+                    if (showCongratsPopup) {
+                        setTimeout(() => {
+                            // Fetch the latest state AFTER update might have happened
+                            getDoc(userDocRef).then(docSnap => {
+                                if (docSnap.exists()) {
+                                    const latestState = docSnap.data();
+                                    const latestBadges = latestState.badges || [];
+                                    const totalStudiedSecondsToday = getTotalStudiedSecondsForToday(); // Recalculate based on latest state? Or use local calculation? Recalculate is safer.
+                                    const goalSeconds = (latestState.dailyGoal || 7) * 3600;
+
+                                    console.log(`Checking goal achievement: Total Today=${totalStudiedSecondsToday}, Goal=${goalSeconds}`);
+                                    if (goalSeconds > 0 && totalStudiedSecondsToday >= goalSeconds) {
+                                        console.log("Goal achieved! Showing popup and checking badge.");
+                                        Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
+
+                                        if (!latestBadges.includes('goal_achiever')) {
+                                            updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') }).then(() => {
+                                                console.log("Goal Achiever badge awarded.");
+                                                Swal.fire({ /* ... goal badge popup ... */ });
+                                            }).catch(err => console.error("Error awarding goal badge:", err));
+                                        }
+                                    }
+                                } else {
+                                     console.warn("User doc doesn't exist during goal check timeout.");
+                                }
+                            }).catch(err => console.error("Error fetching doc for goal check:", err));
+
+                        }, 600); // Delay slightly
+                    }
+                    resolve();
+                } catch (error) {
+                    console.error("Error stopping timer and saving history/points: ", error);
+                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' });
+                    reject(error);
+                }
+             });
         }
-        
+
+
         function updateTimerDisplay() {
-            if (!state || !state.studySession.isActive) return;
+            if (!state || !state.studySession || !state.studySession.isActive) {
+                 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                 timerDisplay.textContent = '00:00:00';
+                 return;
+            };
+            if (state.studySession.startTime === null) {
+                console.warn("updateTimerDisplay: startTime is null but session is active!");
+                timerDisplay.textContent = '00:00:00';
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                return;
+            }
             const elapsed = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
-            timerDisplay.textContent = formatTime(elapsed);
+            timerDisplay.textContent = formatTime(Math.max(0, elapsed));
         }
-        
+
         const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
-        const formatDuration = (s) => { const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || '0 মিনিট'; };
+        const formatDuration = (s) => {
+             if (typeof s !== 'number' || isNaN(s) || s < 0) return '0 মিনিট'; // Input validation
+             const h=Math.floor(s/3600), m=Math.floor(s%3600/60);
+             return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || (s > 0 ? '1 মিনিটের কম' : '0 মিনিট'); // Handle less than a minute
+        };
+
 
         // --- TIMEZONE BUG FIX (Local Date) ---
         const getLocalDateString = (date = new Date()) => {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
+            try {
+                 if (!(date instanceof Date) || isNaN(date.getTime())) {
+                     console.warn("Invalid date passed to getLocalDateString, using current date:", date);
+                     date = new Date();
+                 }
+                 const yyyy = date.getFullYear();
+                 const mm = String(date.getMonth() + 1).padStart(2, '0');
+                 const dd = String(date.getDate()).padStart(2, '0');
+                 return `${yyyy}-${mm}-${dd}`;
+            } catch (e) {
+                 console.error("Error formatting date:", date, e);
+                 return new Date().toISOString().slice(0, 10);
+            }
         };
 
-        const getTotalStudiedSecondsForToday = () => { 
-            if(!state) return 0; 
+        const getTotalStudiedSecondsForToday = () => {
+            if (!state || !Array.isArray(state.studyHistory)) return 0;
             const todayStr = getLocalDateString(new Date());
             return state.studyHistory
-                .filter(e => getLocalDateString(new Date(e.date)) === todayStr)
+                .filter(e => e && e.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr) // Ensure duration is positive number
                 .reduce((sum, e) => sum + e.duration, 0);
         };
         // --- END OF FIX ---
@@ -641,158 +1146,345 @@
 
         // --- UI UPDATES ---
         function loadAndDisplayUserData() {
-            if (!state) return;
-            
-            updateDashboard();
+            if (!state || !currentUser) {
+                 console.warn("loadAndDisplayUserData: State or currentUser is null. Cannot update UI.");
+                 return;
+            }
+            console.log("loadAndDisplayUserData: Updating UI with state:", state);
+
+            // Ensure profile exists in state, if not, use default structure part
+            state.profile = state.profile || createNewUserData(currentUser).profile;
+            state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' };
+            state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : [];
+            state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7;
+            state.points = state.points || 0; // Ensure points exist
+            state.badges = Array.isArray(state.badges) ? state.badges : []; // Ensure badges exist
+
+
+            updateDashboardUIOnly(); // *** FIX: Update non-chart UI first ***
             updateProfilePage();
             dailyGoalInput.value = state.dailyGoal;
 
-            if (state.studySession.isActive && state.studySession.startTime) {
-                startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
-                subjectInput.value = state.studySession.subject; topicInput.value = state.studySession.topic;
+            // Timer state logic - Moved from updateDashboardUIOnly
+            if (state.studySession.isActive && state.studySession.startTime !== null) {
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                subjectInput.value = state.studySession.subject || '';
+                topicInput.value = state.studySession.topic || '';
                 [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
-                if(timerInterval) clearInterval(timerInterval); // Clear any old interval
+                if (timerInterval) clearInterval(timerInterval);
+                updateTimerDisplay(); // Initial display
                 timerInterval = setInterval(updateTimerDisplay, 1000);
+                 console.log("Timer interval set.");
             } else {
-                // Ensure timer is stopped if session is not active
-                if(timerInterval) clearInterval(timerInterval);
-                timerInterval = null;
+                if (timerInterval) {
+                     clearInterval(timerInterval);
+                     timerInterval = null;
+                     console.log("Timer interval cleared because session is inactive.");
+                }
                 timerDisplay.textContent = '00:00:00';
-                startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden');
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
                 [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
+                if (!state.studySession.isActive) {
+                   subjectInput.value = '';
+                   topicInput.value = '';
+                }
             }
+             renderWeeklyChart(); // Render chart after other UI updates
         }
 
-        function updateDashboard() {
-            if (!state) return;
+        // *** FIX: Renamed function, removed chart rendering and timer logic ***
+        function updateDashboardUIOnly() {
+            if (!state) { console.warn("updateDashboardUIOnly: State is null."); return; }
             const totalSecondsToday = getTotalStudiedSecondsForToday();
-            const goalSeconds = state.dailyGoal * 3600;
+            const goalSeconds = (state.dailyGoal || 7) * 3600;
             todayTotalDisplay.textContent = formatDuration(totalSecondsToday);
             todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday));
-            progressBar.style.width = `${Math.min(100, (totalSecondsToday / goalSeconds) * 100)}%`;
+            progressBar.style.width = `${goalSeconds > 0 ? Math.min(100, (totalSecondsToday / goalSeconds) * 100) : 0}%`;
 
+            // Update History Log
             const todayStr = getLocalDateString(new Date());
-            const todayHistory = state.studyHistory.filter(e => getLocalDateString(new Date(e.date)) === todayStr);
-            
-            historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `
-                <div class="p-3 bg-gray-50/80 rounded-lg border border-gray-200">
-                    <p class="font-semibold text-gray-800">${e.subject}: <span class="font-normal">${e.topic}</span></p>
-                    <p class="text-sm text-gray-500">সময়: ${formatDuration(e.duration)}</p>
-                </div>`).join('') : '<p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+            const todayHistory = Array.isArray(state.studyHistory) ? state.studyHistory.filter(e => e && e.date && getLocalDateString(new Date(e.date)) === todayStr) : [];
 
-            renderWeeklyChart();
+            historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `
+                <div class="p-3 bg-gray-50/80 dark:bg-gray-600/80 rounded-lg border border-gray-200 dark:border-gray-500">
+                    <p class="font-semibold">${e.subject || 'N/A'}: <span class="font-normal">${e.topic || 'N/A'}</span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">সময়: ${formatDuration(e.duration || 0)}</p>
+                </div>`).join('') : '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+
+             // Update Subject Summary
+            const subjectTimes = {};
+            todayHistory.forEach(e => {
+                if (e.subject && typeof e.duration === 'number' && e.duration > 0) {
+                    subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration;
+                }
+            });
+
+            if (Object.keys(subjectTimes).length > 0) {
+                 subjectSummaryList.innerHTML = Object.entries(subjectTimes)
+                    .sort(([, timeA], [, timeB]) => timeB - timeA)
+                    .map(([subject, duration]) => `
+                    <div class="subject-summary-item">
+                        <span class="font-medium">${subject}</span>
+                        <span>${formatDuration(duration)}</span>
+                    </div>`).join('');
+            } else {
+                 subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
+            }
+             // Removed renderWeeklyChart call from here
         }
 
-        function renderWeeklyChart() {
-            if (!document.getElementById('weeklyChart') || !state) return;
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            const labels = [], data = [];
+
+        // *** FIX: Added themeChangeOnly parameter & data comparison logic (using stringify) ***
+        function renderWeeklyChart(themeChangeOnly = false) {
+            const chartCanvas = document.getElementById('weeklyChart');
+            // *** FIX: Ensure state exists before proceeding ***
+            if (!chartCanvas || !state || !Array.isArray(state.studyHistory)) {
+                console.warn("renderWeeklyChart: Canvas not found or state/studyHistory invalid. State:", state);
+                if (weeklyChartInstance) {
+                    try { weeklyChartInstance.destroy(); } catch(e){}
+                    weeklyChartInstance = null;
+                    lastChartDataString = null; // Reset last data string
+                }
+                return;
+            }
+            const ctx = chartCanvas.getContext('2d');
+            if (!ctx) { console.error("Could not get 2D context for weeklyChart"); return; }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const tickColor = isDark ? '#d1d5db' : '#4b5563';
+            const titleColor = isDark ? '#f9fafb' : '#1f2937';
+            const legendColor = isDark ? '#f9fafb' : '#1f2937';
+            const barColor = isDark ? 'rgba(96, 165, 250, 0.8)' : 'rgba(37, 99, 235, 0.8)';
+
+            // Calculate new data
+            const newLabels = [], newData = [];
             let totalMinutes = 0;
-            
             for (let i = 6; i >= 0; i--) {
-                const d = new Date(); 
-                d.setDate(d.getDate() - i);
+                const d = new Date(); d.setDate(d.getDate() - i);
                 const dayStr = getLocalDateString(d);
-                labels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
-                
+                newLabels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
                 const dailySeconds = state.studyHistory
-                    .filter(e => getLocalDateString(new Date(e.date)) === dayStr)
+                    .filter(e => e && e.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === dayStr)
                     .reduce((s, e) => s + e.duration, 0);
                 const minutes = Math.round(dailySeconds / 60);
-                data.push(minutes); 
+                newData.push(minutes);
                 totalMinutes += minutes;
             }
-            
-            const activeDays = data.filter(d => d > 0).length || 1;
+            const activeDays = newData.filter(d => d > 0).length || 1;
             const avgMinutes = Math.round(totalMinutes / activeDays);
-            
-            if (weeklyChartInstance) weeklyChartInstance.destroy();
-            weeklyChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'পড়ার সময় (মিনিট)', data: data, backgroundColor: 'rgba(37, 99, 235, 0.8)', borderRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes * 60)}`, font: { size: 16 } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatDuration(c.parsed.y * 60)}` } } } } });
+            const currentChartDataString = JSON.stringify({ labels: newLabels, data: newData }); // Convert current data to string
+
+            // *** FIX: Check if data string actually changed or if it's just a theme change ***
+            const dataChanged = currentChartDataString !== lastChartDataString;
+
+            if (weeklyChartInstance && themeChangeOnly) {
+                // Only update theme colors if the instance exists and it's just a theme change
+                console.log("Updating chart theme only.");
+                weeklyChartInstance.options.scales.y.ticks.color = tickColor;
+                weeklyChartInstance.options.scales.y.grid.color = gridColor;
+                weeklyChartInstance.options.scales.x.ticks.color = tickColor;
+                weeklyChartInstance.options.scales.x.grid.color = gridColor;
+                weeklyChartInstance.options.plugins.title.color = titleColor;
+                weeklyChartInstance.options.plugins.legend.labels.color = legendColor;
+                weeklyChartInstance.data.datasets[0].backgroundColor = barColor;
+                weeklyChartInstance.update('none'); // Update without animation
+            } else if (!weeklyChartInstance || dataChanged) {
+                // Create or recreate chart if instance doesn't exist OR if data changed
+                console.log(weeklyChartInstance ? "Chart data changed, recreating." : "Creating chart instance.");
+                if (weeklyChartInstance) {
+                    try { weeklyChartInstance.destroy(); } catch (e) { console.warn("Could not destroy previous chart instance:", e); }
+                    weeklyChartInstance = null; // Explicitly nullify after destroy
+                }
+
+                try {
+                    // *** FIX: Ensure canvas is visible before creating chart ***
+                    if (chartCanvas.offsetParent === null) {
+                         console.log("Canvas is not visible, delaying chart creation slightly.");
+                         // Optionally delay and retry, or rely on next update when view becomes visible
+                         // setTimeout(() => renderWeeklyChart(), 100); // Simple delay
+                         return; // Don't create chart if canvas isn't visible
+                    }
+
+                    weeklyChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: newLabels, // Use new labels
+                            datasets: [{
+                                label: 'পড়ার সময় (মিনিট)',
+                                data: newData, // Use new data
+                                backgroundColor: barColor,
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, // Allow chart to resize vertically
+                            animation: false, // Keep animation off
+                            scales: {
+                                y: { beginAtZero: true, ticks: { color: tickColor }, grid: { color: gridColor } },
+                                x: { ticks: { color: tickColor }, grid: { color: gridColor } }
+                            },
+                            plugins: {
+                                title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes * 60)}`, font: { size: 16 }, color: titleColor },
+                                tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatDuration(c.parsed.y * 60)}` } },
+                                legend: { labels: { color: legendColor } }
+                            }
+                        }
+                    });
+                    // Store the data string used for this render
+                    lastChartDataString = currentChartDataString;
+                    console.log("Chart rendered successfully.");
+                 } catch (e) {
+                     console.error("Error creating chart:", e);
+                     // Attempt to clean up if creation failed mid-way
+                     if (weeklyChartInstance) {
+                         try { weeklyChartInstance.destroy(); } catch (destroyErr) {}
+                         weeklyChartInstance = null;
+                     }
+                     lastChartDataString = null;
+                 }
+            } else {
+                 console.log("Chart data and theme unchanged, no re-render needed.");
+            }
         }
 
+
         function updateProfilePage() {
-            if (!state || !currentUser) return;
-            const p = state.profile;
-            profileEmailInput.value = currentUser.email;
-            profileNameInput.value = p.name;
-            profileMobileInput.value = p.mobile;
-            profileClassInput.value = p.class;
-            profileInstitutionInput.value = p.institution;
-            profileMotivationInput.value = p.motivation;
-            profileImgDisplay.src = p.profileImg;
+             if (!state || !currentUser) { console.warn("updateProfilePage: State or currentUser is null."); return; }
+            const p = state.profile || {};
+            profileEmailInput.value = currentUser.email || 'N/A';
+            profileNameInput.value = p.name || '';
+            profileMobileInput.value = p.mobile || '';
+            profileClassInput.value = p.class || '';
+            profileInstitutionInput.value = p.institution || '';
+            profileMotivationInput.value = p.motivation || '';
+            profileImgDisplay.src = p.profileImg || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF';
+            imgUploadSpinner.classList.add('hidden');
+
+            // --- Update Points & Badges Display ---
+            profilePointsDisplay.textContent = state.points || 0;
+            if (Array.isArray(state.badges) && state.badges.length > 0) {
+                profileBadgesContainer.innerHTML = state.badges.map(badgeId => {
+                    const badge = badges[badgeId];
+                    if (badge) {
+                        return `<span class="badge" title="${badge.name}"><span>${badge.emoji}</span> ${badge.name}</span>`;
+                    }
+                    return ''; // Handle cases where badge ID might be invalid
+                }).join('');
+            } else {
+                profileBadgesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>';
+            }
+             // --- End Update ---
         }
-        
+
         const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
 
         // --- EVENT LISTENERS ---
         loginButton.addEventListener('click', handleLogin);
         googleLoginButton.addEventListener('click', handleGoogleLogin);
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            handlePasswordReset();
+        });
         [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
         [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
         [navItems.logoutBtn, navItems.mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
-        
+
         startBtn.addEventListener('click', startTimer);
-        stopBtn.addEventListener('click', () => stopTimer(true));
-        
-        dailyGoalInput.addEventListener('change', async () => { 
-            if(state && userDocRef) { 
+        stopBtn.addEventListener('click', () => stopTimer(true)); // Pass true explicitly
+
+        dailyGoalInput.addEventListener('change', async () => {
+            if(state && userDocRef) {
                 const newGoal = parseFloat(dailyGoalInput.value) || 7;
                 try {
                     await updateDoc(userDocRef, { dailyGoal: newGoal });
-                    // onSnapshot auto UI update korbe
+                    console.log("Daily goal updated to:", newGoal);
                 } catch (e) { console.error("Error updating goal: ", e); }
-            } 
+            } else {
+                 console.warn("Cannot update goal: State or userDocRef is null.");
+            }
         });
-        
+
         saveProfileBtn.addEventListener('click', async () => {
-            if(state && userDocRef) {
+             if(state && userDocRef) {
+                const currentProfile = state.profile || {};
                 const updatedProfile = {
-                    ...state.profile, // Purono data rakha
-                    name: profileNameInput.value, 
-                    mobile: profileMobileInput.value, 
-                    class: profileClassInput.value, 
-                    institution: profileInstitutionInput.value, 
-                    motivation: profileMotivationInput.value
+                    ...currentProfile,
+                    name: profileNameInput.value.trim(),
+                    mobile: profileMobileInput.value.trim(),
+                    class: profileClassInput.value.trim(),
+                    institution: profileInstitutionInput.value.trim(),
+                    motivation: profileMotivationInput.value.trim()
+                    // profileImg URL is updated separately on upload
                 };
                 try {
                     await updateDoc(userDocRef, { profile: updatedProfile });
+                     console.log("Profile data saved:", updatedProfile);
                     Swal.fire({ icon: 'success', title: 'সফল!', text: 'আপনার প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', showConfirmButton: false, timer: 1500 });
                 } catch (e) {
                     console.error("Error saving profile: ", e);
                     Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'প্রোফাইল সেভ করা যায়নি।' });
                 }
+            } else {
+                 console.warn("Cannot save profile: State or userDocRef is null.");
             }
         });
-        
-        // Profile image upload (Firebase Storage lagbe, ekhonkar jonno base64 save kora hocche)
-        // NOTE: Base64 boro hole Firestore e somossa korte pare. Optimal solution hocche Firebase Storage.
-        profileImgUpload.addEventListener('change', (e) => {
+
+        profileImgUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (file && state && userDocRef) {
-                // Check file size (e.g., limit to 1MB for base64 in Firestore)
-                if (file.size > 1048576) {
-                    Swal.fire({ icon: 'error', title: 'ছবিটি খুব বড়', text: 'অনুগ্রহ করে 1MB-এর ছোট ছবি আপলোড করুন।' });
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = async (ev) => { 
-                    const imgData = ev.target.result;
-                    try {
-                        await updateDoc(userDocRef, { "profile.profileImg": imgData });
-                        profileImgDisplay.src = imgData; // onSnapshot o eta korbe
-                    } catch (e) {
-                        console.error("Error uploading image data: ", e);
-                        Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ছবি আপলোড করা যায়নি।' });
-                    }
-                };
-                reader.readAsDataURL(file);
+            if (!file || !currentUser || !userDocRef) {
+                 console.log("Image upload cancelled: No file, user, or docRef.");
+                 return;
+             }
+
+            if (file.size > 1048576 * 2) { // Increased limit to 2MB slightly
+                Swal.fire({ icon: 'error', title: 'ছবিটি খুব বড়', text: 'অনুগ্রহ করে 2MB-এর ছোট ছবি আপলোড করুন।' });
+                 e.target.value = null; // Reset input
+                return;
+            }
+
+             imgUploadSpinner.classList.remove('hidden');
+
+            const timestamp = Date.now();
+            const uniqueFileName = `${timestamp}_${file.name}`;
+            const storageRef = ref(storage, `profileImages/${currentUser.uid}/${uniqueFileName}`);
+            console.log("Uploading to:", storageRef.fullPath);
+
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                console.log('Upload successful!', snapshot);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                console.log('File available at', downloadURL);
+
+                await updateDoc(userDocRef, { "profile.profileImg": downloadURL });
+                console.log("Firestore profileImg updated with URL.");
+
+                // UI update hobe onSnapshot theke
+
+                Swal.fire({ icon: 'success', title: 'সফল!', text: 'প্রোফাইল ছবি আপলোড হয়েছে।', showConfirmButton: false, timer: 1500 });
+
+            } catch (error) {
+                console.error("Error uploading image to Storage:", error);
+                 let errorMsg = 'ছবি আপলোড করা যায়নি।';
+                 if (error.code === 'storage/unauthorized') {
+                     errorMsg += ' Storage security rules চেক করুন।';
+                 } else if (error.code === 'storage/canceled') {
+                     errorMsg = 'ছবি আপলোড বাতিল করা হয়েছে।';
+                 } else if (error.code === 'storage/unknown') {
+                     errorMsg += ' একটি অজানা সমস্যা হয়েছে।';
+                 }
+                Swal.fire({ icon: 'error', title: 'সমস্যা', text: errorMsg });
+            } finally {
+                 imgUploadSpinner.classList.add('hidden');
+                 e.target.value = null;
             }
         });
-        
-        // init() function-er ar dorkar nei, onAuthStateChanged shob handle korbe
-    });
+
+    }); // End of DOMContentLoaded
 </script>
 
 </body>
 </html>
-
