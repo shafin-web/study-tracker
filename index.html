@@ -36,6 +36,11 @@
             --chart-tick-color: #6b7280; /* Gray 500 */
             --chart-bar-color: #3b82f6; /* Blue 500 */
             --chart-bar-hover-color: #2563eb; /* Blue 600 */
+            /* Button specific */
+            --btn-gemini-bg: linear-gradient(to right, #4285F4, #9b72cb, #d96570, #f2a600);
+            --btn-gemini-text: white;
+            --btn-gemini-hover-opacity: 0.9;
+            --btn-gemini-disabled-opacity: 0.6;
         }
 
         /* Dark Theme Variables */
@@ -170,6 +175,25 @@
         .dark .btn-google { background-color: #374151; color: #f9fafb; border-color: #4b5563; }
         .dark .btn-google:hover { background-color: #4b5563; }
 
+        /* Gemini Button Style */
+        .btn-gemini {
+            background: var(--btn-gemini-bg);
+            color: var(--btn-gemini-text);
+            transition: opacity 0.3s ease;
+            font-size: 0.875rem; /* text-sm */
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+        }
+        .btn-gemini:hover {
+             opacity: var(--btn-gemini-hover-opacity);
+        }
+         .btn-gemini:disabled {
+             opacity: var(--btn-gemini-disabled-opacity);
+             cursor: not-allowed;
+         }
+
+
         .progress-bar-container { background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; height: 20px; }
         .dark .progress-bar-container { background-color: #4b5563; }
         .progress-bar { background-color: #34d399; transition: width 0.5s ease-in-out; }
@@ -237,6 +261,49 @@
          #todayPieChartCanvas {
              max-height: 260px; /* Adjust height as needed, slightly less to fit legend */
          }
+
+         /* SweetAlert Custom Styles */
+         .swal2-html-container {
+             text-align: left !important;
+             margin-left: 1em !important;
+             margin-right: 1em !important;
+         }
+         .swal2-html-container br {
+            content: "";
+            margin: 0.5em 0;
+            display: block;
+         }
+         .dark .swal2-popup {
+            background-color: #1f2937 !important; /* bg-gray-800 */
+            color: #f9fafb !important; /* text-gray-50 */
+         }
+         .dark .swal2-title {
+             color: #f9fafb !important;
+         }
+         .dark .swal2-html-container {
+             color: #d1d5db !important; /* text-gray-300 */
+         }
+         .dark .swal2-confirm {
+            background-color: #60a5fa !important; /* bg-blue-400 */
+         }
+         .dark .swal2-cancel {
+            background-color: #9ca3af !important; /* bg-gray-400 */
+         }
+
+         /* *** NEW: About Me Background Element Style *** */
+         .bg-element {
+             position: absolute;
+             color: var(--text-secondary);
+             opacity: 0.15; /* Slightly more visible */
+             font-family: sans-serif; /* Use sans-serif for shapes */
+             user-select: none; /* Prevent selection */
+             pointer-events: none; /* Prevent interaction */
+             z-index: 5; /* Below main content */
+         }
+         .dark .bg-element {
+             opacity: 0.1; /* Slightly less visible in dark mode */
+         }
+
     </style>
 </head>
 <body>
@@ -255,6 +322,7 @@
                 <nav id="sidebar-nav" class="flex flex-col space-y-2 flex-grow">
                     <a href="#" id="nav-dashboard" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">ড্যাশবোর্ড</a>
                     <a href="#" id="nav-profile" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">প্রোফাইল</a>
+                    <a href="#" id="nav-about" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">আমার সম্পর্কে</a>
                 </nav>
                 <button id="logout-button" class="w-full btn-secondary font-bold py-2 px-4 rounded-lg mt-4 hidden">লগ আউট</button>
             </aside>
@@ -293,7 +361,7 @@
 
                     <!-- Motivational Quote -->
                     <div id="quote-container" class="mb-6 p-4 bg-blue-50/70 border-l-4 border-blue-500 rounded-r-lg">
-                        <p id="quote-text" class="text-blue-800 italic"></p>
+                        <p id="quote-text" class="text-blue-800 italic">"Loading quote..."</p>
                         <p id="quote-author" class="text-blue-900 font-semibold mt-2 text-xs text-right"></p>
                     </div>
 
@@ -315,7 +383,10 @@
 
                                     <div>
                                         <label for="topic" class="block text-sm font-medium text-main-secondary">টপিক</label>
-                                        <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <button id="get-topic-details-btn" title="Get Topic Details" class="btn-gemini flex-shrink-0">✨</button>
+                                        </div>
                                     </div>
                                     <div class="flex space-x-4">
                                         <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
@@ -374,10 +445,8 @@
                      </div>
 
                     <!-- History & Pie Chart Section -->
-                    <!-- *** MODIFIED: Changed to md:grid-cols-2 *** -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <!-- History Log -->
-                        <!-- *** MODIFIED: Removed lg:col-span-5 *** -->
                         <div class="card">
                             <h2 class="text-2xl font-bold mb-4">আজকের সম্পন্ন টপিক</h2>
                             <div id="history-log" class="space-y-3 max-h-80 overflow-y-auto">
@@ -385,7 +454,7 @@
                             </div>
                         </div>
 
-                        <!-- *** NEW: Today's Subject Pie Chart *** -->
+                        <!-- Today's Subject Pie Chart -->
                         <div class="card">
                             <h2 class="text-2xl font-bold mb-4">আজকের বিষয়ভিত্তিক সারাংশ</h2>
                             <div class="relative" style="max-height: 300px;"> <!-- Container for canvas -->
@@ -396,7 +465,6 @@
                                 <p>আজ কোনো বিষয় পড়া হয়নি।</p>
                             </div>
                         </div>
-                        <!-- *** END: Pie Chart Section *** -->
                     </div>
                 </div>
 
@@ -437,7 +505,7 @@
                             </div>
                         </div>
 
-                        <!-- MODIFIED: Achievement Section -->
+                        <!-- Achievement Section -->
                         <div class="mt-8 pt-6 border-t border-[var(--input-border)]">
                             <h3 class="text-lg font-semibold mb-3 text-center">অর্জন</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
@@ -457,7 +525,7 @@
                                     <p class="text-sm text-main-secondary">(সর্বমোট পয়েন্ট)</p>
                                 </div>
                             </div>
-                            <!-- *** MODIFIED: Lifetime Badges Section (Uncommented) *** -->
+                            <!-- Lifetime Badges Section -->
                             <div class="mt-4">
                                 <h4 class="font-medium mb-2 text-main-secondary text-center">ব্যাজসমূহ (Lifetime):</h4>
                                 <div id="profile-badges" class="flex flex-wrap justify-center gap-2">
@@ -472,6 +540,77 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- *** MODIFIED: About Me View *** -->
+                <div id="about-view" class="hidden">
+                     <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">আমার সম্পর্কে</h1>
+                     <!-- Card with background elements -->
+                    <div class="card max-w-3xl mx-auto relative overflow-hidden">
+                        
+                        <!-- Background Elements (Slightly more visible) -->
+                        <div class="bg-element font-mono text-2xl" style="top: 10%; left: 10%; transform: rotate(-15deg);" aria-hidden="true">E = mc²</div>
+                        <div class="bg-element font-mono text-lg" style="top: 25%; right: 12%; transform: rotate(15deg);" aria-hidden="true">P(A|B) = P(B|A)P(A)/P(B)</div>
+                        <div class="bg-element font-mono text-3xl" style="bottom: 18%; left: 20%; transform: rotate(8deg);" aria-hidden="true">∫ f(x)dx</div>
+                        <div class="bg-element font-mono text-2xl" style="bottom: 12%; right: 25%; transform: rotate(-6deg);" aria-hidden="true">σ² = Σ(x-μ)²/N</div>
+                        <div class="bg-element font-mono text-xl" style="top: 70%; left: 12%; transform: rotate(5deg);" aria-hidden="true">F = ma</div>
+                        <div class="bg-element font-mono text-2xl" style="top: 50%; right: 30%; transform: rotate(-10deg);" aria-hidden="true">x̄ = Σx/n</div>
+                        
+                        <!-- Geometric Shapes -->
+                        <div class="bg-element text-4xl" style="top: 15%; right: 20%; transform: rotate(25deg);" aria-hidden="true">△</div>
+                        <div class="bg-element text-3xl" style="bottom: 30%; left: 10%; transform: rotate(-20deg);" aria-hidden="true">□</div>
+                        <div class="bg-element text-2xl" style="top: 80%; right: 15%; transform: rotate(10deg);" aria-hidden="true">∑</div>
+                        <div class="bg-element text-3xl" style="top: 40%; left: 15%; transform: rotate(30deg);" aria-hidden="true">π</div>
+                         <div class="bg-element text-4xl" style="bottom: 45%; right: 10%; transform: rotate(-25deg);" aria-hidden="true">∇</div>
+
+
+                        <!-- Main Content -->
+                        <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                            <!-- Image -->
+                            <div class="md:col-span-1 flex justify-center">
+                                <!-- Corrected image path -->
+                                <img src="images/IMG_20240916_161328.png" alt="সাদ" class="w-40 h-40 rounded-full object-cover border-4 border-[var(--input-border)] shadow-lg" onerror="this.src='https://placehold.co/160x160/E2E8F0/4A5568?text=Saad';">
+                            </div>
+
+                            <!-- Text -->
+                            <div class="md:col-span-2 space-y-3">
+                                <p class="text-lg">আসসালামু আলাইকুম!😃</p>
+                                <p class="text-main-primary">আমি <strong>সাদ</strong> — রাজশাহী বিশ্ববিদ্যালয়ের <strong> পরিসংখ্যান বিভাগের ৬৩তম ব্যাচের </strong> একজন শিক্ষার্থী 🎓। সংখ্যার জগৎ আমার খুব প্রিয়, আর সেই ভালোবাসা থেকেই আমি এই পথে হাঁটছি।🥱</p>
+                                <p class="text-main-primary">এই প্রজেক্টটা আমার কাছে অনেক বিশেষ ❤️</p>
+                                <p class="text-main-primary">কারণ আমি নিজেই একজন “ফাঁকিবাজ” ছাত্র 😅 — সময়মতো পড়াশোনা করা বা সময়কে কাজে লাগানো আমার পক্ষে সবসময় সহজ ছিল না। তাই এই Study Tracker ওয়েবসাইটটা তৈরি করেছি যেন নিজেকে একটু মোটিভেট রাখতে পারি, আর পড়াশোনার সময়গুলো ঠিকভাবে ট্র্যাক করতে পারি ⏱️</p>
+                                <p class="text-main-primary">আমি চাই, পড়াশোনাতেও যেন ঠিক গেমের মতোই প্রতি সপ্তাহে <strong>“Heroic Rank”</strong> অর্জন করতে পারি 🏆 — কারণ গেমে তো আমি সবসময়ই হিরোইক র‍্যাঙ্ক হোল্ডার 😉</p>
+                                <p class="text-main-primary">আর হ্যাঁ, একটা কথাই বলি —</p>
+                                <p class="text-2xl font-bold text-accent italic text-center my-4">✨ “Life is easy, when you take it easy!” ✨</p>
+                                <p class="text-lg font-semibold text-right">— TaTa 👋</p>
+                            </div>
+                        </div>
+
+                        <!-- "Join Me" / Social Links Section -->
+                        <div class="relative z-10 mt-8 pt-6 border-t border-[var(--input-border)]">
+                            <h3 class="text-xl font-bold text-center mb-6 text-main-primary">যোগাযোগ করুন</h3>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <!-- LinkedIn -->
+                                <a href="https://www.linkedin.com/in/shafin-sanyan-saad/" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 px-5 py-2 rounded-lg bg-[#0077B5] text-white font-semibold transition hover:opacity-90 shadow-md">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                    <span>LinkedIn</span>
+                                </a>
+                                <!-- Facebook -->
+                                <a href="https://www.facebook.com/shafin.sanyan.saad" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 px-5 py-2 rounded-lg bg-[#1877F2] text-white font-semibold transition hover:opacity-90 shadow-md">
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385h-3.038v-3.47h3.038v-2.661c0-3.004 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.49 0-1.956.925-1.956 1.874v2.267h3.328l-.532 3.47h-2.796v8.385c5.737-.9 10.125-5.864 10.125-11.854z"/></svg>
+                                    <span>Facebook</span>
+                                </a>
+                                <!-- WhatsApp -->
+                                <!-- Assumed +880 country code for Bangladesh -->
+                                <a href="https://wa.me/8801776650834" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 px-5 py-2 rounded-lg bg-[#25D366] text-white font-semibold transition hover:opacity-90 shadow-md">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.001 2.16c5.42 0 9.841 4.42 9.841 9.841 0 5.42-4.42 9.841-9.841 9.841-1.601 0-3.11-.38-4.441-1.051l-5.051 1.351 1.371-4.921c-.741-1.381-1.151-2.951-1.151-4.621 0-5.42 4.42-9.841 9.841-9.841zm-2.351 5.4c-.211-.111-.471-.181-.731-.201-.3-.02-.62.03-.9.131-.32.111-.6.281-.82.521-.23.23-.42.521-.52.841-.11.311-.13.631-.08.961.05.33.18.631.36.9.18.27.42.51.72.72s.63.42.99.57c.36.15.75.27 1.17.36s.87.12 1.32.09c.45-.03.88-.13 1.28-.291.4-.16.76-.39 1.06-.671.3-.28.51-.6.64-.951.13-.35.18-.72.18-1.1v-.01c0-.18-.01-.36-.03-.531-.02-.17-.05-.34-.1-.491-.05-.15-.11-.3-.18-.441-.07-.14-.15-.28-.25-.41-.1-.13-.21-.25-.33-.36s-.26-.2-.41-.28c-.15-.08-.31-.15-.48-.2s-.35-.09-.53-.12c-.18-.03-.36-.05-.55-.05-.19 0-.38.02-.56.061-.18.04-.36.1-.52.171-.16.07-.31.15-.45.241-.14.09-.27.2-.39.311s-.22.23-.31.36c-.09.13-.17.27-.22.41s-.1.29-.12.441c-.02.15-.03.3-.03.46 0 .15.01.3.04.44s.07.27.13.39c.06.12.13.23.22.33s.19.18.3.25c.11.07.23.13.36.17.13.04.26.07.4.08.14.01.28.01.42 0 .14 0 .28-.02.41-.05.13-.03.26-.07.38-.13.12-.06.23-.13.33-.21.1-.08.19-.18.27-.28s.15-.22.2-.34c.05-.12.08-.25.1-.38.02-.13.02-.26.02-.4 0-.21-.03-.42-.08-.62-.05-.2-.13-.39-.23-.56s-.23-.33-.37-.46c-.14-.13-.3-.24-.47-.33s-.35-.16-.54-.22c-.19-.06-.38-.1-.58-.12z"/></svg>
+                                    <span>WhatsApp</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- *** END: About Me View *** -->
+
 
                 <footer class="text-center pt-8 text-white/80 font-semibold text-xs drop-shadow-md">
                     Created by Saad | STAT - 63 | RU
@@ -490,6 +629,10 @@
                  <span class="emoji-icon mx-auto">👤</span>
                 <span class="text-xs">প্রোফাইল</span>
             </a>
+            <a href="#" id="mobile-nav-about" class="text-center text-gray-500 dark:text-gray-400 p-2">
+                 <span class="emoji-icon mx-auto">👨‍💻</span>
+                <span class="text-xs">আমার সম্পর্কে</span>
+            </a>
             <a href="#" id="mobile-logout-button" class="text-center text-gray-500 dark:text-gray-400 p-2">
                  <span class="emoji-icon mx-auto">🚪</span>
                 <span class="text-xs">লগ আউট</span>
@@ -500,7 +643,7 @@
 
 <!--
     **************************************************
-    * FIREBASE SCRIPT START - SOB LOGIC EKHANE     *
+    * FIREBASE & GEMINI SCRIPT START                 *
     **************************************************
 -->
 
@@ -538,7 +681,7 @@
     // --- !! IMPORTANT !! ---
     // Firebase Config
     const firebaseConfig = {
-        apiKey: "AIzaSyASoBtoZ3tb7_9joLCaL9jFA3uW-QlCvnA",
+        apiKey: "AIzaSyASoBtoZ3tb7_9joLCaL9jFA3uW-QlCvnA", // *** WARNING: Consider using environment variables for API keys in production ***
         authDomain: "study-trucker-dc956.firebaseapp.com",
         projectId: "study-trucker-dc956",
         storageBucket: "study-trucker-dc956.appspot.com",
@@ -564,21 +707,20 @@
     let timerInterval = null;
     let quoteInterval = null;
     let weeklyChartInstance = null;
-    let todayPieChartInstance = null; // *** NEW: Pie chart instance ***
-    let previousRankName = null; // *** NEW: For rank up toast ***
+    let todayPieChartInstance = null;
+    let previousRankName = null;
     const weeklyChartCanvas = document.getElementById('weeklyChartCanvas');
 
-    // --- *** MODIFIED: BADGE DEFINITIONS (Lifetime Hours/Points) *** ---
+    // --- BADGE DEFINITIONS ---
     const badges = {
         'first_hour':   { name: 'প্রথম ১ ঘন্টা', emoji: '🏆', threshold: 1, type: 'points' },
         'ten_hours':    { name: '১০ ঘন্টা সম্পন্ন', emoji: '⏱️', threshold: 10, type: 'points' },
         'fifty_hours':  { name: '৫০ ঘন্টা সম্পন্ন', emoji: '⏳', threshold: 50, type: 'points' },
-        'hundred_hours': { name: '১০০ ঘন্টা', emoji: '💯', threshold: 100, type: 'points' }, // Renamed
-        'five_hundred_hours': { name: '৫০০ ঘন্টা', emoji: '🔥', threshold: 500, type: 'points' }, // Renamed
-        'thousand_hours': { name: '১০০০+ ঘন্টা', emoji: '⭐', threshold: 1000, type: 'points' }, // Renamed
-        'goal_achiever': { name: 'লক্ষ্য পূরণকারী', emoji: '🎯', type: 'goal_met' }, // This one is special
+        'hundred_hours': { name: '১০০ ঘন্টা', emoji: '💯', threshold: 100, type: 'points' },
+        'five_hundred_hours': { name: '৫০০ ঘন্টা', emoji: '🔥', threshold: 500, type: 'points' },
+        'thousand_hours': { name: '১০০০+ ঘন্টা', emoji: '⭐', threshold: 1000, type: 'points' },
+        'goal_achiever': { name: 'লক্ষ্য পূরণকারী', emoji: '🎯', type: 'goal_met' },
     };
-
 
     // --- RANK DEFINITIONS ---
     const ranks = [
@@ -589,6 +731,120 @@
         { name: 'Diamond', emoji: '💎', minHours: 80 },
         { name: 'Heroic', emoji: '🦸', minHours: 100 },
     ];
+
+    // --- Fallback Quotes ---
+    const fallbackQuotes = [
+         { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
+         { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
+         { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" },
+         { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" },
+         { text: "চমৎকার কাজ করার একমাত্র উপায় হল আপনি যা করেন তা ভালবাসা।", author: "স্টিভ জবস" },
+    ];
+
+
+    // --- *** GEMINI API HELPER FUNCTION *** ---
+    async function callGeminiAPI(prompt) {
+        // IMPORTANT: Leave apiKey as an empty string. The hosting environment will inject it.
+        const apiKey = "";
+        const model = 'gemini-2.5-flash-preview-09-2025'; // Using the Flash model
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            // Optional: Add safety settings if needed
+            // safetySettings: [
+            //     { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            //     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            //     // Add other categories as needed
+            // ]
+        };
+
+        let attempts = 0;
+        const maxAttempts = 5;
+        let delay = 1000; // 1 second initial delay
+
+        while (attempts < maxAttempts) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    // Check for retryable status codes (429 Too Many Requests, 5xx Server Errors)
+                    if (response.status === 429 || response.status >= 500) {
+                        console.warn(`Gemini API request failed with status ${response.status}. Retrying in ${delay / 1000}s... (Attempt ${attempts + 1}/${maxAttempts})`);
+                        // Don't log retries as errors in the console
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; // Exponential backoff
+                        attempts++;
+                        continue; // Go to the next attempt
+                    } else {
+                        // Other client-side errors (400, 401, 403, etc.) - don't retry
+                        console.error(`Gemini API request failed with non-retryable status ${response.status}:`, await response.text());
+                        throw new Error(`API request failed: ${response.statusText} (${response.status})`);
+                    }
+                }
+
+                const result = await response.json();
+                console.log("Gemini API Response:", result); // Log the full response for debugging
+
+                const candidate = result.candidates?.[0];
+
+                if (candidate) {
+                    // Check finish reason and safety ratings *before* accessing content
+                    if (candidate.finishReason && candidate.finishReason !== 'STOP' && candidate.finishReason !== 'MAX_TOKENS') {
+                         console.error(`Content generation stopped unexpectedly. Reason: ${candidate.finishReason}`);
+                         throw new Error(`Content generation failed: ${candidate.finishReason}`);
+                    }
+                     if (candidate.safetyRatings?.some(rating => rating.probability !== 'NEGLIGIBLE')) {
+                         console.warn("Content may be blocked or adjusted due to safety ratings:", candidate.safetyRatings);
+                         // Decide how to handle potentially blocked content (e.g., show a message or use fallback)
+                         // For now, we'll try to return the text if it exists, but log the warning.
+                     }
+
+                    // Attempt to get the text content
+                    const textContent = candidate.content?.parts?.[0]?.text;
+                    if (textContent) {
+                        return textContent; // Success!
+                    } else {
+                        // Handle cases where content is missing even if finishReason is STOP
+                        console.error("No text content found in Gemini response candidate, despite successful status and finish reason.", candidate);
+                         throw new Error("API returned a candidate, but no text content was found.");
+                    }
+                } else if (result.promptFeedback?.blockReason) {
+                    // Handle cases where the entire prompt was blocked
+                     console.error(`Prompt blocked by API. Reason: ${result.promptFeedback.blockReason}`, result.promptFeedback);
+                     throw new Error(`Your request was blocked due to safety concerns (${result.promptFeedback.blockReason}). Please modify your input.`);
+
+                } else {
+                     // Handle other unexpected response structures
+                     console.error("Unexpected response structure from Gemini API. No candidates found.", result);
+                     throw new Error("No content generated or unexpected API response structure.");
+                }
+
+            } catch (error) {
+                console.error(`Error during Gemini API call attempt ${attempts + 1}:`, error);
+                // Don't retry if it's a non-retryable HTTP error caught earlier or a prompt block
+                if (error.message.includes("API request failed:") || error.message.includes("request was blocked")) {
+                     throw error; // Re-throw immediately
+                }
+
+                if (attempts >= maxAttempts - 1) {
+                    console.error("Gemini API call failed after multiple retries.");
+                    throw error; // Re-throw the final error after max retries
+                }
+                // If it wasn't a retryable error caught above, still wait and retry for network issues etc.
+                console.warn(`Retrying Gemini API call in ${delay / 1000}s after error: ${error.message}`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+                attempts++;
+            }
+        }
+        // This line should technically not be reached if errors are thrown correctly
+        throw new Error("Gemini API call failed after multiple retries.");
+    }
+    // --- *** END GEMINI API HELPER *** ---
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -618,10 +874,14 @@
              document.documentElement.classList.toggle('dark', isDark);
              themeIconLight.classList.toggle('hidden', isDark);
              themeIconDark.classList.toggle('hidden', !isDark);
-              if (initialLoadComplete && views.dashboard.offsetParent !== null) {
+             // Apply SweetAlert theme based on body class
+             const swalTheme = isDark ? 'dark' : 'default';
+             // No direct theme option, rely on CSS variables or class toggles
+
+              if (initialLoadComplete && (views.dashboard.offsetParent !== null)) {
                    console.log("Theme changed, rendering charts.");
                    renderWeeklyChart(true);
-                   renderTodayPieChart(true); // *** NEW: Redraw pie chart on theme change ***
+                   renderTodayPieChart(true);
               }
         }
         const currentTheme = localStorage.getItem('theme');
@@ -639,10 +899,20 @@
         });
 
         // --- UI ELEMENTS ---
-        const views = { login: document.getElementById('login-view'), dashboard: document.getElementById('dashboard-view'), profile: document.getElementById('profile-view') };
-        const navItems = { sidebar: document.getElementById('sidebar-nav').parentElement, mobile: document.getElementById('mobile-nav'), logoutBtn: document.getElementById('logout-button') }; // Get parent <aside> for sidebar
-        const navDashboard = document.getElementById('nav-dashboard'), navProfile = document.getElementById('nav-profile');
-        const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile'), mobileLogoutBtn = document.getElementById('mobile-logout-button');
+        const views = {
+            login: document.getElementById('login-view'),
+            dashboard: document.getElementById('dashboard-view'),
+            profile: document.getElementById('profile-view'),
+            about: document.getElementById('about-view')
+        };
+        const navItems = { sidebar: document.getElementById('sidebar-nav').parentElement, mobile: document.getElementById('mobile-nav'), logoutBtn: document.getElementById('logout-button') };
+        const navDashboard = document.getElementById('nav-dashboard'),
+              navProfile = document.getElementById('nav-profile'),
+              navAbout = document.getElementById('nav-about');
+        const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'),
+              mobileNavProfile = document.getElementById('mobile-nav-profile'),
+              mobileNavAbout = document.getElementById('mobile-nav-about'),
+              mobileLogoutBtn = document.getElementById('mobile-logout-button');
         const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password');
         const loginButton = document.getElementById('login-button'), googleLoginButton = document.getElementById('google-login-button');
         const forgotPasswordLink = document.getElementById('forgot-password-link');
@@ -651,27 +921,22 @@
         const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
         const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
         const subjectSummaryList = document.getElementById('subject-summary-list');
-        // Rank display elements
         const rankEmojiDisplay = document.getElementById('rank-emoji');
         const rankNameDisplay = document.getElementById('rank-name');
         const todayPointsDisplay = document.getElementById('today-points');
         const weeklyPointsDisplay = document.getElementById('weekly-points');
-        // Profile elements
         const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload'), imgUploadSpinner = document.getElementById('img-upload-spinner');
         const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
         const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
         const saveProfileBtn = document.getElementById('save-profile');
-        const profilePointsDisplay = document.getElementById('profile-points'); // Lifetime points display
-        // Profile Rank display elements
+        const profilePointsDisplay = document.getElementById('profile-points');
         const profileRankEmojiDisplay = document.getElementById('profile-rank-emoji');
         const profileRankNameDisplay = document.getElementById('profile-rank-name');
         const profileWeeklyPointsDisplay = document.getElementById('profile-weekly-points');
-        const profileBadgesContainer = document.getElementById('profile-badges'); // *** NEW: Badges container ***
+        const profileBadgesContainer = document.getElementById('profile-badges');
+        const quoteTextEl = document.getElementById('quote-text'), quoteAuthorEl = document.getElementById('quote-author'); // Renamed for clarity
+        const getTopicDetailsBtn = document.getElementById('get-topic-details-btn'); // Gemini Button
 
-        const quotes = [
-             { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" }, { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" }, { text: "যে ব্যক্তি জ্ঞানের সন্ধানে বের হয়, সে আল্লাহর পথে থাকে যতক্ষণ না সে ফিরে আসে।", author: "তিরমিযী - ২৬৪৭" }, { text: "যিনি জ্ঞান অনুসন্ধান করেন, আল্লাহ তার জান্নাতের পথ সহজ করে দেন।", author: "সহীহ মুসলিম - ২৬৯৯" }, { text: "...যাদের জ্ঞান দান করা হয়েছে, আল্লাহ তাদেরকে বহু স্তরে উন্নত করবেন।", author: "আল-কুরআন, সূরা মুজাদালা : ১১" }, { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" }, { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" }, { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" }, { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" }, { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" }, { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" }, { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" }, { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" }, { text: "ভবিষ্যৎ তাদেরই যারা তাদের স্বপ্নের সৌন্দর্যে বিশ্বাস করে।", author: "এলেনর রুজভেল্ট" }, { text: "সফলতা চূড়ান্ত নয়, ব্যর্থতা মারাত্মক নয়: চালিয়ে যাওয়ার সাহসটাই আসল।", author: "উইনস্টন চার্চিল" }, { text: "যতক্ষণ না কাজ শেষ হয়, ততক্ষণ পর্যন্ত তা অসম্ভব বলে মনে হয়।", author: "নেলসন ম্যান্ডেলা" }, { text: "চমৎকার কাজ করার একমাত্র উপায় হল আপনি যা করেন তা ভালবাসা।", author: "স্টিভ জবস" },
-        ];
-        const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
 
         // --- DATA PERSISTENCE (Firebase) ---
         function setupFirestoreListener(user) {
@@ -687,14 +952,14 @@
                      loadAndDisplayUserData(isFirstData, historyDataChanged);
                      if (isFirstData) {
                          const { rank } = calculateWeeklyStats(); // Calculate initial rank
-                         previousRankName = rank.name; // *** NEW: Set the initial rank ***
+                         previousRankName = rank.name;
                          showView('dashboard');
                          initialLoadComplete = true;
                      }
                  } else {
                      const newUserData = createNewUserData(user); setDoc(userDocRef, newUserData).then(() => {
                          state = newUserData;
-                         previousRankName = ranks[0].name; // *** NEW: New user is Bronze ***
+                         previousRankName = ranks[0].name;
                          loadAndDisplayUserData(true, true);
                          showView('dashboard');
                          initialLoadComplete = true;
@@ -715,78 +980,92 @@
               if (viewName === 'dashboard' && initialLoadComplete) {
                   console.log("Dashboard view shown, rendering charts.");
                   renderWeeklyChart(false);
-                  renderTodayPieChart(false); // *** NEW: Render pie chart on view show ***
+                  renderTodayPieChart(false);
               }
         }
 
-        function updateUIAfterLogin() { // Shows navs only after login
+        async function updateUIAfterLogin() { // Added async for await updateQuote
              console.log("Updating UI for logged-in state.");
-             navItems.sidebar.classList.remove('hidden'); // Show sidebar
-             navItems.sidebar.classList.add('md:flex'); // Ensure it uses flex on medium screens+
-             navItems.mobile.classList.add('flex'); // Show mobile nav using flex
+             navItems.sidebar.classList.remove('hidden');
+             navItems.sidebar.classList.add('md:flex');
+             navItems.mobile.classList.add('flex');
              navItems.mobile.classList.remove('hidden');
-             navItems.logoutBtn.classList.remove('hidden'); // Show logout btn in sidebar
-             updateQuote();
+             navItems.logoutBtn.classList.remove('hidden');
+             await updateQuote(); // Load initial quote via API
              if(quoteInterval) clearInterval(quoteInterval);
-             quoteInterval = setInterval(updateQuote, 20000);
+             quoteInterval = setInterval(updateQuote, 60000); // Fetch new quote every 60 seconds
         }
 
-        function updateUIAfterLogout() { // Hides navs on logout
+        function updateUIAfterLogout() {
              console.log("Updating UI for logged-out state.");
              if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
              currentUser = null; state = null; userDocRef = null; initialLoadComplete = false;
-             previousRankName = null; // *** NEW: Reset previous rank ***
+             previousRankName = null;
 
-             navItems.sidebar.classList.add('hidden'); // Hide sidebar
+             navItems.sidebar.classList.add('hidden');
              navItems.sidebar.classList.remove('md:flex');
-             navItems.mobile.classList.remove('flex'); // Hide mobile nav
+             navItems.mobile.classList.remove('flex');
              navItems.mobile.classList.add('hidden');
-             navItems.logoutBtn.classList.add('hidden'); // Hide logout btn in sidebar
+             navItems.logoutBtn.classList.add('hidden');
 
-             showView('login'); // Explicitly show login view
+             showView('login');
              loginEmailInput.value = ''; loginPasswordInput.value = '';
              if(quoteInterval) clearInterval(quoteInterval);
+             quoteTextEl.textContent = ''; quoteAuthorEl.textContent = ''; // Clear quote
              if (timerInterval) clearInterval(timerInterval); timerInterval = null;
              timerDisplay.textContent = '00:00:00'; todayTotalDisplay.textContent = '0 ঘন্টা 0 মিনিট'; todayRemainingDisplay.textContent = '0 ঘন্টা 0 মিনিট';
              progressBar.style.width = '0%';
-             historyLog.innerHTML = '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
-             subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
+             historyLog.innerHTML = '<p class="text-main-secondary">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+             subjectSummaryList.innerHTML = '<p class="text-main-secondary text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
              rankEmojiDisplay.textContent = ranks[0].emoji; rankNameDisplay.textContent = ranks[0].name; todayPointsDisplay.textContent = '0.00'; weeklyPointsDisplay.textContent = '0.00';
               if (weeklyChartInstance) { weeklyChartInstance.destroy(); weeklyChartInstance = null; }
-              if (todayPieChartInstance) { todayPieChartInstance.destroy(); todayPieChartInstance = null; } // *** NEW: Destroy pie chart ***
+              if (todayPieChartInstance) { todayPieChartInstance.destroy(); todayPieChartInstance = null; }
         }
 
         function updateNavActiveState(activeView) {
-             [navDashboard, navProfile].forEach(el => el.classList.remove('active'));
-              if (activeView === 'dashboard') navDashboard.classList.add('active'); else if (activeView === 'profile') navProfile.classList.add('active');
-             [mobileNavDashboard, mobileNavProfile].forEach(el => { el.classList.remove('text-blue-600', 'dark:text-blue-400'); el.classList.add('text-gray-500', 'dark:text-gray-400'); });
-             let activeMobileNav = null; if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard; else if (activeView === 'profile') activeMobileNav = mobileNavProfile;
-             if(activeMobileNav) { activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400'); activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400'); }
+             [navDashboard, navProfile, navAbout].forEach(el => el.classList.remove('active'));
+             if (activeView === 'dashboard') navDashboard.classList.add('active');
+             else if (activeView === 'profile') navProfile.classList.add('active');
+             else if (activeView === 'about') navAbout.classList.add('active');
+
+             [mobileNavDashboard, mobileNavProfile, mobileNavAbout].forEach(el => {
+                el.classList.remove('text-blue-600', 'dark:text-blue-400');
+                el.classList.add('text-gray-500', 'dark:text-gray-400');
+             });
+             let activeMobileNav = null;
+             if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard;
+             else if (activeView === 'profile') activeMobileNav = mobileNavProfile;
+             else if (activeView === 'about') activeMobileNav = mobileNavAbout;
+
+             if(activeMobileNav) {
+                activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400');
+                activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400');
+             }
         }
 
         // --- AUTHENTICATION (Firebase) ---
-        onAuthStateChanged(auth, (user) => { // Controls UI based on login status
+        onAuthStateChanged(auth, (user) => {
              console.log("Auth state changed. User:", user ? user.uid : "null");
-             if (user) { // User is logged in
+             if (user) {
                  if (!currentUser || currentUser.uid !== user.uid) {
                      currentUser = user;
-                     updateUIAfterLogin(); // Show navs and update common UI
-                     setupFirestoreListener(user); // Fetch data (will show dashboard)
-                 } else { // User is the same, maybe page refreshed
-                      if (initialLoadComplete && views.login.offsetParent !== null) { // If login page is somehow visible, redirect
+                     updateUIAfterLogin(); // Now async
+                     setupFirestoreListener(user);
+                 } else {
+                      if (initialLoadComplete && views.login.offsetParent !== null) {
                            console.log("User already logged in, showing dashboard.");
                            showView('dashboard');
                       }
                  }
-             } else { // User is logged out or not logged in initially
-                 if (currentUser != null) { // Was previously logged in? Trigger full logout UI update
+             } else {
+                 if (currentUser != null) {
                      updateUIAfterLogout();
-                 } else { // Initial state, user not logged in
+                 } else {
                      console.log("Initial state: User not logged in.");
-                     if (views.login.offsetParent === null) { // If login view is not visible
+                     if (views.login.offsetParent === null) {
                          showView('login');
                      }
-                      navItems.sidebar.classList.add('hidden'); // Ensure hidden initially
+                      navItems.sidebar.classList.add('hidden');
                       navItems.mobile.classList.add('hidden');
                  }
              }
@@ -800,14 +1079,26 @@
              try { await signInWithEmailAndPassword(auth, email, password); console.log("Login successful"); }
              catch (signInError) {
                  console.error("Sign-in failed:", signInError.code);
-                 if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found'].includes(signInError.code)) {
-                     try { await createUserWithEmailAndPassword(auth, email, password); console.log("Signup successful"); }
-                     catch (createError) {
-                         console.error("Signup failed:", createError.code);
-                         let msg = createError.message; if (createError.code === 'auth/email-already-in-use') { msg = 'ভুল পাসওয়ার্ড অথবা এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে।'; } else if (createError.code === 'auth/weak-password') { msg = 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।'; }
-                         Swal.fire({ icon: 'error', title: 'Login/Signup সমস্যা', text: msg });
-                     }
-                 } else { Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message }); }
+                 if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(signInError.code)) { // Added invalid-email
+                     // Try creating account only if it looks like a user/password issue, not general failure
+                    if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found'].includes(signInError.code)) {
+                        try { await createUserWithEmailAndPassword(auth, email, password); console.log("Signup successful"); }
+                        catch (createError) {
+                            console.error("Signup failed:", createError.code);
+                            let msg = createError.message;
+                            if (createError.code === 'auth/email-already-in-use') { msg = 'ভুল পাসওয়ার্ড অথবা এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে।'; }
+                            else if (createError.code === 'auth/weak-password') { msg = 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।'; }
+                            else if (createError.code === 'auth/invalid-email') { msg = 'দয়া করে একটি সঠিক ইমেইল ঠিকানা লিখুন।'; }
+                            else { msg = `অ্যাকাউন্ট তৈরি করা যায়নি: ${createError.code}`; }
+                            Swal.fire({ icon: 'error', title: 'Login/Signup সমস্যা', text: msg });
+                        }
+                    } else { // Handle invalid email specifically during login attempt
+                         Swal.fire({ icon: 'error', title: 'Login সমস্যা', text: 'দয়া করে একটি সঠিক ইমেইল ঠিকানা লিখুন।' });
+                    }
+                 } else {
+                     // Handle other sign-in errors
+                     Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: `পুনরায় চেষ্টা করুন (${signInError.code})` });
+                 }
              }
         }
 
@@ -833,7 +1124,7 @@
 
         // --- CORE LOGIC ---
         async function startTimer() {
-             if (!subjectInput.value.trim() || !topicInput.value.trim()) { Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'বিষয় এবং টপিক লিখুন।' }); return; } if (!userDocRef) { Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি।' }); return; }
+             if (!subjectInput.value.trim() || !topicInput.value.trim()) { Swal.fire({ icon: 'warning', title: 'দুঃখিত!', text: 'বিষয় এবং টপিক লিখুন।' }); return; } if (!userDocRef) { Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি।' }); return; }
              const sessionData = { isActive: true, startTime: Date.now(), subject: subjectInput.value.trim(), topic: topicInput.value.trim() };
              try { await updateDoc(userDocRef, { studySession: sessionData }); console.log("Timer started."); } catch (error) { console.error("Error starting timer:", error); Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' }); }
         }
@@ -844,58 +1135,58 @@
                  const startTime = state.studySession.startTime; if (startTime === null) { try { await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' }}); resolve(); } catch (e) { reject(e); } return; }
                  const duration = Math.round((Date.now() - startTime) / 1000); const pointsEarned = parseFloat((duration / 3600).toFixed(2));
                  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                 // Minimum duration check (e.g., 10 seconds) - optional
+                 // if (duration < 10) {
+                 //     try { await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } }); resolve(); } catch(e) { reject(e); }
+                 //     Swal.fire({ icon: 'info', title: 'Session Too Short', text: 'Study session was too short to save.', timer: 2000 });
+                 //     return;
+                 // }
                  if (duration <= 0) { try { await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } }); resolve(); } catch(e) { reject(e); } return; }
+
                  const sessionHistory = { date: new Date().toISOString(), subject: state.studySession.subject || 'N/A', topic: state.studySession.topic || 'N/A', duration: duration };
                  try {
                      const updateData = { studySession: { isActive: false, startTime: null, subject: '', topic: '' }, points: increment(pointsEarned) };
                      if (Array.isArray(state.studyHistory)) { updateData.studyHistory = arrayUnion(sessionHistory); } else { updateData.studyHistory = [sessionHistory]; }
                      await updateDoc(userDocRef, updateData); console.log("Session stopped. Points Earned (hours):", pointsEarned);
-                     startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false); subjectInput.value = ''; topicInput.value = ''; timerDisplay.textContent = '00:00:00';
-                     
+                     startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false); subjectInput.value = ''; topicInput.value = ''; timerDisplay.textContent = '00:00:00';
+
                      if (showCongratsPopup) {
-                         // *** MODIFIED: Check for goal AND badges after a delay ***
                          setTimeout(() => {
                              getDoc(userDocRef).then(docSnap => {
                                  if (docSnap.exists()) {
                                      const latestState = docSnap.data();
-                                     
-                                     // 1. Goal check
-                                     const goalSeconds = (latestState.dailyGoal || 7) * 3600;
-                                     const totalSecondsToday = getTotalStudiedSecondsForToday(); // Needs state, but this function uses global state. Refetch state.
-                                     
-                                     // Re-calculate today's seconds based on the *latest* state
                                      const todayStr = getLocalDateString();
-                                     const totalSecondsTodayLatest = latestState.studyHistory
+                                     const totalSecondsTodayLatest = (latestState.studyHistory || [])
                                          .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr)
                                          .reduce((sum, e) => sum + e.duration, 0);
+                                     const goalSeconds = (latestState.dailyGoal || 7) * 3600;
 
                                      if (goalSeconds > 0 && totalSecondsTodayLatest >= goalSeconds) {
-                                         Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য পূরণ করেছেন!' });
-                                         if (!latestState.badges?.includes('goal_achiever')) {
-                                             updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') }).then(() => console.log("Goal Achiever badge awarded.")).catch(err => console.error("Error awarding goal badge:", err));
+                                         // Check if goal was *just* met or already met before this session
+                                         const secondsBeforeThisSession = totalSecondsTodayLatest - duration;
+                                         if (secondsBeforeThisSession < goalSeconds) {
+                                             Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য পূরণ করেছেন!' });
+                                             if (!latestState.badges?.includes('goal_achiever')) {
+                                                 updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') }).then(() => console.log("Goal Achiever badge awarded.")).catch(err => console.error("Error awarding goal badge:", err));
+                                             }
                                          }
                                      }
-
-                                     // 2. *** NEW: Badge Check ***
                                      checkAndAwardBadges(latestState);
                                  }
                              }).catch(err => console.error("Error fetching doc for goal/badge check:", err));
                          }, 600);
                      }
-                     updateDashboardUIOnly(); // Update UI immediately
+                     updateDashboardUIOnly();
                      resolve();
                  } catch (error) { console.error("Error stopping timer:", error); Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' }); reject(error); }
              });
         }
 
-        // *** NEW: Function to check and award lifetime badges ***
         async function checkAndAwardBadges(updatedState) {
             if (!userDocRef || !updatedState) return;
-
             const newBadges = [];
             const currentPoints = updatedState.points || 0;
             const currentBadges = updatedState.badges || [];
-
             for (const key in badges) {
                 const badge = badges[key];
                 if (badge.type === 'points') {
@@ -904,49 +1195,41 @@
                     }
                 }
             }
-            // 'goal_achiever' is handled in stopTimer
-
             if (newBadges.length > 0) {
                 try {
-                    await updateDoc(userDocRef, {
-                        badges: arrayUnion(...newBadges)
-                    });
+                    await updateDoc(userDocRef, { badges: arrayUnion(...newBadges) });
                     console.log("Awarded new badges:", newBadges);
-                    // Show a toast for the new badges
                     newBadges.forEach((badgeKey, index) => {
                         const badge = badges[badgeKey];
-                        setTimeout(() => { // Stagger toasts
+                        setTimeout(() => {
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
                                 icon: 'success',
                                 title: `নতুন ব্যাজ অর্জিত! ${badge.emoji}`,
-                                html: `আপনি <strong>"${badge.name}"</strong> ব্যাজটি পেয়েছেন!`,
+                                html: `আপনি <strong>"${badge.name}"</strong> ব্যাজটি পেয়েছেন!`,
                                 timer: 5000,
                                 timerProgressBar: true,
                                 showConfirmButton: false,
                             });
-                        }, index * 1000); // Stagger popups
+                        }, index * 1000);
                     });
-                } catch (err) {
-                    console.error("Error awarding badges:", err);
-                }
+                } catch (err) { console.error("Error awarding badges:", err); }
             }
         }
 
-        // *** NEW: Function to show rank up toast ***
         function showRankUpToast(rank) {
             Swal.fire({
                 toast: true,
-                position: 'top-end', // Top-right corner
+                position: 'top-end',
                 icon: 'success',
                 title: 'অভিনন্দন! 🥳',
                 html: `আপনি <strong>${rank.name} ${rank.emoji}</strong> র‍্যাঙ্কে পৌঁছেছেন!`,
-                timer: 15000, // 15 seconds
+                timer: 15000,
                 timerProgressBar: true,
                 showConfirmButton: false,
-                allowOutsideClick: true, // User can click outside to dismiss
-                allowEscapeKey: true, // User can use Esc to dismiss
+                allowOutsideClick: true,
+                allowEscapeKey: true,
             });
         }
 
@@ -963,27 +1246,22 @@
              try { if (!(date instanceof Date) || isNaN(date.getTime())) date = new Date(); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; } catch (e) { console.error("Date format error:", e); return 'date-error'; }
         };
         const getTotalStudiedSecondsForToday = () => {
-             if (!state?.studyHistory) return 0; const todayStr = getLocalDateString(); return state.studyHistory.filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr).reduce((sum, e) => sum + e.duration, 0);
+             if (!state?.studyHistory) return 0; const todayStr = getLocalDateString(); return (state.studyHistory || []).filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr).reduce((sum, e) => sum + e.duration, 0);
         };
         function getWeekBoundaries(date = new Date()) {
-             // Week starts on Saturday (Day 6) and ends on Friday (Day 5)
-             // We adjust to make Saturday the start.
-             const currentDay = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-             const daysToSaturday = (currentDay < 6) ? (currentDay + 1) : 0; // Days to go back to reach Saturday
-             
+             const currentDay = date.getDay();
+             const daysToSaturday = (currentDay < 6) ? (currentDay + 1) : 0;
              const startDate = new Date(date);
              startDate.setDate(date.getDate() - daysToSaturday);
              startDate.setHours(0, 0, 0, 0);
-             
              const endDate = new Date(startDate);
-             endDate.setDate(startDate.getDate() + 6); // Friday is 6 days after Saturday
+             endDate.setDate(startDate.getDate() + 6);
              endDate.setHours(23, 59, 59, 999);
-             
              return { start: startDate, end: endDate };
         }
         function calculateWeeklyStats() {
              if (!state?.studyHistory) return { rank: ranks[0], weeklyHours: 0, weeklyPoints: 0, todayPoints: 0 }; const { start, end } = getWeekBoundaries(); const startTime = start.getTime(); const endTime = end.getTime(); const todayStr = getLocalDateString(); let weeklySeconds = 0, todaySeconds = 0;
-             state.studyHistory.forEach(e => { if (e?.date && typeof e.duration === 'number' && e.duration > 0) { try { const entryDate = new Date(e.date); if (isNaN(entryDate.getTime())) return; const entryTime = entryDate.getTime(); if (entryTime >= startTime && entryTime <= endTime) { weeklySeconds += e.duration; if (getLocalDateString(entryDate) === todayStr) { todaySeconds += e.duration; } } } catch (err) { console.error("Date parse error:", e.date, err); } } });
+             (state.studyHistory || []).forEach(e => { if (e?.date && typeof e.duration === 'number' && e.duration > 0) { try { const entryDate = new Date(e.date); if (isNaN(entryDate.getTime())) return; const entryTime = entryDate.getTime(); if (entryTime >= startTime && entryTime <= endTime) { weeklySeconds += e.duration; if (getLocalDateString(entryDate) === todayStr) { todaySeconds += e.duration; } } } catch (err) { console.error("Date parse error:", e.date, err); } } });
              const weeklyHours = weeklySeconds / 3600; const weeklyPoints = parseFloat(weeklyHours.toFixed(2)); const todayPoints = parseFloat((todaySeconds / 3600).toFixed(2)); let currentRank = ranks[0]; for (let i = ranks.length - 1; i >= 0; i--) { if (weeklyHours >= ranks[i].minHours) { currentRank = ranks[i]; break; } } return { rank: currentRank, weeklyHours, weeklyPoints, todayPoints };
         }
 
@@ -992,29 +1270,37 @@
              if (!state || !currentUser) { console.warn("loadAndDisplayUserData: State/User null."); return; }
              console.log("loadAndDisplayUserData called. Initial:", isInitialLoad, "History Changed:", historyDataChanged);
              state.profile = state.profile || createNewUserData(currentUser).profile; state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' }; state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : []; state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7; state.points = typeof state.points === 'number' ? state.points : 0; state.badges = Array.isArray(state.badges) ? state.badges : [];
-             
-             // *** NEW: Rank up check logic ***
+
              const { rank: newRank } = calculateWeeklyStats();
              if (previousRankName && newRank.name !== previousRankName && newRank.name !== 'Bronze') {
                  const newRankIndex = ranks.findIndex(r => r.name === newRank.name);
                  const oldRankIndex = ranks.findIndex(r => r.name === previousRankName);
                  if (newRankIndex > oldRankIndex) {
-                     showRankUpToast(newRank); // Show toast notification
+                     showRankUpToast(newRank);
                  }
              }
-             previousRankName = newRank.name; // Update for next check
-             // *** END: Rank up check ***
+             previousRankName = newRank.name;
 
              updateDashboardUIOnly();
              updateProfilePage();
              dailyGoalInput.value = state.dailyGoal;
-             
-             if (state.studySession.isActive && state.studySession.startTime !== null) { startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden'); subjectInput.value = state.studySession.subject || ''; topicInput.value = state.studySession.topic || ''; [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true); if (timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000); } else { if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00'; startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false); if (!state.studySession.isActive) { subjectInput.value = ''; topicInput.value = ''; } }
-             
+
+             if (state.studySession.isActive && state.studySession.startTime !== null) {
+                startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
+                subjectInput.value = state.studySession.subject || ''; topicInput.value = state.studySession.topic || '';
+                [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true); // Disable Gemini btn too
+                if (timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000);
+             } else {
+                 if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00';
+                 startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden');
+                 [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false); // Enable Gemini btn
+                 if (!state.studySession.isActive) { subjectInput.value = ''; topicInput.value = ''; }
+             }
+
               if (isInitialLoad || historyDataChanged) {
                   console.log("Rendering charts.");
                   renderWeeklyChart(false);
-                  renderTodayPieChart(false); // *** NEW: Render pie chart ***
+                  renderTodayPieChart(false);
               }
         }
 
@@ -1022,7 +1308,7 @@
         function updateDashboardUIOnly() {
              if (!state) { console.warn("updateDashboardUIOnly: State is null."); return; }
              const totalSecondsToday = getTotalStudiedSecondsForToday(); const goalSeconds = (state.dailyGoal || 7) * 3600; todayTotalDisplay.textContent = formatDuration(totalSecondsToday); todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday)); progressBar.style.width = `${goalSeconds > 0 ? Math.min(100, (totalSecondsToday / goalSeconds) * 100) : 0}%`;
-             const todayStr = getLocalDateString(); const todayHistory = state.studyHistory?.filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || []; historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `<div class="p-3 history-item rounded-lg"><p class="history-item-subject">${e.subject || 'N/A'}: <span class="history-item-topic">${e.topic || 'N/A'}</span></p><p class="text-sm history-item-time">সময়: ${formatDuration(e.duration || 0)}</p></div>`).join('') : '<p class="text-main-secondary">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+             const todayStr = getLocalDateString(); const todayHistory = (state.studyHistory || []).filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || []; historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `<div class="p-3 history-item rounded-lg"><p class="history-item-subject">${e.subject || 'N/A'}: <span class="history-item-topic">${e.topic || 'N/A'}</span></p><p class="text-sm history-item-time">সময়: ${formatDuration(e.duration || 0)}</p></div>`).join('') : '<p class="text-main-secondary">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
              const subjectTimes = {}; todayHistory.forEach(e => { if (e?.subject && typeof e.duration === 'number' && e.duration > 0) { subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration; } });
              if (Object.keys(subjectTimes).length > 0) { subjectSummaryList.innerHTML = Object.entries(subjectTimes).sort(([, a], [, b]) => b - a).map(([sub, dur]) => `<div class="subject-summary-item"><span class="font-medium text-main-primary">${sub}</span><span class="text-main-secondary">${formatDuration(dur)}</span></div>`).join(''); } else { subjectSummaryList.innerHTML = '<p class="text-main-secondary text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>'; }
              const { rank, weeklyPoints, todayPoints } = calculateWeeklyStats(); rankEmojiDisplay.textContent = rank.emoji; rankNameDisplay.textContent = rank.name; todayPointsDisplay.textContent = todayPoints.toFixed(2); weeklyPointsDisplay.textContent = weeklyPoints.toFixed(2);
@@ -1030,125 +1316,37 @@
 
         // --- Chart Rendering Function ---
         function renderWeeklyChart(themeChangeOnly = false) {
-             if (!state || !Array.isArray(state.studyHistory) || !weeklyChartCanvas) return; const ctx = weeklyChartCanvas.getContext('2d'); if (!ctx) return; 
-             // Logic for week boundaries (Saturday to Friday)
-             const today = new Date();
-             const dayLabels = [];
-             const weeklyData = Array(7).fill(0);
-             
-             const { start } = getWeekBoundaries(today); // Get the start of the current week (Saturday)
-
+             if (!state || !Array.isArray(state.studyHistory) || !weeklyChartCanvas) return; const ctx = weeklyChartCanvas.getContext('2d'); if (!ctx) return;
+             const today = new Date(); const dayLabels = []; const weeklyData = Array(7).fill(0); const { start } = getWeekBoundaries(today);
              for (let i = 0; i < 7; i++) {
-                 const date = new Date(start);
-                 date.setDate(start.getDate() + i);
-                 
-                 const dayStr = getLocalDateString(date);
-                 dayLabels.push(date.toLocaleDateString('bn-BD', { weekday: 'short' }));
-                 
-                 const totalSeconds = state.studyHistory
-                     .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === dayStr)
-                     .reduce((sum, e) => sum + e.duration, 0);
-                     
-                 weeklyData[i] = parseFloat((totalSeconds / 3600).toFixed(2));
+                 const date = new Date(start); date.setDate(start.getDate() + i); const dayStr = getLocalDateString(date); dayLabels.push(date.toLocaleDateString('bn-BD', { weekday: 'short' })); const totalSeconds = (state.studyHistory || []).filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === dayStr).reduce((sum, e) => sum + e.duration, 0); weeklyData[i] = parseFloat((totalSeconds / 3600).toFixed(2));
              }
-
              const computedStyle = getComputedStyle(document.documentElement); const gridColor = computedStyle.getPropertyValue('--chart-grid-color').trim(); const tickColor = computedStyle.getPropertyValue('--chart-tick-color').trim(); const barColor = computedStyle.getPropertyValue('--chart-bar-color').trim(); const barHoverColor = computedStyle.getPropertyValue('--chart-bar-hover-color').trim(); const chartData = { labels: dayLabels, datasets: [{ label: 'পড়ার সময় (ঘন্টা)', data: weeklyData, backgroundColor: barColor, borderColor: barColor, borderWidth: 1, hoverBackgroundColor: barHoverColor, hoverBorderColor: barHoverColor, borderRadius: 5, }]}; const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'ঘন্টা', color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } }, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } } }, x: { grid: { display: false }, ticks: { color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label || ''}: ${ctx.parsed.y !== null ? ctx.parsed.y + ' ঘন্টা' : ''}` } } } }; if (weeklyChartInstance) { weeklyChartInstance.destroy(); } weeklyChartInstance = new Chart(ctx, { type: 'bar', data: chartData, options: chartOptions }); console.log("Weekly chart rendered.");
         }
 
-        // *** NEW: Pie Chart Rendering Function ***
+        // --- Pie Chart Rendering Function ---
         function renderTodayPieChart(themeChangeOnly = false) {
             if (!state || !Array.isArray(state.studyHistory)) return;
             const pieChartCanvas = document.getElementById('todayPieChartCanvas');
             const pieChartLegend = document.getElementById('pie-chart-legend');
             if (!pieChartCanvas || !pieChartLegend) return;
-
             const todayStr = getLocalDateString();
-            const todayHistory = state.studyHistory.filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || [];
+            const todayHistory = (state.studyHistory || []).filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || [];
             const subjectTimes = {};
-            todayHistory.forEach(e => {
-                if (e?.subject && typeof e.duration === 'number' && e.duration > 0) {
-                    subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration;
-                }
-            });
-
-            if (todayPieChartInstance) {
-                todayPieChartInstance.destroy();
-                todayPieChartInstance = null;
-            }
-
+            todayHistory.forEach(e => { if (e?.subject && typeof e.duration === 'number' && e.duration > 0) { subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration; } });
+            if (todayPieChartInstance) { todayPieChartInstance.destroy(); todayPieChartInstance = null; }
             const labels = Object.keys(subjectTimes);
-            const dataInHours = Object.values(subjectTimes).map(sec => parseFloat((sec / 3600).toFixed(2))); // Convert to hours
-
-            if (labels.length === 0) {
-                pieChartCanvas.classList.add('hidden');
-                pieChartLegend.innerHTML = '<p>আজ কোনো বিষয় পড়া হয়নি।</p>';
-                return;
-            }
-
-            pieChartCanvas.classList.remove('hidden');
-            pieChartLegend.innerHTML = ''; // Clear legend text, chart.js will build it
-
-            // Define colors
-            const pieColors = [
-                '#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6',
-                '#ec4899', '#6366f1', '#06b6d4', '#d946ef', '#14b8a6'
-            ];
-            
-            // Get theme-specific colors
-            const computedStyle = getComputedStyle(document.documentElement);
-            const tickColor = computedStyle.getPropertyValue('--chart-tick-color').trim();
-
-            const chartData = {
-                labels: labels,
-                datasets: [{
-                    label: 'পড়ার সময় (ঘন্টা)',
-                    data: dataInHours,
-                    backgroundColor: pieColors.slice(0, labels.length).map(color => color + 'b3'), // Add alpha
-                    borderColor: pieColors.slice(0, labels.length),
-                    hoverOffset: 8
-                }]
-            };
-
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: tickColor,
-                            font: {
-                                family: "'Hind Siliguri', sans-serif"
-                            },
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        titleFont: { family: "'Hind Siliguri', sans-serif" },
-                        bodyFont: { family: "'Hind Siliguri', sans-serif" },
-                        callbacks: {
-                            label: (ctx) => {
-                                const label = ctx.label || '';
-                                const value = ctx.parsed || 0;
-                                const total = ctx.dataset.data.reduce((acc, val) => acc + val, 0);
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return ` ${label}: ${value} ঘন্টা (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            };
-
-            todayPieChartInstance = new Chart(pieChartCanvas.getContext('2d'), {
-                type: 'pie', // 'pie' or 'doughnut'
-                data: chartData,
-                options: chartOptions
-            });
-            console.log("Today's pie chart rendered.");
+            const dataInHours = Object.values(subjectTimes).map(sec => parseFloat((sec / 3600).toFixed(2)));
+            if (labels.length === 0) { pieChartCanvas.classList.add('hidden'); pieChartLegend.innerHTML = '<p>আজ কোনো বিষয় পড়া হয়নি।</p>'; return; }
+            pieChartCanvas.classList.remove('hidden'); pieChartLegend.innerHTML = '';
+            const pieColors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#06b6d4', '#d946ef', '#14b8a6'];
+            const computedStyle = getComputedStyle(document.documentElement); const tickColor = computedStyle.getPropertyValue('--chart-tick-color').trim();
+            const chartData = { labels: labels, datasets: [{ label: 'পড়ার সময় (ঘন্টা)', data: dataInHours, backgroundColor: pieColors.slice(0, labels.length).map(color => color + 'b3'), borderColor: pieColors.slice(0, labels.length), hoverOffset: 8 }]};
+            const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tickColor, font: { family: "'Hind Siliguri', sans-serif" }, padding: 15 } }, tooltip: { titleFont: { family: "'Hind Siliguri', sans-serif" }, bodyFont: { family: "'Hind Siliguri', sans-serif" }, callbacks: { label: (ctx) => { const label = ctx.label || ''; const value = ctx.parsed || 0; const total = ctx.dataset.data.reduce((acc, val) => acc + val, 0); const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0; return ` ${label}: ${value} ঘন্টা (${percentage}%)`; } } } } };
+            todayPieChartInstance = new Chart(pieChartCanvas.getContext('2d'), { type: 'pie', data: chartData, options: chartOptions }); console.log("Today's pie chart rendered.");
         }
 
-
-        // --- UPDATED: Profile Page UI Function ---
+        // --- Profile Page UI Function ---
         function updateProfilePage() {
              if (!state || !currentUser) { console.warn("updateProfilePage: State/User null."); return; }
              const p = state.profile || {};
@@ -1158,32 +1356,123 @@
              profileMotivationInput.value = p.motivation || '';
              profileImgDisplay.src = p.profileImg || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF';
              imgUploadSpinner.classList.add('hidden');
-
-             // Update Lifetime Points
-             profilePointsDisplay.textContent = (state.points || 0).toFixed(2); // Display lifetime hours with decimals
-
-             // Update Weekly Rank on Profile Page
+             profilePointsDisplay.textContent = (state.points || 0).toFixed(2);
              const { rank, weeklyPoints } = calculateWeeklyStats();
              profileRankEmojiDisplay.textContent = rank.emoji;
              profileRankNameDisplay.textContent = rank.name;
              profileWeeklyPointsDisplay.textContent = weeklyPoints.toFixed(2);
-
-             // *** NEW: Update Lifetime Badges ***
              if (Array.isArray(state.badges) && state.badges.length > 0) {
-                 profileBadgesContainer.innerHTML = state.badges.map(badgeKey => {
-                     const badge = badges[badgeKey];
-                     if (!badge) return '';
-                     return `<div class="badge" title="${badge.name}">
-                                 <span>${badge.emoji}</span>
-                                 <span>${badge.name}</span>
-                             </div>`;
-                 }).join('');
-             } else {
-                 profileBadgesContainer.innerHTML = '<p class="text-main-secondary text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>';
-             }
+                 profileBadgesContainer.innerHTML = state.badges.map(badgeKey => { const badge = badges[badgeKey]; if (!badge) return ''; return `<div class="badge" title="${badge.name}"><span>${badge.emoji}</span><span>${badge.name}</span></div>`; }).join('');
+             } else { profileBadgesContainer.innerHTML = '<p class="text-main-secondary text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>'; }
         }
 
-        const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
+        // --- *** MODIFIED: Update Quote Function (using Gemini API) *** ---
+        async function updateQuote() {
+            const fallbackQuote = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+
+            const setQuote = (text, author) => {
+                // Remove surrounding quotes if present
+                text = text.replace(/^["']|["']$/g, '');
+                quoteTextEl.textContent = `"${text}"`;
+                quoteAuthorEl.textContent = author ? `- ${author}` : '';
+            };
+
+            // Set a fallback immediately in case API fails or is slow
+             setQuote(fallbackQuote.text, fallbackQuote.author);
+
+            const prompt = "Generate a short, inspiring motivational quote in Bengali about studying, perseverance, or achieving academic goals. Format it strictly as: \"Quote text\" - Author Name. If the author is unknown or it's a general proverb, omit the ' - Author Name' part entirely. Keep the quote itself concise (around 1-2 sentences).";
+
+            try {
+                const generatedText = await callGeminiAPI(prompt);
+                console.log("Generated Quote Raw:", generatedText);
+
+                // Try to parse the generated text
+                const parts = generatedText.split(' - ');
+                let text = generatedText;
+                let author = '';
+
+                if (parts.length > 1) {
+                    // Assume the last part is the author
+                    const potentialAuthor = parts[parts.length - 1].trim();
+                    // Basic check if it looks like an author name (e.g., not ending with punctuation typical of quotes)
+                    if (!/[.”?!]$/.test(potentialAuthor)) {
+                        author = potentialAuthor;
+                        text = parts.slice(0, -1).join(' - ').trim();
+                    } else {
+                         // Likely no author provided, treat whole string as quote
+                         text = generatedText.trim();
+                         author = ''; // Explicitly clear author
+                    }
+                } else {
+                    // No ' - ' found, assume whole string is the quote
+                    text = generatedText.trim();
+                    author = '';
+                }
+
+                 // Final cleanup and set
+                 setQuote(text, author);
+
+
+            } catch (error) {
+                console.error("Error fetching quote from Gemini:", error);
+                // Fallback is already set, so just log the error
+            }
+        }
+        // --- *** END Update Quote Function *** ---
+
+        // --- *** NEW: Gemini Topic Details Function *** ---
+        async function getTopicDetails() {
+            const subject = subjectInput.value.trim();
+            const topic = topicInput.value.trim();
+            if (!subject || !topic) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'অপেক্ষা করুন!',
+                    text: 'অনুগ্রহ করে প্রথমে বিষয় এবং টপিক লিখুন!',
+                });
+                return;
+            }
+
+            // Show loading popup
+            Swal.fire({
+                title: 'তথ্য আনা হচ্ছে...',
+                text: 'Gemini আপনার টপিকটি বিশ্লেষণ করছে।',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const prompt = `Act as a helpful study assistant. Break down the study topic '${topic}' under the subject '${subject}' into key sub-topics, concepts, or important points suitable for a student in Bangladesh. Provide the response as a bulleted list in Bengali (Bangla script). Keep the points concise and actionable for study planning. Example: For subject 'Physics' and topic 'Newton's Laws', provide points like '* প্রথম সূত্র (জড়তা)', '* দ্বিতীয় সূত্র (F=ma)', '* তৃতীয় সূত্র (ক্রিয়া-প্রতিক্রিয়া)', etc.`;
+
+            try {
+                const resultText = await callGeminiAPI(prompt);
+                // Format the result for better display in SweetAlert
+                const formattedHtml = resultText
+                    .split('\n') // Split into lines
+                    .map(line => line.trim()) // Trim whitespace
+                    .filter(line => line.length > 0) // Remove empty lines
+                    .map(line => `<li>${line.replace(/^\* /, '')}</li>`) // Convert bullet points to HTML list items
+                    .join('');
+
+                Swal.fire({
+                    title: `"${topic}" (${subject}) সম্পর্কে বিস্তারিত`,
+                    html: `<ul class="list-disc list-inside text-left">${formattedHtml}</ul>`, // Display as HTML list
+                    icon: 'info',
+                    confirmButtonText: 'ঠিক আছে'
+                });
+            } catch (error) {
+                console.error("Error fetching topic details from Gemini:", error);
+                Swal.fire({
+                     icon: 'error',
+                     title: 'ত্রুটি!',
+                     text: `টপিকের বিস্তারিত আনা সম্ভব হয়নি। ${error.message}`, // Show specific error message if available
+                     confirmButtonText: 'ঠিক আছে'
+                 });
+            }
+        }
+        // --- *** END Gemini Topic Details Function *** ---
+
 
         // --- EVENT LISTENERS ---
         loginButton.addEventListener('click', handleLogin);
@@ -1191,10 +1480,12 @@
         forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); handlePasswordReset(); });
         [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
         [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
+        [navAbout, mobileNavAbout].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('about'); }));
         [navItems.logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
 
         startBtn.addEventListener('click', startTimer);
         stopBtn.addEventListener('click', () => stopTimer(true));
+        getTopicDetailsBtn.addEventListener('click', getTopicDetails); // *** NEW: Listener for Gemini Button ***
 
         dailyGoalInput.addEventListener('change', async () => {
              if(state && userDocRef) { const newGoal = parseFloat(dailyGoalInput.value) || 7; try { await updateDoc(userDocRef, { dailyGoal: newGoal }); updateDashboardUIOnly(); } catch (e) { console.error("Error updating goal:", e); } }
@@ -1213,3 +1504,4 @@
 
 </body>
 </html>
+
