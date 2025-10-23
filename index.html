@@ -269,13 +269,13 @@
              margin-right: 1em !important;
          }
          .swal2-html-container br {
-            content: "";
-            margin: 0.5em 0;
-            display: block;
+             content: "";
+             margin: 0.5em 0;
+             display: block;
          }
          .dark .swal2-popup {
-            background-color: #1f2937 !important; /* bg-gray-800 */
-            color: #f9fafb !important; /* text-gray-50 */
+             background-color: #1f2937 !important; /* bg-gray-800 */
+             color: #f9fafb !important; /* text-gray-50 */
          }
          .dark .swal2-title {
              color: #f9fafb !important;
@@ -284,10 +284,10 @@
              color: #d1d5db !important; /* text-gray-300 */
          }
          .dark .swal2-confirm {
-            background-color: #60a5fa !important; /* bg-blue-400 */
+             background-color: #60a5fa !important; /* bg-blue-400 */
          }
          .dark .swal2-cancel {
-            background-color: #9ca3af !important; /* bg-gray-400 */
+             background-color: #9ca3af !important; /* bg-gray-400 */
          }
 
          /* About Me Background Element Style */
@@ -316,7 +316,7 @@
     <div class="main-container">
         <!-- Main Content -->
         <div class="flex flex-1">
-            <!-- Sidebar Navigation (Initially Hidden) -->
+            <!-- Sidebar Navigation (Initially Hidden on small screens, shown on medium+) -->
             <aside class="w-64 shadow-lg p-4 flex-shrink-0 hidden md:flex flex-col">
                 <div class="text-2xl font-bold text-blue-600 mb-8 text-center">স্টাডি ট্র্যাকার 📖⌚</div>
                 <nav id="sidebar-nav" class="flex flex-col space-y-2 flex-grow">
@@ -352,7 +352,7 @@
                              <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg mb-4">প্রবেশ করুন / অ্যাকাউন্ট তৈরি করুন</button>
                              <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">পাসওয়ার্ড ভুলে গেছেন?</a>
                          </div>
-                    </div>
+                     </div>
                 </div>
 
                 <!-- Dashboard View (Initially Hidden) -->
@@ -986,8 +986,8 @@
 
         async function updateUIAfterLogin() { // Added async for await updateQuote
              console.log("Updating UI for logged-in state.");
-             navItems.sidebar.classList.remove('hidden');
-             navItems.sidebar.classList.add('md:flex');
+             // navItems.sidebar.classList.remove('hidden'); // *** REMOVED THIS LINE ***
+             navItems.sidebar.classList.add('md:flex'); // This ensures it's only flex on medium screens and up
              navItems.mobile.classList.add('flex');
              navItems.mobile.classList.remove('hidden');
              navItems.logoutBtn.classList.remove('hidden');
@@ -1002,8 +1002,8 @@
              currentUser = null; state = null; userDocRef = null; initialLoadComplete = false;
              previousRankName = null;
 
-             navItems.sidebar.classList.add('hidden');
-             navItems.sidebar.classList.remove('md:flex');
+             navItems.sidebar.classList.add('hidden'); // Ensure it's hidden
+             navItems.sidebar.classList.remove('md:flex'); // Remove the medium screen display class
              navItems.mobile.classList.remove('flex');
              navItems.mobile.classList.add('hidden');
              navItems.logoutBtn.classList.add('hidden');
@@ -1029,8 +1029,8 @@
              else if (activeView === 'about') navAbout.classList.add('active');
 
              [mobileNavDashboard, mobileNavProfile, mobileNavAbout].forEach(el => {
-                el.classList.remove('text-blue-600', 'dark:text-blue-400');
-                el.classList.add('text-gray-500', 'dark:text-gray-400');
+                 el.classList.remove('text-blue-600', 'dark:text-blue-400');
+                 el.classList.add('text-gray-500', 'dark:text-gray-400');
              });
              let activeMobileNav = null;
              if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard;
@@ -1038,8 +1038,8 @@
              else if (activeView === 'about') activeMobileNav = mobileNavAbout;
 
              if(activeMobileNav) {
-                activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400');
-                activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400');
+                 activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400');
+                 activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400');
              }
         }
 
@@ -1065,7 +1065,9 @@
                      if (views.login.offsetParent === null) {
                          showView('login');
                      }
+                      // This ensures sidebar is hidden on initial load if not logged in
                       navItems.sidebar.classList.add('hidden');
+                      navItems.sidebar.classList.remove('md:flex');
                       navItems.mobile.classList.add('hidden');
                  }
              }
@@ -1104,7 +1106,7 @@
 
         // Google login
         async function handleGoogleLogin() {
-              try { await signInWithPopup(auth, provider); } catch (error) { console.error("Google login error:", error); let msg = error.message; if (error.code === 'auth/popup-closed-by-user') msg = 'Google সাইন-ইন পপআপ বন্ধ করা হয়েছে।'; else if (error.code === 'auth/cancelled-popup-request') msg = 'একাধিক সাইন-ইন পপআপ খোলার চেষ্টা করা হয়েছে।'; Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: msg }); }
+             try { await signInWithPopup(auth, provider); } catch (error) { console.error("Google login error:", error); let msg = error.message; if (error.code === 'auth/popup-closed-by-user') msg = 'Google সাইন-ইন পপআপ বন্ধ করা হয়েছে।'; else if (error.code === 'auth/cancelled-popup-request') msg = 'একাধিক সাইন-ইন পপআপ খোলার চেষ্টা করা হয়েছে।'; Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: msg }); }
         }
 
         // Password Reset
@@ -1250,13 +1252,32 @@
         };
         function getWeekBoundaries(date = new Date()) {
              const currentDay = date.getDay();
-             const daysToSaturday = (currentDay < 6) ? (currentDay + 1) : 0;
+             // Adjust calculation: Saturday is 6, Sunday is 0. If today is Saturday (6), daysToSaturday should be 0. If Sunday (0), it should be 1.
+             // daysToSaturday should calculate days *since* last Saturday (inclusive) or days *until* next Friday (inclusive)? Let's assume week starts Saturday, ends Friday.
+             // Day: S M T W T F S
+             // Num: 0 1 2 3 4 5 6
+             // If today is Sunday(0), Saturday was 1 day ago.
+             // If today is Monday(1), Saturday was 2 days ago.
+             // If today is Friday(5), Saturday was 6 days ago.
+             // If today is Saturday(6), Saturday was 0 days ago.
+             const daysSinceSaturday = currentDay === 6 ? 0 : currentDay + 1; // Correction needed
+
              const startDate = new Date(date);
-             startDate.setDate(date.getDate() - daysToSaturday);
+             // startDate.setDate(date.getDate() - daysSinceSaturday); // This logic might be slightly off depending on start day
+             // Let's use a simpler approach: find the *previous* Saturday or *current* Saturday
+             const diff = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1) - 1; // Adjust to find *last* Saturday? No, let's target Saturday as day 0.
+             // Let Sunday = 0, Monday = 1, ..., Saturday = 6
+             // Days to subtract to get to the *previous* Saturday:
+             const daysToSubtract = (currentDay + 1) % 7; // Sunday(0)->1, Mon(1)->2, ..., Sat(6)->0
+             startDate.setDate(date.getDate() - daysToSubtract);
+
+
              startDate.setHours(0, 0, 0, 0);
+
              const endDate = new Date(startDate);
-             endDate.setDate(startDate.getDate() + 6);
+             endDate.setDate(startDate.getDate() + 6); // Saturday + 6 days = Friday
              endDate.setHours(23, 59, 59, 999);
+             // console.log("Week Boundaries:", startDate.toDateString(), "-", endDate.toDateString()); // For debugging
              return { start: startDate, end: endDate };
         }
         function calculateWeeklyStats() {
@@ -1286,15 +1307,15 @@
              dailyGoalInput.value = state.dailyGoal;
 
              if (state.studySession.isActive && state.studySession.startTime !== null) {
-                startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
-                subjectInput.value = state.studySession.subject || ''; topicInput.value = state.studySession.topic || '';
-                [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true); // Disable Gemini btn too
-                if (timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000);
+                 startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
+                 subjectInput.value = state.studySession.subject || ''; topicInput.value = state.studySession.topic || '';
+                 [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true); // Disable Gemini btn too
+                 if (timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000);
              } else {
-                 if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00';
-                 startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden');
-                 [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false); // Enable Gemini btn
-                 if (!state.studySession.isActive) { subjectInput.value = ''; topicInput.value = ''; }
+                  if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00';
+                  startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden');
+                  [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false); // Enable Gemini btn
+                  if (!state.studySession.isActive) { subjectInput.value = ''; topicInput.value = ''; }
              }
 
               if (isInitialLoad || historyDataChanged) {
@@ -1443,7 +1464,7 @@
                 }
             });
 
-            const prompt = `Act as a helpful study assistant. Break down the study topic '${topic}' under the subject '${subject}' into key sub-topics, concepts, or important points suitable for a student in Bangladesh. Provide the response as a bulleted list in Bengali (Bangla script). Keep the points concise and actionable for study planning. Example: For subject 'Physics' and topic 'Newton's Laws', provide points like '* প্রথম সূত্র (জড়তা)', '* দ্বিতীয় সূত্র (F=ma)', '* তৃতীয় সূত্র (ক্রিয়া-প্রতিক্রিয়া)', etc.`;
+            const prompt = `Act as a helpful study assistant. Break down the study topic '${topic}' under the subject '${subject}' into key sub-topics, concepts, or important points suitable for a student in Bangladesh. Provide the response as a bulleted list in Bengali (Bangla script). Keep the points concise and actionable for study planning. Example: For subject 'Physics' and topic 'Newton's Laws', provide points like '* প্রথম সূত্র (জড়তা)', '* দ্বিতীয় সূত্র (F=ma)', '* তৃতীয় সূত্র (ক্রিয়া-প্রতিক্রিয়া)', etc.`;
 
             try {
                 const resultText = await callGeminiAPI(prompt);
@@ -1466,7 +1487,7 @@
                 Swal.fire({
                      icon: 'error',
                      title: 'ত্রুটি!',
-                     text: `টপিকের বিস্তারিত আনা সম্ভব হয়নি। ${error.message}`, // Show specific error message if available
+                     text: `টপিকের বিস্তারিত আনা সম্ভব হয়নি। ${error.message}`, // Show specific error message if available
                      confirmButtonText: 'ঠিক আছে'
                  });
             }
