@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- SweetAlert2 script -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Basic Light Theme Variables */
@@ -27,6 +29,13 @@
             --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
             --badge-bg: #e0e7ff; /* Indigo 100 */
             --badge-text: #3730a3; /* Indigo 800 */
+            --history-item-bg: rgba(249, 250, 251, 0.8); /* bg-gray-50/80 */
+            --history-item-border: #e5e7eb; /* border-gray-200 */
+            /* Chart colors */
+            --chart-grid-color: rgba(0, 0, 0, 0.1);
+            --chart-tick-color: #6b7280; /* Gray 500 */
+            --chart-bar-color: #3b82f6; /* Blue 500 */
+            --chart-bar-hover-color: #2563eb; /* Blue 600 */
         }
 
         /* Dark Theme Variables */
@@ -45,6 +54,13 @@
             --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3);
             --badge-bg: #312e81; /* Indigo 900 */
             --badge-text: #c7d2fe; /* Indigo 200 */
+            --history-item-bg: rgba(55, 65, 81, 0.8); /* dark:bg-gray-600/80 */
+            --history-item-border: #4b5563; /* dark:border-gray-500 */
+             /* Chart colors */
+            --chart-grid-color: rgba(255, 255, 255, 0.1);
+            --chart-tick-color: #9ca3af; /* Gray 400 */
+            --chart-bar-color: #60a5fa; /* Blue 400 */
+            --chart-bar-hover-color: #3b82f6; /* Blue 500 */
         }
 
         body {
@@ -100,6 +116,11 @@
         input::placeholder, textarea::placeholder {
              color: var(--text-secondary);
         }
+        /* Specific Text Colors */
+        .text-main-primary { color: var(--text-primary); }
+        .text-main-secondary { color: var(--text-secondary); }
+        .text-accent { color: var(--text-accent); }
+
         .text-white\/90 { color: rgba(249, 250, 251, 0.9); } /* Gray 50 */
         .dark .text-white\/90 { color: rgba(249, 250, 251, 0.9); }
         .text-white\/80 { color: rgba(249, 250, 251, 0.8); }
@@ -110,22 +131,29 @@
         .dark .text-blue-800 { color: #93c5fd; } /* Blue 300 */
         .text-blue-900 { color: #1e3a8a; }
         .dark .text-blue-900 { color: #bfdbfe; } /* Blue 200 */
-        .text-gray-700 { color: #374151; }
-        .dark .text-gray-700 { color: #d1d5db; } /* Gray 300 */
-        .text-gray-800 { color: #1f2937; }
-        .dark .text-gray-800 { color: #f9fafb; } /* Gray 50 */
-        .text-gray-600 { color: #4b5563; }
-        .dark .text-gray-600 { color: #9ca3af; } /* Gray 400 */
-        .text-gray-500 { color: #6b7280; }
-        .dark .text-gray-500 { color: #9ca3af; } /* Gray 400 */
-        .text-blue-600 { color: #2563eb; }
-        .dark .text-blue-600 { color: #60a5fa; } /* Blue 400 */
         .bg-gray-100 { background-color: #f3f4f6; }
         .dark .bg-gray-100 { background-color: #4b5563; } /* Gray 600 */
-        .bg-gray-50\/80 { background-color: rgba(249, 250, 251, 0.8); }
-        .dark .bg-gray-50\/80 { background-color: rgba(55, 65, 81, 0.8); } /* Gray 600 */
-        .border-gray-200 { border-color: #e5e7eb; }
-        .dark .border-gray-200 { border-color: #4b5563; } /* Gray 600 */
+
+        /* History Item specific styles - Using CSS Variables */
+        .history-item {
+            background-color: var(--history-item-bg);
+            border: 1px solid var(--history-item-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .history-item-subject {
+            color: var(--text-primary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .history-item-topic {
+            font-weight: 400;
+             color: var(--text-primary);
+             transition: color 0.3s ease;
+        }
+        .history-item-time {
+            color: var(--text-secondary);
+             transition: color 0.3s ease;
+        }
 
 
         .btn-primary { background-color: var(--text-accent); color: white; transition: background-color 0.3s ease; }
@@ -156,7 +184,6 @@
             color: var(--text-primary);
             border: 1px solid var(--border-color);
             border-radius: 50%;
-            /* padding: 0.5rem; */ /* Reduced padding for emoji */
             width: 2.5rem; /* Fixed width */
             height: 2.5rem; /* Fixed height */
             display: flex;
@@ -166,7 +193,6 @@
             box-shadow: var(--shadow-card);
             font-size: 1.25rem; /* Adjust emoji size */
         }
-        /* #theme-toggle svg { width: 1.25rem; height: 1.25rem; } */ /* Removed SVG style */
 
         /* Subject Summary */
         .subject-summary-item {
@@ -181,27 +207,35 @@
 
          /* Mobile Nav Icons Emoji Size */
          #mobile-nav span.emoji-icon {
-            font-size: 1.5rem; /* Larger emoji size */
-            line-height: 1;
-            margin-bottom: 0.125rem; /* Adjust spacing */
+             font-size: 1.5rem; /* Larger emoji size */
+             line-height: 1;
+             margin-bottom: 0.125rem; /* Adjust spacing */
          }
 
          /* Badge Styles */
          .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            background-color: var(--badge-bg);
-            color: var(--badge-text);
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
+             display: inline-flex;
+             align-items: center;
+             padding: 0.25rem 0.75rem;
+             border-radius: 9999px;
+             font-size: 0.8rem;
+             font-weight: 500;
+             background-color: var(--badge-bg);
+             color: var(--badge-text);
+             /* margin-right: 0.5rem; */ /* Replaced by gap on parent */
+             /* margin-bottom: 0.5rem; */ /* Replaced by gap on parent */
          }
          .badge span:first-child { /* Emoji */
-             margin-right: 0.3rem;
-             font-size: 1rem;
+              margin-right: 0.3rem;
+              font-size: 1rem;
+         }
+         /* Weekly Chart Canvas Height */
+         #weeklyChartCanvas {
+             max-height: 300px; /* Adjust height as needed */
+         }
+         /* Today Pie Chart Canvas Height */
+         #todayPieChartCanvas {
+             max-height: 260px; /* Adjust height as needed, slightly less to fit legend */
          }
     </style>
 </head>
@@ -215,9 +249,9 @@
     <div class="main-container">
         <!-- Main Content -->
         <div class="flex flex-1">
-            <!-- Sidebar Navigation -->
+            <!-- Sidebar Navigation (Initially Hidden) -->
             <aside class="w-64 shadow-lg p-4 flex-shrink-0 hidden md:flex flex-col">
-                <div class="text-2xl font-bold text-blue-600 mb-8 text-center">স্টাডি ট্র্যাকার</div>
+                <div class="text-2xl font-bold text-blue-600 mb-8 text-center">স্টাডি ট্র্যাকার 📖⌚</div>
                 <nav id="sidebar-nav" class="flex flex-col space-y-2 flex-grow">
                     <a href="#" id="nav-dashboard" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">ড্যাশবোর্ড</a>
                     <a href="#" id="nav-profile" class="nav-item py-2 px-4 rounded-lg font-semibold hover:bg-blue-100">প্রোফাইল</a>
@@ -226,34 +260,34 @@
             </aside>
 
             <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8">
-                <!-- Login View -->
+                <!-- Login View (Initially Shown) -->
                 <div id="login-view">
                      <div class="flex items-center justify-center min-h-[80vh]">
                          <div class="text-center card max-w-md mx-auto">
                              <h1 class="text-3xl font-bold mb-2">স্বাগতম!</h1>
-                             <p class="text-gray-600 mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+                             <p class="text-main-secondary mb-8">লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
 
-                             <!-- Notun Google Sign-in Button -->
+                             <!-- Google Sign-in Button -->
                              <button id="google-login-button" class="w-full btn-google font-bold py-3 px-4 rounded-lg mb-4 flex items-center justify-center space-x-2">
-                                <svg class="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.222 0-9.567-3.108-11.283-7.481l-6.571 4.819C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-0.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.999 36.31 44 30.603 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
-                                <span>Google দিয়ে চালিয়ে যান</span>
+                                 <svg class="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.222 0-9.567-3.108-11.283-7.481l-6.571 4.819C9.656 39.663 16.318 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-0.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C39.999 36.31 44 30.603 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
+                                 <span>Google দিয়ে চালিয়ে যান</span>
                              </button>
 
                              <div class="my-4 flex items-center justify-center">
-                                <span class="flex-grow bg-gray-300 h-px"></span>
-                                <span class="mx-4 text-sm text-gray-500">অথবা</span>
-                                <span class="flex-grow bg-gray-300 h-px"></span>
+                                 <span class="flex-grow bg-gray-300 h-px"></span>
+                                 <span class="mx-4 text-sm text-main-secondary">অথবা</span>
+                                 <span class="flex-grow bg-gray-300 h-px"></span>
                              </div>
 
                              <input type="email" id="login-email" placeholder="student.email@example.com" class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="email">
                              <input type="password" id="login-password" placeholder="পাসওয়ার্ড" class="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
                              <button id="login-button" class="w-full btn-primary font-bold py-3 px-4 rounded-lg mb-4">প্রবেশ করুন / অ্যাকাউন্ট তৈরি করুন</button>
-                             <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">পাসওয়ার্ড ভুলে গেছেন?</a>
+                             <a href="#" id="forgot-password-link" class="text-sm text-accent hover:underline">পাসওয়ার্ড ভুলে গেছেন?</a>
                          </div>
-                     </div>
+                    </div>
                 </div>
 
-                <!-- Dashboard View -->
+                <!-- Dashboard View (Initially Hidden) -->
                 <div id="dashboard-view" class="hidden">
                     <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">ড্যাশবোর্ড</h1>
 
@@ -271,16 +305,16 @@
                                 <h2 class="text-2xl font-bold mb-4">আজকের সেশন</h2>
                                 <div class="space-y-4">
                                     <div>
-                                        <label for="daily-goal" class="block text-sm font-medium">আজকের লক্ষ্য (ঘন্টা)</label>
+                                        <label for="daily-goal" class="block text-sm font-medium text-main-secondary">আজকের লক্ষ্য (ঘন্টা)</label>
                                         <input type="number" id="daily-goal" value="7" min="1" max="24" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div>
-                                        <label for="subject" class="block text-sm font-medium">বিষয়</label>
+                                        <label for="subject" class="block text-sm font-medium text-main-secondary">বিষয়</label>
                                         <input type="text" id="subject" placeholder="যেমন: গণিত" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
 
                                     <div>
-                                        <label for="topic" class="block text-sm font-medium">টপিক</label>
+                                        <label for="topic" class="block text-sm font-medium text-main-secondary">টপিক</label>
                                         <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                     </div>
                                     <div class="flex space-x-4">
@@ -293,102 +327,145 @@
                             <!-- Right: Summary -->
                             <div class="text-center bg-blue-50/70 p-6 rounded-lg">
                                  <p class="text-lg font-semibold text-blue-800">টাইমার</p>
-                                <div id="timer" class="text-6xl font-bold text-blue-600 my-4">00:00:00</div>
+                                <div id="timer" class="text-6xl font-bold text-accent my-4">00:00:00</div>
                                 <div class="space-y-4">
                                     <div>
-                                        <p class="text-md text-gray-600">আজ পড়েছেন</p>
-                                        <p id="today-total" class="text-2xl font-bold">0 ঘন্টা 0 মিনিট</p>
+                                        <p class="text-md text-main-secondary">আজ পড়েছেন</p>
+                                        <p id="today-total" class="text-2xl font-bold text-main-primary">0 ঘন্টা 0 মিনিট</p>
                                     </div>
                                     <div>
-                                        <p class="text-md text-gray-600">লক্ষ্য বাকি</p>
-                                        <p id="today-remaining" class="text-2xl font-bold">7 ঘন্টা 0 মিনিট</p>
+                                        <p class="text-md text-main-secondary">লক্ষ্য বাকি</p>
+                                        <p id="today-remaining" class="text-2xl font-bold text-main-primary">7 ঘন্টা 0 মিনিট</p>
                                     </div>
                                     <div class="w-full progress-bar-container mt-4">
                                         <div id="progress-bar" class="progress-bar h-full" style="width: 0%;"></div>
                                     </div>
-                                    <!-- Notun Subject Summary Section -->
+                                    <!-- Subject Summary Section -->
                                     <div id="subject-summary-today" class="mt-6 text-left">
-                                        <h4 class="text-md font-semibold mb-2 text-center border-b pb-1">আজকের বিষয়ভিত্তিক সময়</h4>
+                                        <h4 class="text-md font-semibold mb-2 text-center border-b pb-1 text-main-secondary">আজকের বিষয়ভিত্তিক সময়</h4>
                                         <div id="subject-summary-list" class="text-sm">
-                                             <p class="text-gray-500 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>
+                                             <p class="text-main-secondary text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>
                                         </div>
                                     </div>
+                                    <!-- Rank Display Box -->
+                                    <div class="mt-6 text-center border-t pt-4 border-[var(--input-border)]">
+                                        <h4 class="text-md font-semibold mb-2 text-main-secondary">সাপ্তাহিক র‍্যাঙ্ক</h4>
+                                        <div id="rank-display" class="text-4xl mb-2">
+                                            <span id="rank-emoji">🥉</span>
+                                            <span id="rank-name" class="text-2xl align-middle font-semibold text-main-primary">Bronze</span>
+                                        </div>
+                                        <div class="text-sm space-y-1">
+                                            <p><span class="font-medium text-main-secondary">আজকের পয়েন্ট:</span> <span id="today-points" class="font-bold text-main-primary">0.00</span></p>
+                                            <p><span class="font-medium text-main-secondary">এই সপ্তাহের পয়েন্ট:</span> <span id="weekly-points" class="font-bold text-main-primary">0.00</span></p>
+                                        </div>
+                                    </div>
+                                    <!-- END: Rank Display Box -->
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Weekly Chart and History -->
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                        <div class="lg:col-span-3 card">
-                             <h2 class="text-2xl font-bold mb-4">সাপ্তাহিক রিপোর্ট</h2>
-                            <canvas id="weeklyChart"></canvas>
-                        </div>
-                        <div class="lg:col-span-2 card">
-                             <h2 class="text-2xl font-bold mb-4">আজকের সম্পন্ন টপিক</h2>
+                    <!-- Weekly Summary Chart -->
+                     <div class="card mb-8">
+                         <h2 class="text-2xl font-bold mb-4">সাপ্তাহিক সারাংশ (ঘন্টা)</h2>
+                         <div class="relative">
+                             <canvas id="weeklyChartCanvas"></canvas>
+                         </div>
+                     </div>
+
+                    <!-- History & Pie Chart Section -->
+                    <!-- *** MODIFIED: Changed to md:grid-cols-2 *** -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- History Log -->
+                        <!-- *** MODIFIED: Removed lg:col-span-5 *** -->
+                        <div class="card">
+                            <h2 class="text-2xl font-bold mb-4">আজকের সম্পন্ন টপিক</h2>
                             <div id="history-log" class="space-y-3 max-h-80 overflow-y-auto">
-                                <p class="text-gray-500">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
+                                <p class="text-main-secondary">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>
                             </div>
                         </div>
+
+                        <!-- *** NEW: Today's Subject Pie Chart *** -->
+                        <div class="card">
+                            <h2 class="text-2xl font-bold mb-4">আজকের বিষয়ভিত্তিক সারাংশ</h2>
+                            <div class="relative" style="max-height: 300px;"> <!-- Container for canvas -->
+                                <canvas id="todayPieChartCanvas"></canvas>
+                            </div>
+                            <!-- Custom legend or fallback text -->
+                            <div id="pie-chart-legend" class="mt-4 text-center text-sm text-main-secondary">
+                                <p>আজ কোনো বিষয় পড়া হয়নি।</p>
+                            </div>
+                        </div>
+                        <!-- *** END: Pie Chart Section *** -->
                     </div>
                 </div>
 
-                <!-- Profile View -->
+                <!-- Profile View (Initially Hidden) -->
                 <div id="profile-view" class="hidden">
                      <h1 class="text-3xl font-bold text-white/90 drop-shadow-lg mb-6">প্রোফাইল</h1>
                     <div class="card max-w-2xl mx-auto">
                         <div class="flex flex-col items-center space-y-4">
                             <img id="profile-img-display" src="https://placehold.co/128x128/E2E8F0/4A5568?text=ছবি" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600">
-                             <!-- Loading Indicator for Image Upload -->
                             <div id="img-upload-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                             <input type="file" id="profile-img-upload" class="hidden" accept="image/*">
-                            <button onclick="document.getElementById('profile-img-upload').click()" class="text-sm text-blue-600 hover:underline">ছবি পরিবর্তন করুন</button>
+                            <button onclick="document.getElementById('profile-img-upload').click()" class="text-sm text-accent hover:underline">ছবি পরিবর্তন করুন</button>
                         </div>
                         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="profile-name" class="block text-sm font-medium">নাম</label>
+                                <label for="profile-name" class="block text-sm font-medium text-main-secondary">নাম</label>
                                 <input type="text" id="profile-name" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div>
-                                <label for="profile-email" class="block text-sm font-medium">ইমেইল</label>
+                                <label for="profile-email" class="block text-sm font-medium text-main-secondary">ইমেইল</label>
                                 <input type="email" id="profile-email" class="mt-1 block w-full border rounded-md shadow-sm bg-gray-100" readonly>
-                            </div>
-
+                             </div>
                             <div>
-                                <label for="profile-mobile" class="block text-sm font-medium">মোবাইল</label>
+                                <label for="profile-mobile" class="block text-sm font-medium text-main-secondary">মোবাইল</label>
                                 <input type="text" id="profile-mobile" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div>
-                                <label for="profile-class" class="block text-sm font-medium">কিসে পড়েন</label>
+                                <label for="profile-class" class="block text-sm font-medium text-main-secondary">একাডেমিক ক্লাস</label>
                                 <input type="text" id="profile-class" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
                              <div class="md:col-span-2">
-                                <label for="profile-institution" class="block text-sm font-medium">শিক্ষা প্রতিষ্ঠান</label>
+                                <label for="profile-institution" class="block text-sm font-medium text-main-secondary">শিক্ষা প্রতিষ্ঠান</label>
                                 <input type="text" id="profile-institution" class="mt-1 block w-full border rounded-md shadow-sm">
                             </div>
-                            <div class="md:col-span-2">
-                                <label for="profile-motivation" class="block text-sm font-medium">আপনার মোটিভেশন</label>
+                             <div class="md:col-span-2">
+                                <label for="profile-motivation" class="block text-sm font-medium text-main-secondary">আপনার মোটিভেশন</label>
                                 <textarea id="profile-motivation" rows="3" class="mt-1 block w-full border rounded-md shadow-sm"></textarea>
                             </div>
                         </div>
 
-                        <!-- Gamification Section -->
+                        <!-- MODIFIED: Achievement Section -->
                         <div class="mt-8 pt-6 border-t border-[var(--input-border)]">
-                            <h3 class="text-lg font-semibold mb-3">অর্জন</h3>
-                            <div class="mb-4">
-                                <span class="font-medium">মোট পয়েন্ট:</span>
-                                <span id="profile-points" class="font-bold text-xl text-[var(--text-accent)]">0</span>
+                            <h3 class="text-lg font-semibold mb-3 text-center">অর্জন</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                                <!-- Weekly Rank -->
+                                <div>
+                                    <h4 class="text-md font-semibold mb-2 text-main-secondary">বর্তমান সাপ্তাহিক র‍্যাঙ্ক</h4>
+                                    <div id="profile-rank-display" class="text-4xl mb-2">
+                                        <span id="profile-rank-emoji">🥉</span>
+                                        <span id="profile-rank-name" class="text-2xl align-middle font-semibold text-main-primary">Bronze</span>
+                                    </div>
+                                    <p class="text-sm"><span class="font-medium text-main-secondary">এই সপ্তাহের পয়েন্ট:</span> <span id="profile-weekly-points" class="font-bold text-main-primary">0.00</span></p>
+                                </div>
+                                <!-- Lifetime Points -->
+                                <div>
+                                    <h4 class="text-md font-semibold mb-2 text-main-secondary">মোট পড়ার সময় (Lifetime)</h4>
+                                    <p><span id="profile-points" class="font-bold text-3xl text-accent">0.00</span> <span class="text-main-secondary">ঘন্টা</span></p>
+                                    <p class="text-sm text-main-secondary">(সর্বমোট পয়েন্ট)</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-medium mb-2">ব্যাজসমূহ:</h4>
-                                <div id="profile-badges" class="flex flex-wrap">
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>
-                                    <!-- Badges will be added here dynamically -->
-                                    <!-- Example: <span class="badge"><span>🏆</span> প্রথম ১ ঘন্টা</span> -->
+                            <!-- *** MODIFIED: Lifetime Badges Section (Uncommented) *** -->
+                            <div class="mt-4">
+                                <h4 class="font-medium mb-2 text-main-secondary text-center">ব্যাজসমূহ (Lifetime):</h4>
+                                <div id="profile-badges" class="flex flex-wrap justify-center gap-2">
+                                    <p class="text-main-secondary text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>
                                 </div>
                             </div>
                         </div>
-                        <!-- End Gamification Section -->
+                        <!-- End Achievement Section -->
 
                         <div class="mt-8 text-right">
                              <button id="save-profile" class="btn-primary font-bold py-2 px-6 rounded-lg">সংরক্ষণ করুন</button>
@@ -403,7 +480,7 @@
             </main>
         </div>
 
-        <!-- Mobile Bottom Navigation with Emojis -->
+        <!-- Mobile Bottom Navigation (Initially Hidden) -->
         <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg shadow-t-lg justify-around p-2 hidden">
             <a href="#" id="mobile-nav-dashboard" class="text-center text-blue-600 dark:text-blue-400 p-2">
                 <span class="emoji-icon mx-auto">📊</span>
@@ -426,7 +503,6 @@
     * FIREBASE SCRIPT START - SOB LOGIC EKHANE     *
     **************************************************
 -->
-<!-- Removed Lucide Script Tag -->
 
 <script type="module">
     // --- FIREBASE SDK IMPORTS ---
@@ -438,7 +514,7 @@
         createUserWithEmailAndPassword,
         signInWithPopup,
         GoogleAuthProvider,
-        sendPasswordResetEmail, // Password Reset er jonno
+        sendPasswordResetEmail,
         signOut
     } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
     import {
@@ -449,9 +525,8 @@
         updateDoc,
         onSnapshot,
         arrayUnion,
-        increment // For updating points easily
+        increment
     } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-    // Firebase Storage er jonno notun import
     import {
         getStorage,
         ref,
@@ -461,12 +536,12 @@
 
 
     // --- !! IMPORTANT !! ---
-    // APNAR FIREBASE CONFIG CODE EKHANE ADD KORA HOYECHE
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyASoBtoZ3tb7_9joLCaL9jFA3uW-QlCvnA",
         authDomain: "study-trucker-dc956.firebaseapp.com",
         projectId: "study-trucker-dc956",
-        storageBucket: "study-trucker-dc956.appspot.com", // *** Default Storage Bucket use korchi ***
+        storageBucket: "study-trucker-dc956.appspot.com",
         messagingSenderId: "457109620815",
         appId: "1:457109620815:web:a71f94e25585cef3d3823a",
         measurementId: "G-T8JNPYCPXB"
@@ -477,33 +552,43 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app); // Storage initialize kora
+    const storage = getStorage(app);
     const provider = new GoogleAuthProvider();
 
-    // --- STATE MANAGEMENT (Firebase driven) --- Moved Up ---
-    let currentUser = null; // Firebase Auth user object
-    let state = null; // User's data from Firestore
-    let userDocRef = null; // Firestore document reference
-    let firestoreUnsubscribe = null; // Function to stop listening to data
-    let initialLoadComplete = false; // *** FIX: Flag for initial load ***
-
+    // --- STATE MANAGEMENT ---
+    let currentUser = null;
+    let state = null;
+    let userDocRef = null;
+    let firestoreUnsubscribe = null;
+    let initialLoadComplete = false;
     let timerInterval = null;
-    let weeklyChartInstance = null;
     let quoteInterval = null;
-    let lastChartDataString = null; // *** FIX: Store last chart data as string ***
-    // Removed Lucide specific variables
-    // --- END STATE MANAGEMENT ---
+    let weeklyChartInstance = null;
+    let todayPieChartInstance = null; // *** NEW: Pie chart instance ***
+    let previousRankName = null; // *** NEW: For rank up toast ***
+    const weeklyChartCanvas = document.getElementById('weeklyChartCanvas');
 
-    // --- BADGE DEFINITIONS ---
+    // --- *** MODIFIED: BADGE DEFINITIONS (Lifetime Hours/Points) *** ---
     const badges = {
-        'first_hour': { name: 'প্রথম ১ ঘন্টা', emoji: '🏆', threshold: 3600, type: 'total_time' }, // 1 hour in seconds
-        'ten_hours': { name: '১০ ঘন্টা সম্পন্ন', emoji: '⏱️', threshold: 36000, type: 'total_time' }, // 10 hours in seconds
-        'fifty_hours': { name: '৫০ ঘন্টা সম্পন্ন', emoji: '⏳', threshold: 180000, type: 'total_time' }, // 50 hours
-        'hundred_points': { name: '১০০ পয়েন্ট অর্জন', emoji: '💯', threshold: 100, type: 'points' },
-        'five_hundred_points': { name: '৫০০ পয়েন্ট অর্জন', emoji: '🔥', threshold: 500, type: 'points' },
-        'thousand_points': { name: '১০০০+ পয়েন্ট', emoji: '⭐', threshold: 1000, type: 'points' },
-        'goal_achiever': { name: 'লক্ষ্য পূরণকারী', emoji: '🎯', type: 'goal_met' }, // Awarded when goal is met
+        'first_hour':   { name: 'প্রথম ১ ঘন্টা', emoji: '🏆', threshold: 1, type: 'points' },
+        'ten_hours':    { name: '১০ ঘন্টা সম্পন্ন', emoji: '⏱️', threshold: 10, type: 'points' },
+        'fifty_hours':  { name: '৫০ ঘন্টা সম্পন্ন', emoji: '⏳', threshold: 50, type: 'points' },
+        'hundred_hours': { name: '১০০ ঘন্টা', emoji: '💯', threshold: 100, type: 'points' }, // Renamed
+        'five_hundred_hours': { name: '৫০০ ঘন্টা', emoji: '🔥', threshold: 500, type: 'points' }, // Renamed
+        'thousand_hours': { name: '১০০০+ ঘন্টা', emoji: '⭐', threshold: 1000, type: 'points' }, // Renamed
+        'goal_achiever': { name: 'লক্ষ্য পূরণকারী', emoji: '🎯', type: 'goal_met' }, // This one is special
     };
+
+
+    // --- RANK DEFINITIONS ---
+    const ranks = [
+        { name: 'Bronze', emoji: '🥉', minHours: 0 },
+        { name: 'Silver', emoji: '🥈', minHours: 20 },
+        { name: 'Gold', emoji: '🥇', minHours: 40 },
+        { name: 'Platinum', emoji: '💠', minHours: 60 },
+        { name: 'Diamond', emoji: '💎', minHours: 80 },
+        { name: 'Heroic', emoji: '🦸', minHours: 100 },
+    ];
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -524,860 +609,578 @@
 
         // --- THEME MANAGEMENT ---
         const themeToggle = document.getElementById('theme-toggle');
-        const themeIconLight = document.getElementById('theme-icon-light'); // Emoji span
-        const themeIconDark = document.getElementById('theme-icon-dark');   // Emoji span
+        const themeIconLight = document.getElementById('theme-icon-light');
+        const themeIconDark = document.getElementById('theme-icon-dark');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
-        function applyTheme(isDark, triggeredByListener = false) { // Add flag
-            console.log("Applying theme. Is dark:", isDark, "Triggered by listener:", triggeredByListener);
-            document.documentElement.classList.toggle('dark', isDark);
-            themeIconLight.classList.toggle('hidden', isDark);
-            themeIconDark.classList.toggle('hidden', !isDark);
-
-            // *** FIX: Only update chart colors if instance exists, triggered by theme toggle (not initial load) ***
-            if (currentUser && weeklyChartInstance && triggeredByListener) {
-                 console.log("Theme changed by toggle, updating chart colors only.");
-                 renderWeeklyChart(true); // Pass true to indicate theme change only
-            } else if (currentUser && !weeklyChartInstance && !triggeredByListener && initialLoadComplete) { // Render only if initial load done
-                 // If called on initial load AFTER user is confirmed, render chart
-                 console.log("Initial theme apply after user confirmed, attempting chart render.");
-                 renderWeeklyChart();
-            } else {
-                 console.log("Skipping chart theme update/render in applyTheme. currentUser:", !!currentUser, "weeklyChartInstance:", !!weeklyChartInstance, "triggeredByListener:", triggeredByListener, "initialLoadComplete:", initialLoadComplete);
-            }
+        function applyTheme(isDark, triggeredByListener = false) {
+             console.log("Applying theme. Is dark:", isDark, "Triggered by listener:", triggeredByListener);
+             document.documentElement.classList.toggle('dark', isDark);
+             themeIconLight.classList.toggle('hidden', isDark);
+             themeIconDark.classList.toggle('hidden', !isDark);
+              if (initialLoadComplete && views.dashboard.offsetParent !== null) {
+                   console.log("Theme changed, rendering charts.");
+                   renderWeeklyChart(true);
+                   renderTodayPieChart(true); // *** NEW: Redraw pie chart on theme change ***
+              }
         }
-
-
-        // Check saved theme or system preference
         const currentTheme = localStorage.getItem('theme');
         const initialDark = currentTheme === 'dark' || (!currentTheme && prefersDark.matches);
-        // *** FIX: Apply theme initially without triggering chart update ***
-        applyTheme(initialDark, false); // Initial call, not triggered by listener
-
-
-        // Theme toggle button listener
+        applyTheme(initialDark, false);
         themeToggle.addEventListener('click', () => {
-            const isDark = !document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            // *** FIX: Indicate theme change was triggered by listener ***
-            applyTheme(isDark, true);
+             const isDark = !document.documentElement.classList.contains('dark');
+             localStorage.setItem('theme', isDark ? 'dark' : 'light');
+             applyTheme(isDark, true);
         });
 
         // --- Default User Data ---
         const createNewUserData = (user) => ({
-            uid: user.uid,
-            email: user.email,
-            profile: {
-                name: user.displayName || '',
-                mobile: user.phoneNumber || '',
-                class: '',
-                institution: '',
-                motivation: '',
-                profileImg: user.photoURL || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
-            },
-            studySession: { isActive: false, startTime: null, subject: '', topic: '' },
-            studyHistory: [],
-            dailyGoal: 7,
-            points: 0, // Added points
-            badges: [] // Added badges array
+             uid: user.uid, email: user.email, profile: { name: user.displayName || '', mobile: user.phoneNumber || '', class: '', institution: '', motivation: '', profileImg: user.photoURL || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF' }, studySession: { isActive: false, startTime: null, subject: '', topic: '' }, studyHistory: [], dailyGoal: 7, points: 0, badges: []
         });
 
         // --- UI ELEMENTS ---
         const views = { login: document.getElementById('login-view'), dashboard: document.getElementById('dashboard-view'), profile: document.getElementById('profile-view') };
-        const navItems = {
-            sidebar: document.getElementById('sidebar-nav'),
-            mobile: document.getElementById('mobile-nav'),
-            logoutBtn: document.getElementById('logout-button'),
-            mobileLogoutBtn: document.getElementById('mobile-logout-button')
-        };
+        const navItems = { sidebar: document.getElementById('sidebar-nav').parentElement, mobile: document.getElementById('mobile-nav'), logoutBtn: document.getElementById('logout-button') }; // Get parent <aside> for sidebar
         const navDashboard = document.getElementById('nav-dashboard'), navProfile = document.getElementById('nav-profile');
-        const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile');
+        const mobileNavDashboard = document.getElementById('mobile-nav-dashboard'), mobileNavProfile = document.getElementById('mobile-nav-profile'), mobileLogoutBtn = document.getElementById('mobile-logout-button');
         const loginEmailInput = document.getElementById('login-email'), loginPasswordInput = document.getElementById('login-password');
         const loginButton = document.getElementById('login-button'), googleLoginButton = document.getElementById('google-login-button');
-        const forgotPasswordLink = document.getElementById('forgot-password-link'); // Forgot password link
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
         const dailyGoalInput = document.getElementById('daily-goal'), subjectInput = document.getElementById('subject'), topicInput = document.getElementById('topic');
         const startBtn = document.getElementById('start-btn'), stopBtn = document.getElementById('stop-btn');
         const timerDisplay = document.getElementById('timer'), todayTotalDisplay = document.getElementById('today-total'), todayRemainingDisplay = document.getElementById('today-remaining');
         const progressBar = document.getElementById('progress-bar'), historyLog = document.getElementById('history-log');
-        const subjectSummaryList = document.getElementById('subject-summary-list'); // Subject summary list container
+        const subjectSummaryList = document.getElementById('subject-summary-list');
+        // Rank display elements
+        const rankEmojiDisplay = document.getElementById('rank-emoji');
+        const rankNameDisplay = document.getElementById('rank-name');
+        const todayPointsDisplay = document.getElementById('today-points');
+        const weeklyPointsDisplay = document.getElementById('weekly-points');
+        // Profile elements
         const profileImgDisplay = document.getElementById('profile-img-display'), profileImgUpload = document.getElementById('profile-img-upload'), imgUploadSpinner = document.getElementById('img-upload-spinner');
         const profileNameInput = document.getElementById('profile-name'), profileEmailInput = document.getElementById('profile-email'), profileMobileInput = document.getElementById('profile-mobile');
         const profileClassInput = document.getElementById('profile-class'), profileInstitutionInput = document.getElementById('profile-institution'), profileMotivationInput = document.getElementById('profile-motivation');
         const saveProfileBtn = document.getElementById('save-profile');
-        const profilePointsDisplay = document.getElementById('profile-points'); // Points display
-        const profileBadgesContainer = document.getElementById('profile-badges'); // Badges container
+        const profilePointsDisplay = document.getElementById('profile-points'); // Lifetime points display
+        // Profile Rank display elements
+        const profileRankEmojiDisplay = document.getElementById('profile-rank-emoji');
+        const profileRankNameDisplay = document.getElementById('profile-rank-name');
+        const profileWeeklyPointsDisplay = document.getElementById('profile-weekly-points');
+        const profileBadgesContainer = document.getElementById('profile-badges'); // *** NEW: Badges container ***
 
         const quotes = [
-            { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" },
-            { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" },
-            { text: "যে ব্যক্তি জ্ঞানের সন্ধানে বের হয়, সে আল্লাহর পথে থাকে যতক্ষণ না সে ফিরে আসে।", author: "তিরমিযী - ২৬৪৭" },
-            { text: "যিনি জ্ঞান অনুসন্ধান করেন, আল্লাহ তার জান্নাতের পথ সহজ করে দেন।", author: "সহীহ মুসলিম - ২৬৯৯" },
-            { text: "...যাদের জ্ঞান দান করা হয়েছে, আল্লাহ তাদেরকে বহু স্তরে উন্নত করবেন।", author: "আল-কুরআন, সূরা মুজাদালা : ১১" },
-            { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" },
-            { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" },
-            { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" },
-            { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" },
-            { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" },
-            { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" },
-            { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" },
-            { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" },
-            { text: "ভবিষ্যৎ তাদেরই যারা তাদের স্বপ্নের সৌন্দর্যে বিশ্বাস করে।", author: "এলেনর রুজভেল্ট" },
-            { text: "সফলতা চূড়ান্ত নয়, ব্যর্থতা মারাত্মক নয়: চালিয়ে যাওয়ার সাহসটাই আসল।", author: "উইনস্টন চার্চিল" },
-            { text: "যতক্ষণ না কাজ শেষ হয়, ততক্ষণ পর্যন্ত তা অসম্ভব বলে মনে হয়।", author: "নেলসন ম্যান্ডেলা" },
-            { text: "চমৎকার কাজ করার একমাত্র উপায় হল আপনি যা করেন তা ভালবাসা।", author: "স্টিভ জবস" },
+             { text: "পড়ুন আপনার পালনকর্তার নামে যিনি সৃষ্টি করেছেন।", author: "আল-কুরআন, সূরা আলাক : ১" }, { text: "এবং বলুন, হে আমার পালনকর্তা, আমার জ্ঞান বৃদ্ধি করুন।", author: "আল-কুরআন, সূরা ত্বা-হা : ১১৪" }, { text: "যে ব্যক্তি জ্ঞানের সন্ধানে বের হয়, সে আল্লাহর পথে থাকে যতক্ষণ না সে ফিরে আসে।", author: "তিরমিযী - ২৬৪৭" }, { text: "যিনি জ্ঞান অনুসন্ধান করেন, আল্লাহ তার জান্নাতের পথ সহজ করে দেন।", author: "সহীহ মুসলিম - ২৬৯৯" }, { text: "...যাদের জ্ঞান দান করা হয়েছে, আল্লাহ তাদেরকে বহু স্তরে উন্নত করবেন।", author: "আল-কুরআন, সূরা মুজাদালা : ১১" }, { text: "সফলতা হলো প্রস্তুতির সাথে সুযোগের মিলন।", author: "ববি আনসার" }, { text: "জ্ঞানই শক্তি।", author: "ফ্রান্সিস বেকন" }, { text: "আপনার ভবিষ্যতের ভবিষ্যদ্বাণী করার সেরা উপায় হল এটি তৈরি করা।", author: "আব্রাহাম লিংকন" }, { text: "শিক্ষা সবচেয়ে শক্তিশালী অস্ত্র যা আপনি বিশ্বকে পরিবর্তন করতে ব্যবহার করতে পারেন।", author: "নেলসন ম্যান্ডেলা" }, { text: "চেষ্টা করার আগে হাল ছেড়ো না।", author: "সংগৃহীত" }, { text: "ব্যর্থতা মানেই সব শেষ নয়, এটি নতুন করে শুরু করার একটি সুযোগ মাত্র।", author: "হেনরি ফোর্ড" }, { text: "সাফল্যের মূলমন্ত্র হল সাধারণ জিনিসগুলোকেও অসাধারণভাবে করা।", author: "জন ডি. রকফেলার" }, { text: "তোমার স্বপ্ন আর তোমার মাঝে দাঁড়িয়ে আছে কেবল একটি জিনিস— সেটি হলো অজুহাত!", author: "জর্ডান বেলফোর্ট" }, { text: "ভবিষ্যৎ তাদেরই যারা তাদের স্বপ্নের সৌন্দর্যে বিশ্বাস করে।", author: "এলেনর রুজভেল্ট" }, { text: "সফলতা চূড়ান্ত নয়, ব্যর্থতা মারাত্মক নয়: চালিয়ে যাওয়ার সাহসটাই আসল।", author: "উইনস্টন চার্চিল" }, { text: "যতক্ষণ না কাজ শেষ হয়, ততক্ষণ পর্যন্ত তা অসম্ভব বলে মনে হয়।", author: "নেলসন ম্যান্ডেলা" }, { text: "চমৎকার কাজ করার একমাত্র উপায় হল আপনি যা করেন তা ভালবাসা।", author: "স্টিভ জবস" },
         ];
         const quoteText = document.getElementById('quote-text'), quoteAuthor = document.getElementById('quote-author');
 
-        // Removed Icon Initialization code
-
-
         // --- DATA PERSISTENCE (Firebase) ---
         function setupFirestoreListener(user) {
-            userDocRef = doc(db, 'users', user.uid);
-            initialLoadComplete = false; // *** FIX: Reset flag on listener setup ***
-
-            if (firestoreUnsubscribe) { // Unsubscribe from previous listener if exists
-                 console.log("Unsubscribing from previous Firestore listener.");
-                 firestoreUnsubscribe();
-                 firestoreUnsubscribe = null;
-            }
-
-            console.log("Setting up Firestore listener for user:", user.uid);
-            firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
-                console.log("Firestore listener triggered.");
-                let needsUIUpdateAndDashboardShow = !initialLoadComplete; // Show dashboard only on first trigger
-
-                if (docSnap.exists()) {
-                    console.log("User data found in Firestore:", docSnap.data());
-                    state = docSnap.data();
-                    // Ensure points and badges exist
-                    state.points = state.points || 0;
-                    state.badges = Array.isArray(state.badges) ? state.badges : [];
-                } else {
-                    console.log("No data found for user, creating new document...");
-                    const newUserData = createNewUserData(user);
-                    needsUIUpdateAndDashboardShow = true; // Also show dashboard after creation
-                    setDoc(userDocRef, newUserData).then(() => {
-                        console.log("New user document created in Firestore.");
-                        state = newUserData; // Set state immediately
-                        loadAndDisplayUserData(); // Update UI
-                        if (needsUIUpdateAndDashboardShow) {
-                            console.log("Showing dashboard after new user creation.");
-                            showView('dashboard');
-                            initialLoadComplete = true; // Mark initial load as complete
-                        }
-                    }).catch(err => {
-                        console.error("Error creating user data in Firestore:", err);
-                        Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা তৈরি করা যায়নি।' });
-                    });
-                    return; // Stop further processing until setDoc completes
-                }
-
-                // If not returned (meaning data exists or setDoc finished previously)
-                loadAndDisplayUserData(); // Update UI with existing or newly set data
-                if (needsUIUpdateAndDashboardShow) {
-                    console.log("Showing dashboard after initial data load.");
-                    showView('dashboard');
-                    initialLoadComplete = true; // Mark initial load as complete
-                }
-
-            }, (error) => {
-                console.error("Error listening to Firestore:", error);
-                Swal.fire({ icon: 'error', title: 'Connection সমস্যা', text: 'ডেটাবেসের সাথে সংযোগ বিচ্ছিন্ন হয়ে গেছে। পৃষ্ঠাটি রিফ্রেশ করুন।' });
-                initialLoadComplete = true; // Mark as complete even on error to prevent loops
-            });
+             userDocRef = doc(db, 'users', user.uid); initialLoadComplete = false;
+             if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
+             firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
+                 const isFirstData = !initialLoadComplete; const previousHistoryLength = state?.studyHistory?.length ?? 0;
+                 if (docSnap.exists()) {
+                     state = docSnap.data();
+                     // Ensure defaults
+                     state.points = typeof state.points === 'number' ? state.points : 0; state.badges = Array.isArray(state.badges) ? state.badges : []; state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : []; state.profile = state.profile || createNewUserData(user).profile; state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' }; state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7;
+                     const historyDataChanged = state.studyHistory.length !== previousHistoryLength;
+                     loadAndDisplayUserData(isFirstData, historyDataChanged);
+                     if (isFirstData) {
+                         const { rank } = calculateWeeklyStats(); // Calculate initial rank
+                         previousRankName = rank.name; // *** NEW: Set the initial rank ***
+                         showView('dashboard');
+                         initialLoadComplete = true;
+                     }
+                 } else {
+                     const newUserData = createNewUserData(user); setDoc(userDocRef, newUserData).then(() => {
+                         state = newUserData;
+                         previousRankName = ranks[0].name; // *** NEW: New user is Bronze ***
+                         loadAndDisplayUserData(true, true);
+                         showView('dashboard');
+                         initialLoadComplete = true;
+                     }).catch(err => { console.error("Error creating user data:", err); Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা তৈরি করা যায়নি।' }); initialLoadComplete = true; });
+                 }
+             }, (error) => { console.error("Error listening to Firestore:", error); Swal.fire({ icon: 'error', title: 'Connection সমস্যা', text: 'ডেটাবেসের সাথে সংযোগ বিচ্ছিন্ন হয়েছে।' }); initialLoadComplete = true; });
         }
 
 
         // --- NAVIGATION & VIEWS ---
         function showView(viewName) {
-            console.log("Showing view:", viewName); // Log view change
-            Object.values(views).forEach(view => view.classList.add('hidden'));
-            if(views[viewName]) views[viewName].classList.remove('hidden');
-            updateNavActiveState(viewName);
-            // No need to render icons here
+             console.log("Showing view:", viewName);
+             const currentView = Object.keys(views).find(key => !views[key].classList.contains('hidden'));
+             if (currentView === viewName && !views[viewName].classList.contains('hidden')) { console.log("Already on view:", viewName); return; }
+             Object.values(views).forEach(view => view.classList.add('hidden'));
+             if(views[viewName]) views[viewName].classList.remove('hidden');
+             updateNavActiveState(viewName);
+              if (viewName === 'dashboard' && initialLoadComplete) {
+                  console.log("Dashboard view shown, rendering charts.");
+                  renderWeeklyChart(false);
+                  renderTodayPieChart(false); // *** NEW: Render pie chart on view show ***
+              }
         }
 
-        // *** REMOVED showView('dashboard') from here ***
-        function updateUIAfterLogin() {
-             console.log("Updating common UI elements for logged-in state.");
-            navItems.sidebar.classList.remove('hidden');
-            navItems.mobile.classList.add('flex');
-            navItems.mobile.classList.remove('hidden');
-            navItems.logoutBtn.classList.remove('hidden');
-            // Dashboard view will be shown by the Firestore listener now
-            updateQuote();
-            if(quoteInterval) clearInterval(quoteInterval);
-            quoteInterval = setInterval(updateQuote, 20000);
-            // No need to render icons here
+        function updateUIAfterLogin() { // Shows navs only after login
+             console.log("Updating UI for logged-in state.");
+             navItems.sidebar.classList.remove('hidden'); // Show sidebar
+             navItems.sidebar.classList.add('md:flex'); // Ensure it uses flex on medium screens+
+             navItems.mobile.classList.add('flex'); // Show mobile nav using flex
+             navItems.mobile.classList.remove('hidden');
+             navItems.logoutBtn.classList.remove('hidden'); // Show logout btn in sidebar
+             updateQuote();
+             if(quoteInterval) clearInterval(quoteInterval);
+             quoteInterval = setInterval(updateQuote, 20000);
         }
 
-        function updateUIAfterLogout() {
+        function updateUIAfterLogout() { // Hides navs on logout
              console.log("Updating UI for logged-out state.");
-            if (firestoreUnsubscribe) {
-                 console.log("Unsubscribing from Firestore listener on logout.");
-                 firestoreUnsubscribe();
-                 firestoreUnsubscribe = null; // Reset variable
-            }
-            currentUser = null;
-            state = null;
-            userDocRef = null;
-            initialLoadComplete = false; // Reset initial load flag
+             if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
+             currentUser = null; state = null; userDocRef = null; initialLoadComplete = false;
+             previousRankName = null; // *** NEW: Reset previous rank ***
 
-            navItems.sidebar.classList.add('hidden');
-            navItems.mobile.classList.remove('flex');
-            navItems.mobile.classList.add('hidden');
-            navItems.logoutBtn.classList.add('hidden');
-            showView('login'); // Show login view explicitly
-            loginEmailInput.value = '';
-            loginPasswordInput.value = '';
-            if(quoteInterval) clearInterval(quoteInterval);
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = null;
-            timerDisplay.textContent = '00:00:00';
-            todayTotalDisplay.textContent = '0 ঘন্টা 0 মিনিট';
-            todayRemainingDisplay.textContent = '0 ঘন্টা 0 মিনিট';
-            progressBar.style.width = '0%';
-            historyLog.innerHTML = '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
-            subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
-            if (weeklyChartInstance) {
-                weeklyChartInstance.destroy();
-                weeklyChartInstance = null;
-                 lastChartDataString = null; // *** FIX: Reset last chart data on logout ***
-            }
+             navItems.sidebar.classList.add('hidden'); // Hide sidebar
+             navItems.sidebar.classList.remove('md:flex');
+             navItems.mobile.classList.remove('flex'); // Hide mobile nav
+             navItems.mobile.classList.add('hidden');
+             navItems.logoutBtn.classList.add('hidden'); // Hide logout btn in sidebar
 
+             showView('login'); // Explicitly show login view
+             loginEmailInput.value = ''; loginPasswordInput.value = '';
+             if(quoteInterval) clearInterval(quoteInterval);
+             if (timerInterval) clearInterval(timerInterval); timerInterval = null;
+             timerDisplay.textContent = '00:00:00'; todayTotalDisplay.textContent = '0 ঘন্টা 0 মিনিট'; todayRemainingDisplay.textContent = '0 ঘন্টা 0 মিনিট';
+             progressBar.style.width = '0%';
+             historyLog.innerHTML = '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+             subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
+             rankEmojiDisplay.textContent = ranks[0].emoji; rankNameDisplay.textContent = ranks[0].name; todayPointsDisplay.textContent = '0.00'; weeklyPointsDisplay.textContent = '0.00';
+              if (weeklyChartInstance) { weeklyChartInstance.destroy(); weeklyChartInstance = null; }
+              if (todayPieChartInstance) { todayPieChartInstance.destroy(); todayPieChartInstance = null; } // *** NEW: Destroy pie chart ***
         }
 
         function updateNavActiveState(activeView) {
-            // Update sidebar
-            [navDashboard, navProfile].forEach(el => el.classList.remove('active'));
-             if (activeView === 'dashboard') navDashboard.classList.add('active');
-             else if (activeView === 'profile') navProfile.classList.add('active');
-
-            // Update mobile nav
-            [mobileNavDashboard, mobileNavProfile].forEach(el => {
-                el.classList.remove('text-blue-600', 'dark:text-blue-400');
-                el.classList.add('text-gray-500', 'dark:text-gray-400');
-            });
-            let activeMobileNav = null;
-            if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard;
-            else if (activeView === 'profile') activeMobileNav = mobileNavProfile;
-
-            if(activeMobileNav) {
-                activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400');
-                activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400');
-            }
+             [navDashboard, navProfile].forEach(el => el.classList.remove('active'));
+              if (activeView === 'dashboard') navDashboard.classList.add('active'); else if (activeView === 'profile') navProfile.classList.add('active');
+             [mobileNavDashboard, mobileNavProfile].forEach(el => { el.classList.remove('text-blue-600', 'dark:text-blue-400'); el.classList.add('text-gray-500', 'dark:text-gray-400'); });
+             let activeMobileNav = null; if (activeView === 'dashboard') activeMobileNav = mobileNavDashboard; else if (activeView === 'profile') activeMobileNav = mobileNavProfile;
+             if(activeMobileNav) { activeMobileNav.classList.remove('text-gray-500', 'dark:text-gray-400'); activeMobileNav.classList.add('text-blue-600', 'dark:text-blue-400'); }
         }
 
         // --- AUTHENTICATION (Firebase) ---
-
-        // Main auth listener
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, (user) => { // Controls UI based on login status
              console.log("Auth state changed. User:", user ? user.uid : "null");
-            if (user) {
-                if (!currentUser || currentUser.uid !== user.uid) { // Only setup listener if user is new or changed
-                    currentUser = user;
-                    updateUIAfterLogin(); // Update common UI elements like nav/logout button
-                    setupFirestoreListener(user); // Setup listener for the logged-in user (will show dashboard on first data)
-                } else {
-                     console.log("Auth state changed, but user is the same. No listener setup needed.");
-                     // Ensure dashboard is visible if already logged in and not on login page
-                     if (initialLoadComplete && views.login.classList.contains('hidden') && views.dashboard.classList.contains('hidden')) {
-                         console.log("User already logged in, ensuring dashboard is visible.");
-                         showView('dashboard');
-                     } else if (!initialLoadComplete) {
-                         console.log("Auth state changed, user same, but initial load not complete yet.");
-                     }
-                }
-            } else {
-                 if (currentUser != null) { // Only trigger logout UI if there WAS a logged-in user before
-                    updateUIAfterLogout();
-                 } else {
-                     console.log("Auth state changed, user is null, already logged out.");
-                     showView('login'); // Ensure login view is shown if initially logged out
+             if (user) { // User is logged in
+                 if (!currentUser || currentUser.uid !== user.uid) {
+                     currentUser = user;
+                     updateUIAfterLogin(); // Show navs and update common UI
+                     setupFirestoreListener(user); // Fetch data (will show dashboard)
+                 } else { // User is the same, maybe page refreshed
+                      if (initialLoadComplete && views.login.offsetParent !== null) { // If login page is somehow visible, redirect
+                           console.log("User already logged in, showing dashboard.");
+                           showView('dashboard');
+                      }
                  }
-            }
+             } else { // User is logged out or not logged in initially
+                 if (currentUser != null) { // Was previously logged in? Trigger full logout UI update
+                     updateUIAfterLogout();
+                 } else { // Initial state, user not logged in
+                     console.log("Initial state: User not logged in.");
+                     if (views.login.offsetParent === null) { // If login view is not visible
+                         showView('login');
+                     }
+                      navItems.sidebar.classList.add('hidden'); // Ensure hidden initially
+                      navItems.mobile.classList.add('hidden');
+                 }
+             }
         });
 
 
-        // Email/Password login ba create
+        // Email/Password login/create
         async function handleLogin() {
-            const email = loginEmailInput.value.trim().toLowerCase();
-            const password = loginPasswordInput.value;
-
-            if (!email || !password || !email.includes('@')) {
-                Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'অনুগ্রহ করে সঠিক ইমেইল এবং পাসওয়ার্ড দিন।' });
-                return;
-            }
-
-            console.log("Attempting sign in for:", email);
-
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                console.log("Login successful for:", email);
-                // onAuthStateChanged will handle UI updates via listener
-            } catch (signInError) {
-                console.error("Sign-in attempt failed. Error Code:", signInError.code, "Message:", signInError.message);
-                // Check for common 'invalid credential' errors first
-                if (signInError.code === 'auth/invalid-credential' || signInError.code === 'auth/invalid-login-credentials' || signInError.code === 'auth/wrong-password' || signInError.code === 'auth/user-not-found') { // Combine checks
-                     console.log("Invalid credentials or user not found, attempting signup...");
-                    try {
-                        console.log("Attempting account creation for:", email);
-                        await createUserWithEmailAndPassword(auth, email, password);
-                        console.log("Signup successful for:", email);
-                        // onAuthStateChanged will handle UI updates via listener
-                    } catch (createError) {
-                         // This error happens if sign-in failed due to WRONG PASSWORD (and user actually exists) OR other signup errors
-                         console.error("Signup attempt also failed. Error Code:", createError.code, "Message:", createError.message);
-                         if (createError.code === 'auth/email-already-in-use') {
-                             // This means the initial sign-in attempt failed because of wrong password OR user not found wasn't the real issue
-                             Swal.fire({ icon: 'error', title: 'ভুল পাসওয়ার্ড', text: 'আপনার দেওয়া পাসওয়ার্ডটি সঠিক নয় অথবা অন্য কোনো সমস্যা হয়েছে।' });
-                         } else if (createError.code === 'auth/weak-password') {
-                             Swal.fire({ icon: 'error', title: 'Account তৈরিতে সমস্যা', text: 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।' });
-                         } else {
-                            Swal.fire({ icon: 'error', title: 'Login/Signup সমস্যা', text: createError.message });
-                         }
-                    }
-                } else {
-                    console.error("Unhandled Login error:", signInError);
-                    Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message });
-                }
-            }
+             const email = loginEmailInput.value.trim().toLowerCase(); const password = loginPasswordInput.value;
+             if (!email || !password || !email.includes('@')) { Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'সঠিক ইমেইল ও পাসওয়ার্ড দিন।' }); return; }
+             try { await signInWithEmailAndPassword(auth, email, password); console.log("Login successful"); }
+             catch (signInError) {
+                 console.error("Sign-in failed:", signInError.code);
+                 if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found'].includes(signInError.code)) {
+                     try { await createUserWithEmailAndPassword(auth, email, password); console.log("Signup successful"); }
+                     catch (createError) {
+                         console.error("Signup failed:", createError.code);
+                         let msg = createError.message; if (createError.code === 'auth/email-already-in-use') { msg = 'ভুল পাসওয়ার্ড অথবা এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে।'; } else if (createError.code === 'auth/weak-password') { msg = 'পাসওয়ার্ডটি অন্তত ৬ অক্ষর দীর্ঘ হতে হবে।'; }
+                         Swal.fire({ icon: 'error', title: 'Login/Signup সমস্যা', text: msg });
+                     }
+                 } else { Swal.fire({ icon: 'error', title: 'Login-এ সমস্যা', text: signInError.message }); }
+             }
         }
 
         // Google login
         async function handleGoogleLogin() {
-            try {
-                await signInWithPopup(auth, provider);
-                // onAuthStateChanged will handle UI updates via listener
-            } catch (error) {
-                 console.error("Google login error:", error);
-                 let errorMsg = error.message;
-                 if (error.code === 'auth/popup-closed-by-user') {
-                     errorMsg = 'Google সাইন-ইন পপআপ বন্ধ করা হয়েছে।';
-                 } else if (error.code === 'auth/cancelled-popup-request') {
-                     errorMsg = 'একাধিক সাইন-ইন পপআপ খোলার চেষ্টা করা হয়েছে।';
-                 }
-                Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: errorMsg });
-            }
+              try { await signInWithPopup(auth, provider); } catch (error) { console.error("Google login error:", error); let msg = error.message; if (error.code === 'auth/popup-closed-by-user') msg = 'Google সাইন-ইন পপআপ বন্ধ করা হয়েছে।'; else if (error.code === 'auth/cancelled-popup-request') msg = 'একাধিক সাইন-ইন পপআপ খোলার চেষ্টা করা হয়েছে।'; Swal.fire({ icon: 'error', title: 'Google Login-এ সমস্যা', text: msg }); }
         }
 
-        // Password Reset Function
+        // Password Reset
         async function handlePasswordReset() {
-             const { value: email } = await Swal.fire({
-                title: 'পাসওয়ার্ড রিসেট',
-                input: 'email',
-                inputLabel: 'আপনার অ্যাকাউন্টের ইমেইল ঠিকানা দিন',
-                inputPlaceholder: 'email@example.com',
-                showCancelButton: true,
-                confirmButtonText: 'রিসেট লিংক পাঠান',
-                cancelButtonText: 'বাতিল'
-            });
-
-            if (email) {
-                console.log("Requesting password reset for:", email);
-                try {
-                    await sendPasswordResetEmail(auth, email);
-                    console.log("Password reset email sent successfully.");
-                    Swal.fire({ icon: 'success', title: 'লিংক পাঠানো হয়েছে!', text: 'আপনার ইমেইল ('+email+') চেক করুন এবং পাসওয়ার্ড রিসেট করার জন্য লিংকে ক্লিক করুন।' });
-                } catch (error) {
-                    console.error("Password reset error:", error);
-                     let errorMsg = 'পাসওয়ার্ড রিসেট লিংক পাঠানো যায়নি।';
-                     if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                         errorMsg += ' ইমেইল ঠিকানাটি সঠিক কিনা বা অ্যাকাউন্ট আছে কিনা দেখুন।';
-                     } else {
-                          errorMsg += ` (${error.code})`;
-                     }
-                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: errorMsg });
-                }
-            }
+             const { value: email } = await Swal.fire({ title: 'পাসওয়ার্ড রিসেট', input: 'email', inputLabel: 'আপনার অ্যাকাউন্টের ইমেইল', inputPlaceholder: 'email@example.com', showCancelButton: true, confirmButtonText: 'লিংক পাঠান', cancelButtonText: 'বাতিল' });
+              if (email) {
+                  try { await sendPasswordResetEmail(auth, email); Swal.fire({ icon: 'success', title: 'লিংক পাঠানো হয়েছে!', text: `আপনার ইমেইল (${email}) চেক করুন।` }); } catch (error) { console.error("Password reset error:", error); let msg = 'লিংক পাঠানো যায়নি।'; if (['auth/user-not-found', 'auth/invalid-email'].includes(error.code)) { msg += ' ইমেইল ঠিকানাটি সঠিক কিনা দেখুন।'; } else { msg += ` (${error.code})`; } Swal.fire({ icon: 'error', title: 'সমস্যা', text: msg }); }
+              }
         }
 
-
+        // Logout
         function handleLogout() {
-            console.log("Logout initiated...");
-            const isActiveSession = state && state.studySession && state.studySession.isActive;
-            if (isActiveSession) {
-                 console.log("Active session detected, attempting to save before logout...");
-                 stopTimer(false).then(() => { // stopTimer returns a promise now
-                     console.log("Session handling complete, proceeding with sign out.");
-                     signOut(auth).catch(err => console.error("Sign out error:", err));
-                 }).catch(err => {
-                      console.error("Error stopping/saving timer before logout:", err);
-                      // Still try to sign out even if stopTimer fails
-                      signOut(auth).catch(err => console.error("Sign out error after stopTimer failure:", err));
-                 });
-            } else {
-                 console.log("No active session, signing out directly.");
-                 signOut(auth).catch(err => console.error("Sign out error:", err));
-            }
+             console.log("Logout initiated..."); const isActiveSession = state?.studySession?.isActive;
+             if (isActiveSession) { stopTimer(false).finally(() => { signOut(auth).catch(err => console.error("Sign out error:", err)); }); }
+             else { signOut(auth).catch(err => console.error("Sign out error:", err)); }
         }
 
-
-        // --- CORE LOGIC (Firebase backed) ---
+        // --- CORE LOGIC ---
         async function startTimer() {
-            if (!subjectInput.value.trim() || !topicInput.value.trim()) {
-                Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'অনুগ্রহ করে বিষয় এবং টপিক লিখুন।' });
-                return;
-            }
-             if (!userDocRef) {
-                 console.error("startTimer: userDocRef is null!");
-                 Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি। আবার চেষ্টা করুন।' });
-                 return;
-             }
-
-            const sessionData = {
-                isActive: true,
-                startTime: new Date().getTime(),
-                subject: subjectInput.value.trim(),
-                topic: topicInput.value.trim()
-            };
-
-            try {
-                await updateDoc(userDocRef, { studySession: sessionData });
-                console.log("Timer started, session data updated in Firestore.");
-                // UI update will be handled by onSnapshot triggering loadAndDisplayUserData
-            } catch (error) {
-                console.error("Error starting timer: ", error);
-                Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' });
-            }
+             if (!subjectInput.value.trim() || !topicInput.value.trim()) { Swal.fire({ icon: 'error', title: 'দুঃখিত!', text: 'বিষয় এবং টপিক লিখুন।' }); return; } if (!userDocRef) { Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি।' }); return; }
+             const sessionData = { isActive: true, startTime: Date.now(), subject: subjectInput.value.trim(), topic: topicInput.value.trim() };
+             try { await updateDoc(userDocRef, { studySession: sessionData }); console.log("Timer started."); } catch (error) { console.error("Error starting timer:", error); Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' }); }
         }
 
         async function stopTimer(showCongratsPopup = true) {
              return new Promise(async (resolve, reject) => {
-                if (!state || !state.studySession || !state.studySession.isActive || !userDocRef) {
-                     console.log("stopTimer: No active session or userDocRef. State:", state);
-                     resolve(); return;
-                }
+                 if (!state?.studySession?.isActive || !userDocRef) { resolve(); return; }
+                 const startTime = state.studySession.startTime; if (startTime === null) { try { await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' }}); resolve(); } catch (e) { reject(e); } return; }
+                 const duration = Math.round((Date.now() - startTime) / 1000); const pointsEarned = parseFloat((duration / 3600).toFixed(2));
+                 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                 if (duration <= 0) { try { await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } }); resolve(); } catch(e) { reject(e); } return; }
+                 const sessionHistory = { date: new Date().toISOString(), subject: state.studySession.subject || 'N/A', topic: state.studySession.topic || 'N/A', duration: duration };
+                 try {
+                     const updateData = { studySession: { isActive: false, startTime: null, subject: '', topic: '' }, points: increment(pointsEarned) };
+                     if (Array.isArray(state.studyHistory)) { updateData.studyHistory = arrayUnion(sessionHistory); } else { updateData.studyHistory = [sessionHistory]; }
+                     await updateDoc(userDocRef, updateData); console.log("Session stopped. Points Earned (hours):", pointsEarned);
+                     startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false); subjectInput.value = ''; topicInput.value = ''; timerDisplay.textContent = '00:00:00';
+                     
+                     if (showCongratsPopup) {
+                         // *** MODIFIED: Check for goal AND badges after a delay ***
+                         setTimeout(() => {
+                             getDoc(userDocRef).then(docSnap => {
+                                 if (docSnap.exists()) {
+                                     const latestState = docSnap.data();
+                                     
+                                     // 1. Goal check
+                                     const goalSeconds = (latestState.dailyGoal || 7) * 3600;
+                                     const totalSecondsToday = getTotalStudiedSecondsForToday(); // Needs state, but this function uses global state. Refetch state.
+                                     
+                                     // Re-calculate today's seconds based on the *latest* state
+                                     const todayStr = getLocalDateString();
+                                     const totalSecondsTodayLatest = latestState.studyHistory
+                                         .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr)
+                                         .reduce((sum, e) => sum + e.duration, 0);
 
-                const startTime = state.studySession.startTime;
-                if (startTime === null) {
-                    console.warn("stopTimer: startTime is null, cannot calculate duration.");
-                    try {
-                         await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' }});
-                         console.log("Cleared potentially inconsistent session state.");
-                         resolve();
-                    } catch (clearError) {
-                         console.error("Error clearing inconsistent session state:", clearError);
-                         reject(clearError);
-                    }
-                    return;
-                }
+                                     if (goalSeconds > 0 && totalSecondsTodayLatest >= goalSeconds) {
+                                         Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য পূরণ করেছেন!' });
+                                         if (!latestState.badges?.includes('goal_achiever')) {
+                                             updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') }).then(() => console.log("Goal Achiever badge awarded.")).catch(err => console.error("Error awarding goal badge:", err));
+                                         }
+                                     }
 
-                const duration = Math.round((new Date().getTime() - startTime) / 1000);
-                const pointsEarned = Math.floor(duration / 60); // 1 point per minute
-
-                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; console.log("Timer interval cleared."); }
-
-                if (duration <= 0) {
-                     console.log("Session duration <= 0, clearing session without saving history.");
-                     try {
-                         await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } });
-                         console.log("Inactive session cleared in Firestore.");
-                         resolve();
-                     } catch(error) {
-                         console.error("Error clearing inactive session:", error);
-                         reject(error);
+                                     // 2. *** NEW: Badge Check ***
+                                     checkAndAwardBadges(latestState);
+                                 }
+                             }).catch(err => console.error("Error fetching doc for goal/badge check:", err));
+                         }, 600);
                      }
-                     return;
-                }
-
-                const sessionHistory = {
-                    date: new Date().toISOString(),
-                    subject: state.studySession.subject || 'N/A',
-                    topic: state.studySession.topic || 'N/A',
-                    duration: duration
-                };
-
-                try {
-                    const currentData = state || {}; // Use state directly
-                    const historyExists = Array.isArray(currentData.studyHistory);
-                    const currentPoints = currentData.points || 0;
-                    const currentBadges = Array.isArray(currentData.badges) ? currentData.badges : [];
-
-                    const updateData = {
-                        studySession: { isActive: false, startTime: null, subject: '', topic: '' },
-                        points: increment(pointsEarned) // Update points using increment
-                    };
-
-                    if (historyExists) {
-                         updateData.studyHistory = arrayUnion(sessionHistory);
-                    } else {
-                         console.warn("studyHistory array not found, creating it.");
-                         updateData.studyHistory = [sessionHistory]; // Create as a new array
-                    }
-
-                    // --- Check for new badges ---
-                    const newTotalPoints = currentPoints + pointsEarned;
-                    // Calculate total study seconds AFTER potential history update
-                    const updatedHistory = historyExists ? [...currentData.studyHistory, sessionHistory] : [sessionHistory];
-                    const totalStudySeconds = updatedHistory.reduce((sum, h) => sum + (h.duration || 0), 0);
-                    const newBadgesEarned = [];
-
-
-                    for (const badgeId in badges) {
-                        if (badgeId !== 'goal_achiever' && !currentBadges.includes(badgeId)) { // Skip goal badge here
-                            const badge = badges[badgeId];
-                            let earned = false;
-                            if (badge.type === 'points' && newTotalPoints >= badge.threshold) {
-                                earned = true;
-                            } else if (badge.type === 'total_time' && totalStudySeconds >= badge.threshold) {
-                                earned = true;
-                            }
-                            if (earned) {
-                                newBadgesEarned.push(badgeId);
-                            }
-                        }
-                    }
-
-                    if (newBadgesEarned.length > 0) {
-                        updateData.badges = arrayUnion(...newBadgesEarned); // Add new badges
-                        console.log("New badges earned (time/points):", newBadgesEarned);
-                        // Show popup after a delay
-                        setTimeout(() => {
-                            newBadgesEarned.forEach(badgeId => {
-                                Swal.fire({ /* ... badge popup ... */ });
-                            });
-                        }, 800);
-                    }
-                    // --- End Badge Check ---
-
-                    await updateDoc(userDocRef, updateData);
-                    console.log("Session stopped, history and points updated. Points Earned:", pointsEarned);
-
-                    // Immediate UI updates for responsiveness
-                    startBtn.classList.remove('hidden');
-                    stopBtn.classList.add('hidden');
-                    [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
-                    subjectInput.value = '';
-                    topicInput.value = '';
-                    timerDisplay.textContent = '00:00:00';
-
-                    // --- Goal Met Badge Check ---
-                    if (showCongratsPopup) {
-                        setTimeout(() => {
-                            // Fetch the latest state AFTER update might have happened
-                            getDoc(userDocRef).then(docSnap => {
-                                if (docSnap.exists()) {
-                                    const latestState = docSnap.data();
-                                    const latestBadges = latestState.badges || [];
-                                    const totalStudiedSecondsToday = getTotalStudiedSecondsForToday(); // Recalculate based on latest state? Or use local calculation? Recalculate is safer.
-                                    const goalSeconds = (latestState.dailyGoal || 7) * 3600;
-
-                                    console.log(`Checking goal achievement: Total Today=${totalStudiedSecondsToday}, Goal=${goalSeconds}`);
-                                    if (goalSeconds > 0 && totalStudiedSecondsToday >= goalSeconds) {
-                                        console.log("Goal achieved! Showing popup and checking badge.");
-                                        Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য সফলভাবে পূরণ করেছেন!' });
-
-                                        if (!latestBadges.includes('goal_achiever')) {
-                                            updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') }).then(() => {
-                                                console.log("Goal Achiever badge awarded.");
-                                                Swal.fire({ /* ... goal badge popup ... */ });
-                                            }).catch(err => console.error("Error awarding goal badge:", err));
-                                        }
-                                    }
-                                } else {
-                                     console.warn("User doc doesn't exist during goal check timeout.");
-                                }
-                            }).catch(err => console.error("Error fetching doc for goal check:", err));
-
-                        }, 600); // Delay slightly
-                    }
-                    resolve();
-                } catch (error) {
-                    console.error("Error stopping timer and saving history/points: ", error);
-                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' });
-                    reject(error);
-                }
+                     updateDashboardUIOnly(); // Update UI immediately
+                     resolve();
+                 } catch (error) { console.error("Error stopping timer:", error); Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন সেভ করা যায়নি।' }); reject(error); }
              });
+        }
+
+        // *** NEW: Function to check and award lifetime badges ***
+        async function checkAndAwardBadges(updatedState) {
+            if (!userDocRef || !updatedState) return;
+
+            const newBadges = [];
+            const currentPoints = updatedState.points || 0;
+            const currentBadges = updatedState.badges || [];
+
+            for (const key in badges) {
+                const badge = badges[key];
+                if (badge.type === 'points') {
+                    if (currentPoints >= badge.threshold && !currentBadges.includes(key)) {
+                        newBadges.push(key);
+                    }
+                }
+            }
+            // 'goal_achiever' is handled in stopTimer
+
+            if (newBadges.length > 0) {
+                try {
+                    await updateDoc(userDocRef, {
+                        badges: arrayUnion(...newBadges)
+                    });
+                    console.log("Awarded new badges:", newBadges);
+                    // Show a toast for the new badges
+                    newBadges.forEach((badgeKey, index) => {
+                        const badge = badges[badgeKey];
+                        setTimeout(() => { // Stagger toasts
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: `নতুন ব্যাজ অর্জিত! ${badge.emoji}`,
+                                html: `আপনি <strong>"${badge.name}"</strong> ব্যাজটি পেয়েছেন!`,
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false,
+                            });
+                        }, index * 1000); // Stagger popups
+                    });
+                } catch (err) {
+                    console.error("Error awarding badges:", err);
+                }
+            }
+        }
+
+        // *** NEW: Function to show rank up toast ***
+        function showRankUpToast(rank) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end', // Top-right corner
+                icon: 'success',
+                title: 'অভিনন্দন! 🥳',
+                html: `আপনি <strong>${rank.name} ${rank.emoji}</strong> র‍্যাঙ্কে পৌঁছেছেন!`,
+                timer: 15000, // 15 seconds
+                timerProgressBar: true,
+                showConfirmButton: false,
+                allowOutsideClick: true, // User can click outside to dismiss
+                allowEscapeKey: true, // User can use Esc to dismiss
+            });
         }
 
 
         function updateTimerDisplay() {
-            if (!state || !state.studySession || !state.studySession.isActive) {
-                 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-                 timerDisplay.textContent = '00:00:00';
-                 return;
-            };
-            if (state.studySession.startTime === null) {
-                console.warn("updateTimerDisplay: startTime is null but session is active!");
-                timerDisplay.textContent = '00:00:00';
-                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-                return;
-            }
-            const elapsed = Math.round((new Date().getTime() - state.studySession.startTime) / 1000);
-            timerDisplay.textContent = formatTime(Math.max(0, elapsed));
+             if (!state?.studySession?.isActive || state.studySession.startTime === null) { if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00'; return; }; const elapsed = Math.round((Date.now() - state.studySession.startTime) / 1000); timerDisplay.textContent = formatTime(Math.max(0, elapsed));
         }
 
         const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
         const formatDuration = (s) => {
-             if (typeof s !== 'number' || isNaN(s) || s < 0) return '0 মিনিট'; // Input validation
-             const h=Math.floor(s/3600), m=Math.floor(s%3600/60);
-             return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || (s > 0 ? '1 মিনিটের কম' : '0 মিনিট'); // Handle less than a minute
+             if (typeof s !== 'number' || isNaN(s) || s < 0) return '0 মিনিট'; const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return `${h>0?h+' ঘন্টা ':''}${m>0?m+' মিনিট':''}`.trim() || (s > 0 ? '1 মিনিটের কম' : '0 মিনিট');
         };
-
-
-        // --- TIMEZONE BUG FIX (Local Date) ---
         const getLocalDateString = (date = new Date()) => {
-            try {
-                 if (!(date instanceof Date) || isNaN(date.getTime())) {
-                     console.warn("Invalid date passed to getLocalDateString, using current date:", date);
-                     date = new Date();
-                 }
-                 const yyyy = date.getFullYear();
-                 const mm = String(date.getMonth() + 1).padStart(2, '0');
-                 const dd = String(date.getDate()).padStart(2, '0');
-                 return `${yyyy}-${mm}-${dd}`;
-            } catch (e) {
-                 console.error("Error formatting date:", date, e);
-                 return new Date().toISOString().slice(0, 10);
-            }
+             try { if (!(date instanceof Date) || isNaN(date.getTime())) date = new Date(); const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, '0'), d = String(date.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; } catch (e) { console.error("Date format error:", e); return 'date-error'; }
         };
-
         const getTotalStudiedSecondsForToday = () => {
-            if (!state || !Array.isArray(state.studyHistory)) return 0;
-            const todayStr = getLocalDateString(new Date());
-            return state.studyHistory
-                .filter(e => e && e.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr) // Ensure duration is positive number
-                .reduce((sum, e) => sum + e.duration, 0);
+             if (!state?.studyHistory) return 0; const todayStr = getLocalDateString(); return state.studyHistory.filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr).reduce((sum, e) => sum + e.duration, 0);
         };
-        // --- END OF FIX ---
-
-
-        // --- UI UPDATES ---
-        function loadAndDisplayUserData() {
-            if (!state || !currentUser) {
-                 console.warn("loadAndDisplayUserData: State or currentUser is null. Cannot update UI.");
-                 return;
-            }
-            console.log("loadAndDisplayUserData: Updating UI with state:", state);
-
-            // Ensure profile exists in state, if not, use default structure part
-            state.profile = state.profile || createNewUserData(currentUser).profile;
-            state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' };
-            state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : [];
-            state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7;
-            state.points = state.points || 0; // Ensure points exist
-            state.badges = Array.isArray(state.badges) ? state.badges : []; // Ensure badges exist
-
-
-            updateDashboardUIOnly(); // *** FIX: Update non-chart UI first ***
-            updateProfilePage();
-            dailyGoalInput.value = state.dailyGoal;
-
-            // Timer state logic - Moved from updateDashboardUIOnly
-            if (state.studySession.isActive && state.studySession.startTime !== null) {
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
-                subjectInput.value = state.studySession.subject || '';
-                topicInput.value = state.studySession.topic || '';
-                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true);
-                if (timerInterval) clearInterval(timerInterval);
-                updateTimerDisplay(); // Initial display
-                timerInterval = setInterval(updateTimerDisplay, 1000);
-                 console.log("Timer interval set.");
-            } else {
-                if (timerInterval) {
-                     clearInterval(timerInterval);
-                     timerInterval = null;
-                     console.log("Timer interval cleared because session is inactive.");
-                }
-                timerDisplay.textContent = '00:00:00';
-                startBtn.classList.remove('hidden');
-                stopBtn.classList.add('hidden');
-                [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false);
-                if (!state.studySession.isActive) {
-                   subjectInput.value = '';
-                   topicInput.value = '';
-                }
-            }
-             renderWeeklyChart(); // Render chart after other UI updates
+        function getWeekBoundaries(date = new Date()) {
+             // Week starts on Saturday (Day 6) and ends on Friday (Day 5)
+             // We adjust to make Saturday the start.
+             const currentDay = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+             const daysToSaturday = (currentDay < 6) ? (currentDay + 1) : 0; // Days to go back to reach Saturday
+             
+             const startDate = new Date(date);
+             startDate.setDate(date.getDate() - daysToSaturday);
+             startDate.setHours(0, 0, 0, 0);
+             
+             const endDate = new Date(startDate);
+             endDate.setDate(startDate.getDate() + 6); // Friday is 6 days after Saturday
+             endDate.setHours(23, 59, 59, 999);
+             
+             return { start: startDate, end: endDate };
+        }
+        function calculateWeeklyStats() {
+             if (!state?.studyHistory) return { rank: ranks[0], weeklyHours: 0, weeklyPoints: 0, todayPoints: 0 }; const { start, end } = getWeekBoundaries(); const startTime = start.getTime(); const endTime = end.getTime(); const todayStr = getLocalDateString(); let weeklySeconds = 0, todaySeconds = 0;
+             state.studyHistory.forEach(e => { if (e?.date && typeof e.duration === 'number' && e.duration > 0) { try { const entryDate = new Date(e.date); if (isNaN(entryDate.getTime())) return; const entryTime = entryDate.getTime(); if (entryTime >= startTime && entryTime <= endTime) { weeklySeconds += e.duration; if (getLocalDateString(entryDate) === todayStr) { todaySeconds += e.duration; } } } catch (err) { console.error("Date parse error:", e.date, err); } } });
+             const weeklyHours = weeklySeconds / 3600; const weeklyPoints = parseFloat(weeklyHours.toFixed(2)); const todayPoints = parseFloat((todaySeconds / 3600).toFixed(2)); let currentRank = ranks[0]; for (let i = ranks.length - 1; i >= 0; i--) { if (weeklyHours >= ranks[i].minHours) { currentRank = ranks[i]; break; } } return { rank: currentRank, weeklyHours, weeklyPoints, todayPoints };
         }
 
-        // *** FIX: Renamed function, removed chart rendering and timer logic ***
+        // --- UI UPDATES ---
+        function loadAndDisplayUserData(isInitialLoad = false, historyDataChanged = false) {
+             if (!state || !currentUser) { console.warn("loadAndDisplayUserData: State/User null."); return; }
+             console.log("loadAndDisplayUserData called. Initial:", isInitialLoad, "History Changed:", historyDataChanged);
+             state.profile = state.profile || createNewUserData(currentUser).profile; state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' }; state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : []; state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7; state.points = typeof state.points === 'number' ? state.points : 0; state.badges = Array.isArray(state.badges) ? state.badges : [];
+             
+             // *** NEW: Rank up check logic ***
+             const { rank: newRank } = calculateWeeklyStats();
+             if (previousRankName && newRank.name !== previousRankName && newRank.name !== 'Bronze') {
+                 const newRankIndex = ranks.findIndex(r => r.name === newRank.name);
+                 const oldRankIndex = ranks.findIndex(r => r.name === previousRankName);
+                 if (newRankIndex > oldRankIndex) {
+                     showRankUpToast(newRank); // Show toast notification
+                 }
+             }
+             previousRankName = newRank.name; // Update for next check
+             // *** END: Rank up check ***
+
+             updateDashboardUIOnly();
+             updateProfilePage();
+             dailyGoalInput.value = state.dailyGoal;
+             
+             if (state.studySession.isActive && state.studySession.startTime !== null) { startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden'); subjectInput.value = state.studySession.subject || ''; topicInput.value = state.studySession.topic || ''; [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = true); if (timerInterval) clearInterval(timerInterval); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000); } else { if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerDisplay.textContent = '00:00:00'; startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); [subjectInput, topicInput, dailyGoalInput].forEach(el => el.disabled = false); if (!state.studySession.isActive) { subjectInput.value = ''; topicInput.value = ''; } }
+             
+              if (isInitialLoad || historyDataChanged) {
+                  console.log("Rendering charts.");
+                  renderWeeklyChart(false);
+                  renderTodayPieChart(false); // *** NEW: Render pie chart ***
+              }
+        }
+
+
         function updateDashboardUIOnly() {
-            if (!state) { console.warn("updateDashboardUIOnly: State is null."); return; }
-            const totalSecondsToday = getTotalStudiedSecondsForToday();
-            const goalSeconds = (state.dailyGoal || 7) * 3600;
-            todayTotalDisplay.textContent = formatDuration(totalSecondsToday);
-            todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday));
-            progressBar.style.width = `${goalSeconds > 0 ? Math.min(100, (totalSecondsToday / goalSeconds) * 100) : 0}%`;
+             if (!state) { console.warn("updateDashboardUIOnly: State is null."); return; }
+             const totalSecondsToday = getTotalStudiedSecondsForToday(); const goalSeconds = (state.dailyGoal || 7) * 3600; todayTotalDisplay.textContent = formatDuration(totalSecondsToday); todayRemainingDisplay.textContent = formatDuration(Math.max(0, goalSeconds - totalSecondsToday)); progressBar.style.width = `${goalSeconds > 0 ? Math.min(100, (totalSecondsToday / goalSeconds) * 100) : 0}%`;
+             const todayStr = getLocalDateString(); const todayHistory = state.studyHistory?.filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || []; historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `<div class="p-3 history-item rounded-lg"><p class="history-item-subject">${e.subject || 'N/A'}: <span class="history-item-topic">${e.topic || 'N/A'}</span></p><p class="text-sm history-item-time">সময়: ${formatDuration(e.duration || 0)}</p></div>`).join('') : '<p class="text-main-secondary">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+             const subjectTimes = {}; todayHistory.forEach(e => { if (e?.subject && typeof e.duration === 'number' && e.duration > 0) { subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration; } });
+             if (Object.keys(subjectTimes).length > 0) { subjectSummaryList.innerHTML = Object.entries(subjectTimes).sort(([, a], [, b]) => b - a).map(([sub, dur]) => `<div class="subject-summary-item"><span class="font-medium text-main-primary">${sub}</span><span class="text-main-secondary">${formatDuration(dur)}</span></div>`).join(''); } else { subjectSummaryList.innerHTML = '<p class="text-main-secondary text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>'; }
+             const { rank, weeklyPoints, todayPoints } = calculateWeeklyStats(); rankEmojiDisplay.textContent = rank.emoji; rankNameDisplay.textContent = rank.name; todayPointsDisplay.textContent = todayPoints.toFixed(2); weeklyPointsDisplay.textContent = weeklyPoints.toFixed(2);
+        }
 
-            // Update History Log
-            const todayStr = getLocalDateString(new Date());
-            const todayHistory = Array.isArray(state.studyHistory) ? state.studyHistory.filter(e => e && e.date && getLocalDateString(new Date(e.date)) === todayStr) : [];
+        // --- Chart Rendering Function ---
+        function renderWeeklyChart(themeChangeOnly = false) {
+             if (!state || !Array.isArray(state.studyHistory) || !weeklyChartCanvas) return; const ctx = weeklyChartCanvas.getContext('2d'); if (!ctx) return; 
+             // Logic for week boundaries (Saturday to Friday)
+             const today = new Date();
+             const dayLabels = [];
+             const weeklyData = Array(7).fill(0);
+             
+             const { start } = getWeekBoundaries(today); // Get the start of the current week (Saturday)
 
-            historyLog.innerHTML = todayHistory.length > 0 ? todayHistory.slice().reverse().map(e => `
-                <div class="p-3 bg-gray-50/80 dark:bg-gray-600/80 rounded-lg border border-gray-200 dark:border-gray-500">
-                    <p class="font-semibold">${e.subject || 'N/A'}: <span class="font-normal">${e.topic || 'N/A'}</span></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">সময়: ${formatDuration(e.duration || 0)}</p>
-                </div>`).join('') : '<p class="text-gray-500 dark:text-gray-400">এখনও কোনো টপিক সম্পন্ন হয়নি।</p>';
+             for (let i = 0; i < 7; i++) {
+                 const date = new Date(start);
+                 date.setDate(start.getDate() + i);
+                 
+                 const dayStr = getLocalDateString(date);
+                 dayLabels.push(date.toLocaleDateString('bn-BD', { weekday: 'short' }));
+                 
+                 const totalSeconds = state.studyHistory
+                     .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === dayStr)
+                     .reduce((sum, e) => sum + e.duration, 0);
+                     
+                 weeklyData[i] = parseFloat((totalSeconds / 3600).toFixed(2));
+             }
 
-             // Update Subject Summary
+             const computedStyle = getComputedStyle(document.documentElement); const gridColor = computedStyle.getPropertyValue('--chart-grid-color').trim(); const tickColor = computedStyle.getPropertyValue('--chart-tick-color').trim(); const barColor = computedStyle.getPropertyValue('--chart-bar-color').trim(); const barHoverColor = computedStyle.getPropertyValue('--chart-bar-hover-color').trim(); const chartData = { labels: dayLabels, datasets: [{ label: 'পড়ার সময় (ঘন্টা)', data: weeklyData, backgroundColor: barColor, borderColor: barColor, borderWidth: 1, hoverBackgroundColor: barHoverColor, hoverBorderColor: barHoverColor, borderRadius: 5, }]}; const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'ঘন্টা', color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } }, grid: { color: gridColor }, ticks: { color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } } }, x: { grid: { display: false }, ticks: { color: tickColor, font: { family: "'Hind Siliguri', sans-serif" } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label || ''}: ${ctx.parsed.y !== null ? ctx.parsed.y + ' ঘন্টা' : ''}` } } } }; if (weeklyChartInstance) { weeklyChartInstance.destroy(); } weeklyChartInstance = new Chart(ctx, { type: 'bar', data: chartData, options: chartOptions }); console.log("Weekly chart rendered.");
+        }
+
+        // *** NEW: Pie Chart Rendering Function ***
+        function renderTodayPieChart(themeChangeOnly = false) {
+            if (!state || !Array.isArray(state.studyHistory)) return;
+            const pieChartCanvas = document.getElementById('todayPieChartCanvas');
+            const pieChartLegend = document.getElementById('pie-chart-legend');
+            if (!pieChartCanvas || !pieChartLegend) return;
+
+            const todayStr = getLocalDateString();
+            const todayHistory = state.studyHistory.filter(e => e?.date && getLocalDateString(new Date(e.date)) === todayStr) || [];
             const subjectTimes = {};
             todayHistory.forEach(e => {
-                if (e.subject && typeof e.duration === 'number' && e.duration > 0) {
+                if (e?.subject && typeof e.duration === 'number' && e.duration > 0) {
                     subjectTimes[e.subject] = (subjectTimes[e.subject] || 0) + e.duration;
                 }
             });
 
-            if (Object.keys(subjectTimes).length > 0) {
-                 subjectSummaryList.innerHTML = Object.entries(subjectTimes)
-                    .sort(([, timeA], [, timeB]) => timeB - timeA)
-                    .map(([subject, duration]) => `
-                    <div class="subject-summary-item">
-                        <span class="font-medium">${subject}</span>
-                        <span>${formatDuration(duration)}</span>
-                    </div>`).join('');
-            } else {
-                 subjectSummaryList.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2">এখনও কোনো সেশন সম্পন্ন হয়নি।</p>';
+            if (todayPieChartInstance) {
+                todayPieChartInstance.destroy();
+                todayPieChartInstance = null;
             }
-             // Removed renderWeeklyChart call from here
-        }
 
+            const labels = Object.keys(subjectTimes);
+            const dataInHours = Object.values(subjectTimes).map(sec => parseFloat((sec / 3600).toFixed(2))); // Convert to hours
 
-        // *** FIX: Added themeChangeOnly parameter & data comparison logic (using stringify) ***
-        function renderWeeklyChart(themeChangeOnly = false) {
-            const chartCanvas = document.getElementById('weeklyChart');
-            // *** FIX: Ensure state exists before proceeding ***
-            if (!chartCanvas || !state || !Array.isArray(state.studyHistory)) {
-                console.warn("renderWeeklyChart: Canvas not found or state/studyHistory invalid. State:", state);
-                if (weeklyChartInstance) {
-                    try { weeklyChartInstance.destroy(); } catch(e){}
-                    weeklyChartInstance = null;
-                    lastChartDataString = null; // Reset last data string
-                }
+            if (labels.length === 0) {
+                pieChartCanvas.classList.add('hidden');
+                pieChartLegend.innerHTML = '<p>আজ কোনো বিষয় পড়া হয়নি।</p>';
                 return;
             }
-            const ctx = chartCanvas.getContext('2d');
-            if (!ctx) { console.error("Could not get 2D context for weeklyChart"); return; }
 
-            const isDark = document.documentElement.classList.contains('dark');
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const tickColor = isDark ? '#d1d5db' : '#4b5563';
-            const titleColor = isDark ? '#f9fafb' : '#1f2937';
-            const legendColor = isDark ? '#f9fafb' : '#1f2937';
-            const barColor = isDark ? 'rgba(96, 165, 250, 0.8)' : 'rgba(37, 99, 235, 0.8)';
+            pieChartCanvas.classList.remove('hidden');
+            pieChartLegend.innerHTML = ''; // Clear legend text, chart.js will build it
 
-            // Calculate new data
-            const newLabels = [], newData = [];
-            let totalMinutes = 0;
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const dayStr = getLocalDateString(d);
-                newLabels.push(d.toLocaleDateString('bn-BD', { weekday: 'short' }));
-                const dailySeconds = state.studyHistory
-                    .filter(e => e && e.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === dayStr)
-                    .reduce((s, e) => s + e.duration, 0);
-                const minutes = Math.round(dailySeconds / 60);
-                newData.push(minutes);
-                totalMinutes += minutes;
-            }
-            const activeDays = newData.filter(d => d > 0).length || 1;
-            const avgMinutes = Math.round(totalMinutes / activeDays);
-            const currentChartDataString = JSON.stringify({ labels: newLabels, data: newData }); // Convert current data to string
+            // Define colors
+            const pieColors = [
+                '#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6',
+                '#ec4899', '#6366f1', '#06b6d4', '#d946ef', '#14b8a6'
+            ];
+            
+            // Get theme-specific colors
+            const computedStyle = getComputedStyle(document.documentElement);
+            const tickColor = computedStyle.getPropertyValue('--chart-tick-color').trim();
 
-            // *** FIX: Check if data string actually changed or if it's just a theme change ***
-            const dataChanged = currentChartDataString !== lastChartDataString;
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    label: 'পড়ার সময় (ঘন্টা)',
+                    data: dataInHours,
+                    backgroundColor: pieColors.slice(0, labels.length).map(color => color + 'b3'), // Add alpha
+                    borderColor: pieColors.slice(0, labels.length),
+                    hoverOffset: 8
+                }]
+            };
 
-            if (weeklyChartInstance && themeChangeOnly) {
-                // Only update theme colors if the instance exists and it's just a theme change
-                console.log("Updating chart theme only.");
-                weeklyChartInstance.options.scales.y.ticks.color = tickColor;
-                weeklyChartInstance.options.scales.y.grid.color = gridColor;
-                weeklyChartInstance.options.scales.x.ticks.color = tickColor;
-                weeklyChartInstance.options.scales.x.grid.color = gridColor;
-                weeklyChartInstance.options.plugins.title.color = titleColor;
-                weeklyChartInstance.options.plugins.legend.labels.color = legendColor;
-                weeklyChartInstance.data.datasets[0].backgroundColor = barColor;
-                weeklyChartInstance.update('none'); // Update without animation
-            } else if (!weeklyChartInstance || dataChanged) {
-                // Create or recreate chart if instance doesn't exist OR if data changed
-                console.log(weeklyChartInstance ? "Chart data changed, recreating." : "Creating chart instance.");
-                if (weeklyChartInstance) {
-                    try { weeklyChartInstance.destroy(); } catch (e) { console.warn("Could not destroy previous chart instance:", e); }
-                    weeklyChartInstance = null; // Explicitly nullify after destroy
-                }
-
-                try {
-                    // *** FIX: Ensure canvas is visible before creating chart ***
-                    if (chartCanvas.offsetParent === null) {
-                         console.log("Canvas is not visible, delaying chart creation slightly.");
-                         // Optionally delay and retry, or rely on next update when view becomes visible
-                         // setTimeout(() => renderWeeklyChart(), 100); // Simple delay
-                         return; // Don't create chart if canvas isn't visible
-                    }
-
-                    weeklyChartInstance = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: newLabels, // Use new labels
-                            datasets: [{
-                                label: 'পড়ার সময় (মিনিট)',
-                                data: newData, // Use new data
-                                backgroundColor: barColor,
-                                borderRadius: 5
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false, // Allow chart to resize vertically
-                            animation: false, // Keep animation off
-                            scales: {
-                                y: { beginAtZero: true, ticks: { color: tickColor }, grid: { color: gridColor } },
-                                x: { ticks: { color: tickColor }, grid: { color: gridColor } }
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: tickColor,
+                            font: {
+                                family: "'Hind Siliguri', sans-serif"
                             },
-                            plugins: {
-                                title: { display: true, text: `গড় পড়ার সময়: ${formatDuration(avgMinutes * 60)}`, font: { size: 16 }, color: titleColor },
-                                tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatDuration(c.parsed.y * 60)}` } },
-                                legend: { labels: { color: legendColor } }
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        titleFont: { family: "'Hind Siliguri', sans-serif" },
+                        bodyFont: { family: "'Hind Siliguri', sans-serif" },
+                        callbacks: {
+                            label: (ctx) => {
+                                const label = ctx.label || '';
+                                const value = ctx.parsed || 0;
+                                const total = ctx.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return ` ${label}: ${value} ঘন্টা (${percentage}%)`;
                             }
                         }
-                    });
-                    // Store the data string used for this render
-                    lastChartDataString = currentChartDataString;
-                    console.log("Chart rendered successfully.");
-                 } catch (e) {
-                     console.error("Error creating chart:", e);
-                     // Attempt to clean up if creation failed mid-way
-                     if (weeklyChartInstance) {
-                         try { weeklyChartInstance.destroy(); } catch (destroyErr) {}
-                         weeklyChartInstance = null;
-                     }
-                     lastChartDataString = null;
-                 }
-            } else {
-                 console.log("Chart data and theme unchanged, no re-render needed.");
-            }
+                    }
+                }
+            };
+
+            todayPieChartInstance = new Chart(pieChartCanvas.getContext('2d'), {
+                type: 'pie', // 'pie' or 'doughnut'
+                data: chartData,
+                options: chartOptions
+            });
+            console.log("Today's pie chart rendered.");
         }
 
 
+        // --- UPDATED: Profile Page UI Function ---
         function updateProfilePage() {
-             if (!state || !currentUser) { console.warn("updateProfilePage: State or currentUser is null."); return; }
-            const p = state.profile || {};
-            profileEmailInput.value = currentUser.email || 'N/A';
-            profileNameInput.value = p.name || '';
-            profileMobileInput.value = p.mobile || '';
-            profileClassInput.value = p.class || '';
-            profileInstitutionInput.value = p.institution || '';
-            profileMotivationInput.value = p.motivation || '';
-            profileImgDisplay.src = p.profileImg || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF';
-            imgUploadSpinner.classList.add('hidden');
+             if (!state || !currentUser) { console.warn("updateProfilePage: State/User null."); return; }
+             const p = state.profile || {};
+             profileEmailInput.value = currentUser.email || 'N/A';
+             profileNameInput.value = p.name || ''; profileMobileInput.value = p.mobile || '';
+             profileClassInput.value = p.class || ''; profileInstitutionInput.value = p.institution || '';
+             profileMotivationInput.value = p.motivation || '';
+             profileImgDisplay.src = p.profileImg || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF';
+             imgUploadSpinner.classList.add('hidden');
 
-            // --- Update Points & Badges Display ---
-            profilePointsDisplay.textContent = state.points || 0;
-            if (Array.isArray(state.badges) && state.badges.length > 0) {
-                profileBadgesContainer.innerHTML = state.badges.map(badgeId => {
-                    const badge = badges[badgeId];
-                    if (badge) {
-                        return `<span class="badge" title="${badge.name}"><span>${badge.emoji}</span> ${badge.name}</span>`;
-                    }
-                    return ''; // Handle cases where badge ID might be invalid
-                }).join('');
-            } else {
-                profileBadgesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>';
-            }
-             // --- End Update ---
+             // Update Lifetime Points
+             profilePointsDisplay.textContent = (state.points || 0).toFixed(2); // Display lifetime hours with decimals
+
+             // Update Weekly Rank on Profile Page
+             const { rank, weeklyPoints } = calculateWeeklyStats();
+             profileRankEmojiDisplay.textContent = rank.emoji;
+             profileRankNameDisplay.textContent = rank.name;
+             profileWeeklyPointsDisplay.textContent = weeklyPoints.toFixed(2);
+
+             // *** NEW: Update Lifetime Badges ***
+             if (Array.isArray(state.badges) && state.badges.length > 0) {
+                 profileBadgesContainer.innerHTML = state.badges.map(badgeKey => {
+                     const badge = badges[badgeKey];
+                     if (!badge) return '';
+                     return `<div class="badge" title="${badge.name}">
+                                 <span>${badge.emoji}</span>
+                                 <span>${badge.name}</span>
+                             </div>`;
+                 }).join('');
+             } else {
+                 profileBadgesContainer.innerHTML = '<p class="text-main-secondary text-sm">এখনও কোনো ব্যাজ অর্জন করেননি।</p>';
+             }
         }
 
         const updateQuote = () => { const q=quotes[Math.floor(Math.random()*quotes.length)]; quoteText.textContent=`"${q.text}"`; quoteAuthor.textContent=`- ${q.author}`; };
@@ -1385,102 +1188,24 @@
         // --- EVENT LISTENERS ---
         loginButton.addEventListener('click', handleLogin);
         googleLoginButton.addEventListener('click', handleGoogleLogin);
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            handlePasswordReset();
-        });
+        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); handlePasswordReset(); });
         [navDashboard, mobileNavDashboard].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); }));
         [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
-        [navItems.logoutBtn, navItems.mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
+        [navItems.logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
 
         startBtn.addEventListener('click', startTimer);
-        stopBtn.addEventListener('click', () => stopTimer(true)); // Pass true explicitly
+        stopBtn.addEventListener('click', () => stopTimer(true));
 
         dailyGoalInput.addEventListener('change', async () => {
-            if(state && userDocRef) {
-                const newGoal = parseFloat(dailyGoalInput.value) || 7;
-                try {
-                    await updateDoc(userDocRef, { dailyGoal: newGoal });
-                    console.log("Daily goal updated to:", newGoal);
-                } catch (e) { console.error("Error updating goal: ", e); }
-            } else {
-                 console.warn("Cannot update goal: State or userDocRef is null.");
-            }
+             if(state && userDocRef) { const newGoal = parseFloat(dailyGoalInput.value) || 7; try { await updateDoc(userDocRef, { dailyGoal: newGoal }); updateDashboardUIOnly(); } catch (e) { console.error("Error updating goal:", e); } }
         });
 
         saveProfileBtn.addEventListener('click', async () => {
-             if(state && userDocRef) {
-                const currentProfile = state.profile || {};
-                const updatedProfile = {
-                    ...currentProfile,
-                    name: profileNameInput.value.trim(),
-                    mobile: profileMobileInput.value.trim(),
-                    class: profileClassInput.value.trim(),
-                    institution: profileInstitutionInput.value.trim(),
-                    motivation: profileMotivationInput.value.trim()
-                    // profileImg URL is updated separately on upload
-                };
-                try {
-                    await updateDoc(userDocRef, { profile: updatedProfile });
-                     console.log("Profile data saved:", updatedProfile);
-                    Swal.fire({ icon: 'success', title: 'সফল!', text: 'আপনার প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', showConfirmButton: false, timer: 1500 });
-                } catch (e) {
-                    console.error("Error saving profile: ", e);
-                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'প্রোফাইল সেভ করা যায়নি।' });
-                }
-            } else {
-                 console.warn("Cannot save profile: State or userDocRef is null.");
-            }
+             if(state && userDocRef) { const updatedProfile = { ...(state.profile || {}), name: profileNameInput.value.trim(), mobile: profileMobileInput.value.trim(), class: profileClassInput.value.trim(), institution: profileInstitutionInput.value.trim(), motivation: profileMotivationInput.value.trim() }; try { await updateDoc(userDocRef, { profile: updatedProfile }); Swal.fire({ icon: 'success', title: 'সফল!', text: 'প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে।', timer: 1500 }); } catch (e) { Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'প্রোফাইল সেভ করা যায়নি।' }); } }
         });
 
         profileImgUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file || !currentUser || !userDocRef) {
-                 console.log("Image upload cancelled: No file, user, or docRef.");
-                 return;
-             }
-
-            if (file.size > 1048576 * 2) { // Increased limit to 2MB slightly
-                Swal.fire({ icon: 'error', title: 'ছবিটি খুব বড়', text: 'অনুগ্রহ করে 2MB-এর ছোট ছবি আপলোড করুন।' });
-                 e.target.value = null; // Reset input
-                return;
-            }
-
-             imgUploadSpinner.classList.remove('hidden');
-
-            const timestamp = Date.now();
-            const uniqueFileName = `${timestamp}_${file.name}`;
-            const storageRef = ref(storage, `profileImages/${currentUser.uid}/${uniqueFileName}`);
-            console.log("Uploading to:", storageRef.fullPath);
-
-            try {
-                const snapshot = await uploadBytes(storageRef, file);
-                console.log('Upload successful!', snapshot);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                console.log('File available at', downloadURL);
-
-                await updateDoc(userDocRef, { "profile.profileImg": downloadURL });
-                console.log("Firestore profileImg updated with URL.");
-
-                // UI update hobe onSnapshot theke
-
-                Swal.fire({ icon: 'success', title: 'সফল!', text: 'প্রোফাইল ছবি আপলোড হয়েছে।', showConfirmButton: false, timer: 1500 });
-
-            } catch (error) {
-                console.error("Error uploading image to Storage:", error);
-                 let errorMsg = 'ছবি আপলোড করা যায়নি।';
-                 if (error.code === 'storage/unauthorized') {
-                     errorMsg += ' Storage security rules চেক করুন।';
-                 } else if (error.code === 'storage/canceled') {
-                     errorMsg = 'ছবি আপলোড বাতিল করা হয়েছে।';
-                 } else if (error.code === 'storage/unknown') {
-                     errorMsg += ' একটি অজানা সমস্যা হয়েছে।';
-                 }
-                Swal.fire({ icon: 'error', title: 'সমস্যা', text: errorMsg });
-            } finally {
-                 imgUploadSpinner.classList.add('hidden');
-                 e.target.value = null;
-            }
+             const file = e.target.files[0]; if (!file || !currentUser || !userDocRef) return; if (file.size > 2 * 1048576) { Swal.fire({ icon: 'error', title: 'ছবি খুব বড়', text: '2MB-এর ছোট ছবি দিন।' }); e.target.value = null; return; } imgUploadSpinner.classList.remove('hidden'); const uniqueFileName = `${Date.now()}_${file.name}`; const storageRef = ref(storage, `profileImages/${currentUser.uid}/${uniqueFileName}`); try { const snapshot = await uploadBytes(storageRef, file); const downloadURL = await getDownloadURL(snapshot.ref); await updateDoc(userDocRef, { "profile.profileImg": downloadURL }); Swal.fire({ icon: 'success', title: 'সফল!', text: 'প্রোফাইল ছবি আপলোড হয়েছে।', timer: 1500 }); } catch (error) { Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ছবি আপলোড করা যায়নি।' }); } finally { imgUploadSpinner.classList.add('hidden'); e.target.value = null; }
         });
 
     }); // End of DOMContentLoaded
