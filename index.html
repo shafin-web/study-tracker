@@ -378,11 +378,16 @@
                                     </div>
                                     <div>
                                         <label for="topic" class="block text-sm font-medium text-main-secondary">টপিক</label>
-                                        <div class="flex items-center space-x-2 mt-1">
-                                            <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                            <button id="get-topic-details-btn" title="Get Topic Details" class="btn-gemini flex-shrink-0">✨</button>
+                                        <div class="flex items-end space-x-2 mt-1"> 
+                                            <div class="flex-grow">
+                                                <input type="text" id="topic" placeholder="যেমন: ত্রিকোণমিতি" class="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            </div>
+                                            <div class="flex-shrink-0 text-center">
+                                                <label for="get-topic-details-btn" class="block text-xs font-medium text-main-secondary mb-1">Ask Gemini</label> 
+                                                <button id="get-topic-details-btn" title="Get Topic Details" class="btn-gemini flex-shrink-0">✨</button>
+                                            </div>
                                         </div>
-                                    </div>
+                                        </div>
                                     <div class="flex space-x-4">
                                         <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
                                         <button id="stop-btn" class="w-full btn-secondary font-bold py-3 rounded-lg text-lg hidden">থামুন এবং সংরক্ষণ করুন</button>
@@ -2198,3 +2203,4 @@
 </script>
 </body>
 </html>
+
