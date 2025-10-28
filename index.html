@@ -390,7 +390,12 @@
                                         </div>
                                     <div class="flex space-x-4">
                                         <button id="start-btn" class="w-full btn-primary font-bold py-3 rounded-lg text-lg">পড়া শুরু করুন</button>
-                                        <button id="stop-btn" class="w-full btn-secondary font-bold py-3 rounded-lg text-lg hidden">থামুন এবং সংরক্ষণ করুন</button>
+                                        <button id="pause-btn" class="w-1/2 btn-primary font-bold py-3 rounded-lg text-lg hidden" style="background-color: #f59e0b; opacity: 1;">বিরতি দিন</button>
+                                        <button id="resume-btn" class="w-1/2 btn-primary font-bold py-3 rounded-lg text-lg hidden" style="background-color: #10b981; opacity: 1;">আবার শুরু</button>
+                                        <button id="stop-btn" class="w-1/2 btn-secondary font-bold py-3 rounded-lg text-lg hidden">থামুন এবং সংরক্ষণ করুন</button>
+                                    </div>
+                                    <div class="mt-4 text-center">
+                                         <button id="reset-btn" class="w-full text-sm text-accent hover:underline hidden">ভুল টপিক? সেশন বাতিল করুন।</button>
                                     </div>
                                 </div>
                             </div>
@@ -629,7 +634,7 @@
                  <span class="emoji-icon mx-auto">👨‍💻</span>
                 <span class="text-xs">আমার সম্পর্কে</span>
             </a>
-            <a href="#" id="mobile-logout-button" classs="text-center text-gray-500 dark:text-gray-400 p-2">
+            <a href="#" id="mobile-logout-button" class="text-center text-gray-500 dark:text-gray-400 p-2">
                  <span class="emoji-icon mx-auto">🚪</span>
                 <span class="text-xs">লগ আউট</span>
             </a>
@@ -745,6 +750,9 @@
           topicInput = document.getElementById('topic'),
           startBtn = document.getElementById('start-btn'),
           stopBtn = document.getElementById('stop-btn');
+    const pauseBtn = document.getElementById('pause-btn'),
+          resumeBtn = document.getElementById('resume-btn'),
+          resetBtn = document.getElementById('reset-btn');
     // Dashboard Display
     const timerDisplay = document.getElementById('timer'),
           todayTotalDisplay = document.getElementById('today-total'),
@@ -926,11 +934,8 @@
         throw new Error("Gemini API call failed after multiple retries.");
     }
     // --- *** END GEMINI API HELPER *** ---
-
-
     // --- Initialization on DOM Load ---
     document.addEventListener('DOMContentLoaded', function() {
-
         // --- SET RANDOM BACKGROUND IMAGE ---
         const backgroundImages = [
             'https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg?auto=compress&cs=tinysrgb&w=1920',
@@ -944,7 +949,7 @@
         ];
         const randomIndex = Math.floor(Math.random() * backgroundImages.length);
         document.body.style.backgroundImage = `url('${backgroundImages[randomIndex]}')`;
-
+    
         // --- THEME MANAGEMENT ---
         const themeToggle = document.getElementById('theme-toggle');
         const themeIconLight = document.getElementById('theme-icon-light');
@@ -962,8 +967,9 @@
                   console.log("Theme changed, rendering charts.");
                   renderWeeklyChart(true);
                   renderTodayPieChart(true);
-             }
+            }
         }
+
         // Check local storage first
         const currentTheme = localStorage.getItem('theme');
         // Determine initial theme
@@ -976,7 +982,6 @@
              localStorage.setItem('theme', isDark ? 'dark' : 'light');
              applyTheme(isDark, true);
         });
-
 
         // --- Helper: Create New User Data Structure ---
         const createNewUserData = (user) => ({
@@ -991,10 +996,12 @@
                 profileImg: user.photoURL || 'https://placehold.co/128x128/E2E8F0/4A5568?text=%E0%A6%9B%E0%A6%AC%E0%A6%BF'
             },
             studySession: {
-                isActive: false,
-                startTime: null,
+                status: 'stopped', // 'stopped', 'running', 'paused'
                 subject: '',
-                topic: ''
+                topic: '',
+                originalStartTime: null, // সেশনটি প্রথম কখন শুরু হয়েছিল
+                lastStartTime: null, // শেষবার কখন 'resume' বা 'start' করা হয়েছিল
+                accumulatedMs: 0  // বিরতির আগে মোট কত মিলিসেকেন্ড পড়া হয়েছে
             },
             studyHistory: [],
             dailyGoal: 7,
@@ -1023,7 +1030,24 @@
                     state.badges = Array.isArray(state.badges) ? state.badges : [];
                     state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : [];
                     state.profile = state.profile || createNewUserData(user).profile;
-                    state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' };
+                    if (!state.studySession || typeof state.studySession.status === 'undefined') {
+                         // এটি নতুন ইউজার বা পুরানো ডেটা স্ট্রাকচার
+                         if (state.studySession && state.studySession.isActive === true) {
+                            // পুরানো ডেটা থেকে মাইগ্রেট করুন
+                            state.studySession = {
+                            status: 'running',
+                                subject: state.studySession.subject || '',
+                                topic: state.studySession.topic || '',
+                                originalStartTime: state.studySession.startTime,
+                                lastStartTime: state.studySession.startTime,
+                                accumulatedMs: 0
+                            };
+                        } else {
+                            // ডিফল্ট নতুন স্ট্রাকচার
+                            state.studySession = { status: 'stopped', subject: '', topic: '', originalStartTime: null, lastStartTime: null, accumulatedMs: 0 };
+                        }
+                    }
+                     // --- পরিবর্তন শেষ ---
                     state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7;
                     // --- End Sanitization ---
 
@@ -1288,7 +1312,7 @@
 
         function handleLogout() {
             console.log("Logout initiated...");
-            const isActiveSession = state?.studySession?.isActive;
+            const isActiveSession = state?.studySession?.status === 'running' || state?.studySession?.status === 'paused';
             if (isActiveSession) {
                 // If timer is running, stop it *then* log out
                 stopTimer(false).finally(() => {
@@ -1301,6 +1325,7 @@
         }
 
         // --- Core: Study Timer Logic ---
+        // --- Ei function ta replace koro ---
         async function startTimer() {
             if (!subjectInput.value.trim() || !topicInput.value.trim()) {
                 Swal.fire({ icon: 'warning', title: 'দুঃখিত!', text: 'বিষয় এবং টপিক লিখুন।' });
@@ -1310,105 +1335,120 @@
                 Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'ব্যবহারকারীর ডেটা লোড হয়নি।' });
                 return;
             }
+
+            const now = Date.now();
             const sessionData = {
-                isActive: true,
-                startTime: Date.now(),
+                status: 'running',
                 subject: subjectInput.value.trim(),
-                topic: topicInput.value.trim()
+                topic: topicInput.value.trim(),
+                originalStartTime: now, // সেশনের আসল শুরু
+                lastStartTime: now,  // বর্তমান রানিং সেগমেন্টের শুরু
+                accumulatedMs: 0 // নতুন সেশনে এটি ০ থাকবে
             };
+
             try {
                 await updateDoc(userDocRef, { studySession: sessionData });
                 console.log("Timer started.");
-                // UI update will happen via onSnapshot listener
+                // UI update onSnapshot listener দ্বারা হবে
             } catch (error) {
                 console.error("Error starting timer:", error);
                 Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'টাইমার শুরু করা যায়নি।' });
             }
         }
 
+            // --- এই ফাংশনটি পুরোপুরি Replace করুন (Task 1 + Task 2) ---
         async function stopTimer(showCongratsPopup = true) {
-            // Return a promise to handle async logout
+            // এই ফাংশনটি একটি Promise রিটার্ন করে যাতে logout ঠিকমতো কাজ করে
             return new Promise(async (resolve, reject) => {
-                if (!state?.studySession?.isActive || !userDocRef) {
+                if (!state?.studySession || state.studySession.status === 'stopped' || !userDocRef) {
                     resolve();
                     return;
                 }
-                const startTime = state.studySession.startTime;
-                // If startTime is null (somehow), just reset session and resolve
-                if (startTime === null) {
+
+                const session = state.studySession;
+                const endTime = Date.now();
+
+                // যদি সেশনটি 'running' থাকে, তবে শেষ সেগমেন্টের সময় যোগ করুন
+                // যদি 'paused' থাকে, তবে currentSegmentMs 0 হবে, যা সঠিক
+                const currentSegmentMs = (session.status === 'running') ? (endTime - session.lastStartTime) : 0;
+                const totalElapsedMs = session.accumulatedMs + currentSegmentMs;
+                const totalDurationSec = Math.round(totalElapsedMs / 1000);
+
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+                // নতুন 'stopped' সেশনের ডেটা
+                const stoppedSessionData = {
+                    status: 'stopped',
+                    subject: '',
+                    topic: '',
+                    originalStartTime: null,
+                    lastStartTime: null,
+                    accumulatedMs: 0
+                };
+
+                // যদি ০ সেকেন্ডের কম পড়া হয়, তবে শুধু সেশন রিসেট করুন, সেভ করবেন না
+                if (totalDurationSec <= 0) {
                     try {
-                        await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' }});
+                        await updateDoc(userDocRef, { studySession: stoppedSessionData });
                         resolve();
                     } catch (e) { reject(e); }
                     return;
                 }
 
-                const duration = Math.round((Date.now() - startTime) / 1000); // Duration in seconds
-                const pointsEarned = parseFloat((duration / 3600).toFixed(2)); // Points in hours
-
-                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-
-                // Don't save if duration is 0 or less
-                if (duration <= 0) {
-                     try {
-                        await updateDoc(userDocRef, { studySession: { isActive: false, startTime: null, subject: '', topic: '' } });
-                        resolve();
-                     } catch(e) { reject(e); }
-                     return;
-                }
-
-                const sessionHistory = {
-                    date: new Date().toISOString(), // This is the endTime
-                    subject: state.studySession.subject || 'N/A',
-                    topic: state.studySession.topic || 'N/A',
-                    duration: duration,
-                    startTime: startTime // Add the startTime timestamp
+                const historyEntry = {
+                    date: new Date(endTime).toISOString(), // সেশনটি কখন শেষ হলো
+                    subject: session.subject || 'N/A',
+                    topic: session.topic || 'N/A',
+                    duration: totalDurationSec,
+                    startTime: session.originalStartTime // সেশনটি কখন প্রথম শুরু হয়েছিল
                 };
+
+                const pointsEarned = parseFloat((totalDurationSec / 3600).toFixed(2));
 
                 try {
                     const updateData = {
-                        studySession: { isActive: false, startTime: null, subject: '', topic: '' },
+                        studySession: stoppedSessionData,
                         points: increment(pointsEarned)
                     };
-                    // Ensure studyHistory exists before using arrayUnion
+
+                    // studyHistory অ্যারে আছে কিনা তা নিশ্চিত করুন
                     if (Array.isArray(state.studyHistory)) {
-                        updateData.studyHistory = arrayUnion(sessionHistory);
+                        updateData.studyHistory = arrayUnion(historyEntry);
                     } else {
-                        updateData.studyHistory = [sessionHistory];
+                        updateData.studyHistory = [historyEntry];
                     }
 
                     await updateDoc(userDocRef, updateData);
                     console.log("Session stopped. Points Earned (hours):", pointsEarned);
 
-                    // --- Direct UI Updates (for responsiveness) ---
-                    // These will be confirmed by onSnapshot, but updating now feels faster
+                    // --- UI আপডেটের জন্য (দ্রুত রেসপন্স) ---
                     startBtn.classList.remove('hidden');
                     stopBtn.classList.add('hidden');
+                    pauseBtn.classList.add('hidden');
+                    resumeBtn.classList.add('hidden');
+                    resetBtn.classList.add('hidden');
                     [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false);
                     subjectInput.value = '';
                     topicInput.value = '';
                     timerDisplay.textContent = '00:00:00';
-                    // --- End Direct UI Updates ---
+                    // --- UI আপডেট শেষ ---
 
                     if (showCongratsPopup) {
-                        // Use a short delay to allow onSnapshot to potentially fire first
+                        // onSnapshot ফায়ার হওয়ার জন্য সামান্য দেরি
                         setTimeout(() => {
-                            // Get the *very latest* state to check goals/badges
                             getDoc(userDocRef).then(docSnap => {
                                 if (docSnap.exists()) {
                                     const latestState = docSnap.data();
                                     const todayStr = getLocalDateString();
                                     const totalSecondsTodayLatest = (latestState.studyHistory || [])
-                                          .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr)
-                                          .reduce((sum, e) => sum + e.duration, 0);
+                                        .filter(e => e?.date && typeof e.duration === 'number' && e.duration > 0 && getLocalDateString(new Date(e.date)) === todayStr)
+                                        .reduce((sum, e) => sum + e.duration, 0);
                                     const goalSeconds = (latestState.dailyGoal || 7) * 3600;
 
                                     if (goalSeconds > 0 && totalSecondsTodayLatest >= goalSeconds) {
-                                        // Check if goal was *just* met or already met before this session
-                                        const secondsBeforeThisSession = totalSecondsTodayLatest - duration;
+                                        const secondsBeforeThisSession = totalSecondsTodayLatest - totalDurationSec;
                                         if (secondsBeforeThisSession < goalSeconds) {
                                             Swal.fire({ icon: 'success', title: 'অভিনন্দন!', text: 'আপনি আজকের পড়ার লক্ষ্য পূরণ করেছেন!' });
-                                            // Award goal_achiever badge if not already present
                                             if (!latestState.badges?.includes('goal_achiever')) {
                                                 updateDoc(userDocRef, { badges: arrayUnion('goal_achiever') })
                                                     .then(() => console.log("Goal Achiever badge awarded."))
@@ -1416,15 +1456,13 @@
                                             }
                                         }
                                     }
-                                    // Check for other badges
                                     checkAndAwardBadges(latestState);
                                 }
                             }).catch(err => console.error("Error fetching doc for goal/badge check:", err));
-                        }, 600); // 600ms delay
+                        }, 600);
                     }
 
-                    // Update UI elements that depend on history (like charts, lists)
-                    updateDashboardUIOnly(); // Manually trigger this update
+                    updateDashboardUIOnly(); // ম্যানুয়ালি UI আপডেট ট্রিগার করুন
                     resolve();
 
                 } catch (error) {
@@ -1497,17 +1535,199 @@
 
 
         // --- UI Update Functions ---
+// --- এই ফাংশনটি পুরোপুরি Replace করুন (Task 1 + Task 2) ---
         function updateTimerDisplay() {
-            if (!state?.studySession?.isActive || state.studySession.startTime === null) {
+            if (!state?.studySession || state.studySession.status !== 'running' || state.studySession.lastStartTime === null) {
+                // টাইমার চলছে না বা ডেটা নেই
                 if (timerInterval) clearInterval(timerInterval);
                 timerInterval = null;
-                timerDisplay.textContent = '00:00:00';
+                // যদি সেশন 'paused' হয়, তবে থামানো সময়টি দেখান
+                if (state?.studySession?.status === 'paused') {
+                    const elapsed = Math.round(state.studySession.accumulatedMs / 1000);
+                    timerDisplay.textContent = formatTime(Math.max(0, elapsed));
+                } else {
+                    timerDisplay.textContent = '00:00:00';
+                }
                 return;
             };
-            const elapsed = Math.round((Date.now() - state.studySession.startTime) / 1000);
-            timerDisplay.textContent = formatTime(Math.max(0, elapsed));
+
+            const now = Date.now();
+            const currentSegmentMs = now - state.studySession.lastStartTime;
+            const totalElapsedMs = state.studySession.accumulatedMs + currentSegmentMs;
+            const elapsedSeconds = Math.round(totalElapsedMs / 1000);
+
+            timerDisplay.textContent = formatTime(Math.max(0, elapsedSeconds));
+
+            // --- TASK 1: Midnight Split Logic ---
+            // এই সেগমেন্টটি কি মধ্যরাত পার করেছে?
+            const lastStartDateStr = getLocalDateString(new Date(state.studySession.lastStartTime));
+            const currentDateStr = getLocalDateString(new Date(now));
+
+            if (lastStartDateStr !== currentDateStr) {
+                console.log("Midnight cross detected! Splitting session...");
+                // টাইমার ইন্টারভ্যাল বন্ধ করুন, কারণ splitSessionAtMidnight এটি আবার চালু করবে
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = null;
+                
+                // সেশন বিভক্ত করার ফাংশন কল করুন
+                splitSessionAtMidnight();
+            }
+            // --- End Task 1 ---
+        }
+        // --- TASK 1: এই নতুন ফাংশনটি যোগ করুন ---
+        async function splitSessionAtMidnight() {
+            if (!state || !userDocRef || state.studySession.status !== 'running') {
+                console.warn("Split failed: No active session or user ref.");
+                return;
+            }
+
+            const session = state.studySession;
+            
+            // নতুন দিনের মধ্যরাত (00:00:00)
+            const midnight = new Date();
+            midnight.setHours(0, 0, 0, 0);
+            const midnightTs = midnight.getTime(); // নতুন দিনের শুরু
+
+            // মধ্যরাতের আগ পর্যন্ত কত সময় পড়া হয়েছে (শেষ সেগমেন্ট)
+            const lastSegmentMs = midnightTs - session.lastStartTime;
+            // আগের দিনের মোট সময়
+            const totalMsForOldDay = session.accumulatedMs + lastSegmentMs;
+            const totalSecForOldDay = Math.round(totalMsForOldDay / 1000);
+
+            console.log(`Splitting: ${totalSecForOldDay}s for previous day.`);
+
+            // যদি আগের দিনে কোনো সময় না থাকে, তবে শুধু সেশন আপডেট করুন
+            if (totalSecForOldDay <= 0) {
+                console.log("No time recorded for previous day. Updating session start time.");
+                try {
+                    await updateDoc(userDocRef, {
+                        "studySession.originalStartTime": midnightTs, // নতুন দিনের জন্য আসল শুরু
+                        "studySession.lastStartTime": midnightTs,
+                        "studySession.accumulatedMs": 0
+                    });
+                     // UI আপডেট onSnapshot দ্বারা হবে, কিন্তু টাইমার আবার চালু করতে হবে
+                    if (timerInterval) clearInterval(timerInterval);
+                    timerInterval = setInterval(updateTimerDisplay, 1000);
+                } catch (e) {
+                    console.error("Error updating session at midnight split:", e);
+                }
+                return;
+            }
+
+            // --- আগের দিনের জন্য একটি history entry তৈরি করুন ---
+            const historyEntry = {
+                date: new Date(midnightTs - 1).toISOString(), // মধ্যরাতের ১ মিলিসেকেন্ড আগে
+                subject: session.subject || 'N/A',
+                topic: session.topic || 'N/A',
+                duration: totalSecForOldDay,
+                startTime: session.originalStartTime 
+            };
+            
+            const pointsEarned = parseFloat((totalSecForOldDay / 3600).toFixed(2));
+
+            // --- নতুন দিনের জন্য নতুন সেশন ডেটা ---
+            const newSessionData = {
+                status: 'running', // সেশন চলতে থাকবে
+                subject: session.subject,
+                topic: session.topic,
+                originalStartTime: midnightTs, // নতুন দিনের শুরু
+                lastStartTime: midnightTs,
+                accumulatedMs: 0 // নতুন দিনের জন্য রিসেট
+            };
+
+            try {
+                // ডেটাবেস আপডেট করুন
+                await updateDoc(userDocRef, {
+                    studySession: newSessionData,
+                    points: increment(pointsEarned),
+                    studyHistory: arrayUnion(historyEntry)
+                });
+                console.log("Session split successfully. New day started.");
+                // onSnapshot এই পরিবর্তনটি ধরবে এবং UI আপডেট করবে
+                // কিন্তু আমাদের টাইমার ইন্টারভ্যালটি ম্যানুয়ালি আবার চালু করতে হবে
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+
+            } catch (error) {
+                console.error("Error splitting session at midnight:", error);
+                // যদি কোনো কারণে ব্যর্থ হয়, অন্তত টাইমারটি আবার চালু করুন
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+            }
+        }
+        // --- TASK 2: এই তিনটি নতুন ফাংশন যোগ করুন ---
+
+        async function pauseTimer() {
+            if (!state || state.studySession.status !== 'running' || !userDocRef) return;
+
+            const now = Date.now();
+            const currentSegmentMs = now - state.studySession.lastStartTime;
+            const newAccumulatedMs = state.studySession.accumulatedMs + currentSegmentMs;
+
+            try {
+                await updateDoc(userDocRef, {
+                    "studySession.status": 'paused',
+                    "studySession.accumulatedMs": newAccumulatedMs,
+                    "studySession.lastStartTime": null // বিরতির সময় lastStartTime null থাকবে
+                });
+                console.log("Timer paused.");
+                // onSnapshot UI আপডেট করবে
+            } catch (error) {
+                console.error("Error pausing timer:", error);
+            }
         }
 
+        async function resumeTimer() {
+            if (!state || state.studySession.status !== 'paused' || !userDocRef) return;
+
+            try {
+                await updateDoc(userDocRef, {
+                    "studySession.status": 'running',
+                    "studySession.lastStartTime": Date.now() // নতুন করে শুরু
+                });
+                console.log("Timer resumed.");
+                // onSnapshot UI এবং টাইমার ইন্টারভ্যাল আপডেট করবে
+            } catch (error) {
+                console.error("Error resuming timer:", error);
+            }
+        }
+
+        async function resetTimer() {
+            if (!state || state.studySession.status === 'stopped' || !userDocRef) return;
+
+            // ব্যবহারকারীকে নিশ্চিত করতে বলুন
+            const result = await Swal.fire({
+                title: 'আপনি কি নিশ্চিত?',
+                text: "এই সেশনটি সেভ না করেই বাতিল হয়ে যাবে!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'হ্যাঁ, বাতিল করুন!',
+                cancelButtonText: 'না'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    // সেশনকে ডিফল্ট 'stopped' অবস্থায় রিসেট করুন
+                    await updateDoc(userDocRef, {
+                        studySession: {
+                            status: 'stopped',
+                            subject: '',
+                            topic: '',
+                            originalStartTime: null,
+                            lastStartTime: null,
+                            accumulatedMs: 0
+                        }
+                    });
+                    console.log("Session reset/cancelled.");
+                    // onSnapshot UI আপডেট করবে (ইনপুট ক্লিয়ার করবে, বাটন রিসেট করবে)
+                } catch (error) {
+                    console.error("Error resetting session:", error);
+                    Swal.fire({ icon: 'error', title: 'সমস্যা', text: 'সেশন রিসেট করা যায়নি।' });
+                }
+            }
+        }
         // --- Formatting Helpers ---
         const formatTime = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor(s%3600/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
         
@@ -1615,17 +1835,18 @@
             return { rank: currentRank, weeklyHours, weeklyPoints, todayPoints };
         }
 
-        // --- Main Data-to-UI Synchronization ---
+        // --- এই ফাংশনটি পুরোপুরি Replace করুন (Task 2 বাটন লজিক) ---
         function loadAndDisplayUserData(isInitialLoad = false, historyDataChanged = false) {
             if (!state || !currentUser) {
                 console.warn("loadAndDisplayUserData: State/User null.");
                 return;
             }
-            console.log("loadAndDisplayUserData called. Initial:", isInitialLoad, "History Changed:", historyDataChanged);
+            console.log("loadAndDisplayUserData called. Initial:", isInitialLoad, "History Changed:", historyDataChanged, "Status:", state.studySession.status);
 
             // --- Ensure data structures exist (redundant but safe) ---
             state.profile = state.profile || createNewUserData(currentUser).profile;
-            state.studySession = state.studySession || { isActive: false, startTime: null, subject: '', topic: '' };
+            // ডেটা মাইগ্রেশনের লজিকটি setupFirestoreListener-এ থাকায় এখানে আর দরকার নেই
+            state.studySession = state.studySession || { status: 'stopped', subject: '', topic: '', originalStartTime: null, lastStartTime: null, accumulatedMs: 0 };
             state.studyHistory = Array.isArray(state.studyHistory) ? state.studyHistory : [];
             state.dailyGoal = typeof state.dailyGoal === 'number' ? state.dailyGoal : 7;
             state.points = typeof state.points === 'number' ? state.points : 0;
@@ -1634,11 +1855,11 @@
             // --- Check for Rank Up ---
             const { rank: newRank } = calculateWeeklyStats();
             if (previousRankName && newRank.name !== previousRankName && newRank.name !== 'Bronze') {
-                 const newRankIndex = ranks.findIndex(r => r.name === newRank.name);
-                 const oldRankIndex = ranks.findIndex(r => r.name === previousRankName);
-                 if (newRankIndex > oldRankIndex) {
+                const newRankIndex = ranks.findIndex(r => r.name === newRank.name);
+                const oldRankIndex = ranks.findIndex(r => r.name === previousRankName);
+                if (newRankIndex > oldRankIndex) {
                     showRankUpToast(newRank);
-                 }
+                }
             }
             previousRankName = newRank.name; // Update current rank
 
@@ -1647,37 +1868,68 @@
             updateProfilePage();
             dailyGoalInput.value = state.dailyGoal;
 
-            // --- Handle Active Timer State ---
-            if (state.studySession.isActive && state.studySession.startTime !== null) {
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
-                subjectInput.value = state.studySession.subject || '';
-                topicInput.value = state.studySession.topic || '';
-                [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true); // Disable Gemini btn too
-
-                if (timerInterval) clearInterval(timerInterval);
-                updateTimerDisplay(); // Call immediately
-                timerInterval = setInterval(updateTimerDisplay, 1000);
-            } else {
-                if (timerInterval) clearInterval(timerInterval);
+            // --- Handle Active Timer State based on status ---
+            if (timerInterval) {
+                clearInterval(timerInterval);
                 timerInterval = null;
-                timerDisplay.textContent = '00:00:00';
-                startBtn.classList.remove('hidden');
-                stopBtn.classList.add('hidden');
-                [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false); // Enable Gemini btn
-                // Clear inputs only if session is truly inactive (not just stopped)
-                if (!state.studySession.isActive) {
+            }
+
+            const session = state.studySession;
+
+            switch (session.status) {
+                case 'running':
+                    // টাইমার চলছে
+                    startBtn.classList.add('hidden');
+                    pauseBtn.classList.remove('hidden');
+                    resumeBtn.classList.add('hidden');
+                    stopBtn.classList.remove('hidden');
+                    resetBtn.classList.remove('hidden'); // রিসেট বাটন দেখান
+
+                    subjectInput.value = session.subject || '';
+                    topicInput.value = session.topic || '';
+                    [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true);
+
+                    updateTimerDisplay(); // অবিলম্বে কল করুন
+                    timerInterval = setInterval(updateTimerDisplay, 1000);
+                    break;
+
+                case 'paused':
+                    // টাইমার বিরতিতে আছে
+                    startBtn.classList.add('hidden');
+                    pauseBtn.classList.add('hidden');
+                    resumeBtn.classList.remove('hidden');
+                    stopBtn.classList.remove('hidden');
+                    resetBtn.classList.remove('hidden'); // রিসেট বাটন দেখান
+
+                    subjectInput.value = session.subject || '';
+                    topicInput.value = session.topic || '';
+                    [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = true);
+
+                    updateTimerDisplay(); // থামা সময়টি দেখানোর জন্য কল করুন
+                    break;
+
+                case 'stopped':
+                default:
+                    // টাইমার বন্ধ
+                    startBtn.classList.remove('hidden');
+                    pauseBtn.classList.add('hidden');
+                    resumeBtn.classList.add('hidden');
+                    stopBtn.classList.add('hidden');
+                    resetBtn.classList.add('hidden'); // রিসেট বাটন লুকান
+
+                    [subjectInput, topicInput, dailyGoalInput, getTopicDetailsBtn].forEach(el => el.disabled = false);
                     subjectInput.value = '';
                     topicInput.value = '';
-                }
+                    
+                    updateTimerDisplay(); // '00:00:00' দেখানোর জন্য কল করুন
+                    break;
             }
 
             // --- Update Charts (if needed) ---
-            // Re-render charts on initial load or if history data changed
             if (isInitialLoad || historyDataChanged) {
-                 console.log("Rendering charts.");
-                 renderWeeklyChart(false);
-                 renderTodayPieChart(false);
+                console.log("Rendering charts.");
+                renderWeeklyChart(false);
+                renderTodayPieChart(false);
             }
         }
 
@@ -2140,9 +2392,21 @@
         [navProfile, mobileNavProfile].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('profile'); }));
         [navAbout, mobileNavAbout].forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); showView('about'); }));
         [navItems.logoutBtn, mobileLogoutBtn].forEach(el => el.addEventListener('click', handleLogout));
+        // --- Event Listeners ---
+        // Auth
+        // ... (আগের কোড)
+        // Navigation
+        // ... (আগের কোড)
+
         // Dashboard
         startBtn.addEventListener('click', startTimer);
         stopBtn.addEventListener('click', () => stopTimer(true)); // Pass true for congrats popup
+
+        // --- TASK 2: এই নতুন লিসেনারগুলো যোগ করুন ---
+        pauseBtn.addEventListener('click', pauseTimer);
+        resumeBtn.addEventListener('click', resumeTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        // --- যোগ করা শেষ ---
         getTopicDetailsBtn.addEventListener('click', getTopicDetails); // *** NEW: Listener for Gemini Button ***
         dailyGoalInput.addEventListener('change', async () => {
              if(state && userDocRef) {
@@ -2203,4 +2467,3 @@
 </script>
 </body>
 </html>
-
